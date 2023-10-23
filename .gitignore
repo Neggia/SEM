@@ -36,3 +36,5 @@ lerna-debug.log*
 
 # Project
 .env
+/src/database/database.db
+/src/database/sqlite.db
