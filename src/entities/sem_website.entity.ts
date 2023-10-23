@@ -1,7 +1,7 @@
 import { Entity, PrimaryGeneratedColumn, Column } from 'typeorm';
 
 @Entity()
-export class UserEntity {
+export class SemWebsite {
   @PrimaryGeneratedColumn()
   id: number;
 

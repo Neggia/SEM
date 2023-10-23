@@ -26,6 +26,7 @@ import { Module } from '@nestjs/common';
 import { TypeOrmModule } from '@nestjs/typeorm';
 import { ConfigModule, ConfigService } from '@nestjs/config';
 import { SemProduct } from '../entities/sem_product.entity';
+import { SemProcess } from '../entities/sem_process.entity';
 
 @Module({
   imports: [
@@ -33,12 +34,13 @@ import { SemProduct } from '../entities/sem_product.entity';
       imports: [ConfigModule],
       useFactory: (configService: ConfigService) => ({
         type: 'sqlite',
-        database: configService.get('DB_NAME'),
+        database: __dirname + '/' + configService.get('DB_NAME'),
         entities: [__dirname + '/../**/*.entity{.ts,.js}'],
         synchronize: true,
       }),
       inject: [ConfigService],
     }),
+    TypeOrmModule.forFeature([SemProcess])
   ],
 })
 export class DatabaseModule {}
