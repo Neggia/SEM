@@ -25,6 +25,7 @@
 import { Module } from '@nestjs/common';
 import { TypeOrmModule } from '@nestjs/typeorm';
 import { ConfigModule, ConfigService } from '@nestjs/config';
+import { SemProduct } from '../entities/sem_product.entity';
 
 @Module({
   imports: [
