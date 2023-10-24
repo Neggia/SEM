@@ -22,15 +22,14 @@ export class SemProduct {
   description_long: string;
 
   @Column()
-  price_01: float;
+  price_01: number;
 
   @Column()
-  id_currency_01: bigint;
+  id_currency_01: number;
 
   @Column()
-  price_02: float;
+  price_02: number;
 
   @Column()
-  id_currency_02: bigint;
-}
+  id_currency_02: number;
 }
