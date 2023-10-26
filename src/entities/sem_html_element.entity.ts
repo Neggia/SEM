@@ -6,8 +6,11 @@ export class SemHtmlElement {
   id: number;
 
   @Column()
-  name: string;
+  website_id: number;
 
   @Column()
-  email: string;
+  group_id: number;
+
+  @Column()
+  html_element: string;
 }
