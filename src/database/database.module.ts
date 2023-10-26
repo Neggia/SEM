@@ -1,6 +1,13 @@
-// import { Module } from '@nestjs/common';
-// import { TypeOrmModule } from '@nestjs/typeorm';
-// import { ConfigModule, ConfigService } from '@nestjs/config';
+import { Module } from '@nestjs/common';
+import { TypeOrmModule } from '@nestjs/typeorm';
+import { ConfigModule, ConfigService } from '@nestjs/config';
+import { SemCurrency } from '../entities/sem_currency.entity';
+import { SemHtmlElement } from '../entities/sem_html_element.entity';
+import { SemHtmlElementService } from '../entities/sem_html_element.service';
+import { SemProcess } from '../entities/sem_process.entity';
+import { SemProductJSON } from '../entities/sem_product_json.entity';
+import { SemProduct } from '../entities/sem_product.entity';
+import { SemWebsite } from '../entities/sem_website.entity';
 
 // @Module({
 //   imports: [
@@ -22,11 +29,6 @@
 // })
 // export class DatabaseModule {}
 
-import { Module } from '@nestjs/common';
-import { TypeOrmModule } from '@nestjs/typeorm';
-import { ConfigModule, ConfigService } from '@nestjs/config';
-import { SemProduct } from '../entities/sem_product.entity';
-import { SemProcess } from '../entities/sem_process.entity';
 import { join } from 'path';
 
 @Module({
@@ -35,7 +37,7 @@ import { join } from 'path';
       imports: [ConfigModule],
       useFactory: (configService: ConfigService) => {
         const dbName = configService.get<string>('DB_NAME');
-        console.log('DB_NAME:', dbName);  // Add this line to debug 
+        console.log('DB_NAME:', dbName);
         const databasePath = join(__dirname, '..', 'database', dbName)
         console.log('databasePath:', databasePath);
 
@@ -44,16 +46,18 @@ import { join } from 'path';
         }
         return {
           type: 'sqlite',
-          database: databasePath, //join(__dirname, '..', 'database', dbName),
+          database: databasePath,
           entities: [join(__dirname, '..', '**', '*.entity.{ts,js}')],
           synchronize: true,
-          logging: true,  // Enable logging
+          logging: true,
         };
       },      
       inject: [ConfigService],
     }),
-    TypeOrmModule.forFeature([SemProcess, SemProduct]), // Include all entities that will be used in this module
+    TypeOrmModule.forFeature([SemCurrency, SemHtmlElement, SemProcess, SemProductJSON, SemProduct, SemWebsite]),
   ],
+  providers: [SemHtmlElementService],
+  exports: [TypeOrmModule, SemHtmlElementService],
 })
 export class DatabaseModule {}
 

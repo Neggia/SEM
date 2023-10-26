@@ -1,7 +1,7 @@
 import { Entity, PrimaryGeneratedColumn, Column } from 'typeorm';
 
 @Entity()
-export class SemProductJson {
+export class SemProductJSON {
   @PrimaryGeneratedColumn()
   id: number;
 

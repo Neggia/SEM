@@ -18,7 +18,9 @@
     "test:cov": "jest --coverage",
     "test:debug": "node --inspect-brk -r tsconfig-paths/register -r ts-node/register node_modules/.bin/jest --runInBand",
     "test:e2e": "jest --config ./test/jest-e2e.json",
-    "addmodule": "nest g module"
+    "addmodule": "nest g module",
+    "addservice": "nest g service",
+    "addcontroller": "nest g controller"
   },
   "dependencies": {
     "@nestjs/common": "^10.0.0",
