@@ -8,6 +8,8 @@ import { SemProcess } from '../entities/sem_process.entity';
 import { SemProductJSON } from '../entities/sem_product_json.entity';
 import { SemProduct } from '../entities/sem_product.entity';
 import { SemWebsite } from '../entities/sem_website.entity';
+import { SemOpenaiCompletions } from '../entities/sem_openai_completions.entity';
+import { SemOpenaiCompletionsService } from '../entities/sem_openai_completions.service';
 
 // @Module({
 //   imports: [
@@ -54,10 +56,10 @@ import { join } from 'path';
       },      
       inject: [ConfigService],
     }),
-    TypeOrmModule.forFeature([SemCurrency, SemHtmlElement, SemProcess, SemProductJSON, SemProduct, SemWebsite]),
+    TypeOrmModule.forFeature([SemCurrency, SemHtmlElement, SemProcess, SemProductJSON, SemProduct, SemWebsite, SemOpenaiCompletions]),
   ],
-  providers: [SemHtmlElementService],
-  exports: [TypeOrmModule, SemHtmlElementService],
+  providers: [SemHtmlElementService, SemOpenaiCompletionsService],
+  exports: [TypeOrmModule, SemHtmlElementService, SemOpenaiCompletionsService],
 })
 export class DatabaseModule {}
 
