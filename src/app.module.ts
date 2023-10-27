@@ -5,6 +5,7 @@ import { AppService } from './app.service';
 import { DatabaseModule } from './database/database.module';
 import { ServiceOpenaiService } from './service_openai/service_openai.service';
 import { ServiceOpenaiController } from './service_openai/service_openai.controller';
+import { FixturesService } from './fixtures/fixtures.service';
 
 @Module({
   imports: [
@@ -15,6 +16,6 @@ import { ServiceOpenaiController } from './service_openai/service_openai.control
     DatabaseModule
   ],
   controllers: [AppController, ServiceOpenaiController],
-  providers: [AppService, ServiceOpenaiService],
+  providers: [AppService, ServiceOpenaiService, FixturesService],
 })
 export class AppModule {}

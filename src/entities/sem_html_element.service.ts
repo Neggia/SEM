@@ -7,14 +7,14 @@ import { SemHtmlElement } from '../entities/sem_html_element.entity';
 export class SemHtmlElementService {
   constructor(
     @InjectRepository(SemHtmlElement)
-    private readonly SemHtmlElementRepository: Repository<SemHtmlElement>,
+    private readonly semHtmlElementRepository: Repository<SemHtmlElement>,
   ) {}
 
   findAll(): Promise<SemHtmlElement[]> {
-    return this.SemHtmlElementRepository.find();
+    return this.semHtmlElementRepository.find();
   }
 
-//   async findOne(id: number): Promise<SemHtmlElement> {
-//     return this.SemHtmlElementRepository.findOne(id);
-//   }
+  async findOne(id: number): Promise<SemHtmlElement> {
+    return this.semHtmlElementRepository.findOne({ where: { id } });
+  }
 }
