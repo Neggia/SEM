@@ -1,7 +1,7 @@
 import { Entity, PrimaryGeneratedColumn, Column, Unique } from 'typeorm';
 
 @Entity()
-@Unique(["url"])
+@Unique(['url'])
 export class SemProduct {
   @PrimaryGeneratedColumn()
   id: number;
@@ -9,7 +9,7 @@ export class SemProduct {
   @Column()
   url: string;
 
-  @Column("blob")
+  @Column('blob')
   thumbnail: Buffer;
 
   @Column()

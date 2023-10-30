@@ -13,7 +13,7 @@ import { FixturesService } from './fixtures/fixtures.service';
       isGlobal: true,
       envFilePath: '.env',
     }),
-    DatabaseModule
+    DatabaseModule,
   ],
   controllers: [AppController, ServiceOpenaiController],
   providers: [AppService, ServiceOpenaiService, FixturesService],
