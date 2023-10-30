@@ -12,5 +12,5 @@ export class SemHtmlElement {
   group_id: number;
 
   @Column()
-  html_element: string;
+  content: string;
 }

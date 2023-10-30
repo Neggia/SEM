@@ -9,5 +9,17 @@ export class SemWebsite {
   name: string;
 
   @Column()
-  email: string;
+  url: string;
+
+  @Column()
+  process_id: number;
+
+  @Column()
+  last_run: string; //timestamp
+
+  @Column()
+  last_page: number;
+
+  @Column()
+  openai_completions_id: number;
 }

@@ -6,7 +6,9 @@ export class ServiceOpenaiController {
   constructor(private readonly serviceOpenaiService: ServiceOpenaiService) {}
 
   @Get('get-product-json')
-  getProductJSON(@Query('url') htmlElement: string): Promise<any> {
-    return this.serviceOpenaiService.getProductJSON(htmlElement);
+  getProductJSON(
+    @Query('html_element_id') htmlElementId: number,
+  ): Promise<any> {
+    return this.serviceOpenaiService.getProductJSON(htmlElementId);
   }
 }

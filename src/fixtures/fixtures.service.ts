@@ -1,33 +1,44 @@
 import { Injectable } from '@nestjs/common';
 import { InjectRepository } from '@nestjs/typeorm';
 import { Repository } from 'typeorm';
-import { SemOpenaiCompletions } from '../entities/sem_openai_completions.entity';
 import { SemHtmlElement } from '../entities/sem_html_element.entity';
-import { SemOpenaiCompletionsFixtures } from '../fixtures/sem_openai_completions.fixtures';
 import { SemHtmlElementFixtures } from '../fixtures/sem_html_element.fixtures';
+import { SemOpenaiCompletions } from '../entities/sem_openai_completions.entity';
+import { SemOpenaiCompletionsFixtures } from '../fixtures/sem_openai_completions.fixtures';
+import { SemWebsite } from '../entities/sem_website.entity';
+import { SemWebsiteFixtures } from '../fixtures/sem_website.fixtures';
 
 @Injectable()
 export class FixturesService {
+  private readonly repositories: Array<Repository<any>>;
+
   constructor(
-    @InjectRepository(SemOpenaiCompletions)
-    private readonly SemOpenaiCompletionsRepository: Repository<SemOpenaiCompletions>,
     @InjectRepository(SemHtmlElement)
-    private readonly SemHtmlElementRepository: Repository<SemHtmlElement>,
-  ) {}
+    private readonly semHtmlElementRepository: Repository<SemHtmlElement>,
+    @InjectRepository(SemOpenaiCompletions)
+    private readonly semOpenaiCompletionsRepository: Repository<SemOpenaiCompletions>,
+    @InjectRepository(SemWebsite)
+    private readonly semWebsiteRepository: Repository<SemWebsite>,
+  ) {
+    this.repositories = [
+      this.semHtmlElementRepository,
+      this.semOpenaiCompletionsRepository,
+      this.semWebsiteRepository,
+    ];
+  }
 
   async loadFixtures(): Promise<void> {
-    for (const semOpenaiCompletionsfixture of SemOpenaiCompletionsFixtures) {
-      const semOpenaiCompletions = this.SemOpenaiCompletionsRepository.create(
-        semOpenaiCompletionsfixture,
-      );
-      await this.SemOpenaiCompletionsRepository.save(semOpenaiCompletions);
-    }
+    const fixtures = [
+      SemHtmlElementFixtures,
+      SemOpenaiCompletionsFixtures,
+      SemWebsiteFixtures,
+    ];
 
-    for (const semHtmlElementfixture of SemHtmlElementFixtures) {
-      const semHtmlElement = this.SemHtmlElementRepository.create(
-        semHtmlElementfixture,
-      );
-      await this.SemHtmlElementRepository.save(semHtmlElement);
+    for (let i = 0; i < this.repositories.length; i++) {
+      for (const fixture of fixtures[i]) {
+        const entity = this.repositories[i].create(fixture);
+        await this.repositories[i].save(entity);
+      }
     }
   }
 }

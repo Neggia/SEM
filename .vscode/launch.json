@@ -1,15 +1,15 @@
 {
-    "version": "0.2.0",
-    "configurations": [
-      {
-        "type": "pwa-node",
-        "request": "launch",
-        "name": "Debug NestJS",
-        "skipFiles": ["<node_internals>/**"],
-        "program": "${workspaceFolder}/main.ts",
-        "preLaunchTask": "tsc: build - tsconfig.json",
-        "outFiles": ["${workspaceFolder}/dist/**/*.js"]
-      }
-    ]
-  }
-  
+  "version": "0.2.0",
+  "configurations": [
+    {
+      "type": "pwa-node",
+      "request": "launch",
+      "name": "Debug NestJS",
+      "skipFiles": ["<node_internals>/**"],
+      "program": "${workspaceFolder}/src/main.ts",
+      "preLaunchTask": "tsc: build - tsconfig.json",
+      "outFiles": ["${workspaceFolder}/dist/**/*.js"],
+      "envFile": "${workspaceFolder}/.env"
+    }
+  ]
+}
