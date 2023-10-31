@@ -6,6 +6,7 @@ import { DatabaseModule } from './database/database.module';
 import { ServiceOpenaiService } from './service_openai/service_openai.service';
 import { ServiceOpenaiController } from './service_openai/service_openai.controller';
 import { FixturesService } from './fixtures/fixtures.service';
+import { AuthModule } from './auth/auth.module';
 
 @Module({
   imports: [
@@ -14,6 +15,7 @@ import { FixturesService } from './fixtures/fixtures.service';
       envFilePath: '.env',
     }),
     DatabaseModule,
+    AuthModule,
   ],
   controllers: [AppController, ServiceOpenaiController],
   providers: [AppService, ServiceOpenaiService, FixturesService],
