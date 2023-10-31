@@ -18,12 +18,38 @@ export class SemProductJSONService {
     return this.semProductJSONRepository.findOne({ where: { id } });
   }
 
+  async findOneByCompletionsId(
+    openaiCompletionsId: number,
+  ): Promise<SemProductJSON> {
+    return this.semProductJSONRepository.findOne({
+      where: {
+        openai_completions_id: openaiCompletionsId,
+      },
+    });
+  }
+
+  async findOneBy(
+    openaiCompletionsId: number,
+    websiteId: number,
+    groupId: number,
+  ): Promise<SemProductJSON> {
+    return this.semProductJSONRepository.findOne({
+      where: {
+        openai_completions_id: openaiCompletionsId,
+        website_id: websiteId,
+        group_id: groupId,
+      },
+    });
+  }
+
   async createProductJSON(
+    openaiCompletionsId: number,
     websiteId: number,
     groupId: number,
     content: string,
   ): Promise<SemProductJSON> {
     const newProductJSON = this.semProductJSONRepository.create({
+      openai_completions_id: openaiCompletionsId,
       website_id: websiteId,
       group_id: groupId,
       content: content,

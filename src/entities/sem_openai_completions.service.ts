@@ -17,4 +17,83 @@ export class SemOpenaiCompletionsService {
   async findOne(id: number): Promise<SemOpenaiCompletions> {
     return this.semOpenaiCompletionsRepository.findOne({ where: { id } });
   }
+
+  async findOneBy(
+    functionName: string,
+    websiteId?: number,
+    groupId?: number,
+  ): Promise<SemOpenaiCompletions> {
+    const queryBuilder = this.semOpenaiCompletionsRepository
+      .createQueryBuilder('completions')
+      .where('completions.function_name = :functionName', { functionName });
+
+    if (websiteId !== undefined) {
+      queryBuilder.andWhere('completions.website_id = :websiteId', {
+        websiteId,
+      });
+
+      if (groupId !== undefined) {
+        queryBuilder.andWhere('completions.group_id = :groupId', { groupId });
+      } else {
+        queryBuilder.andWhere('completions.group_id = null');
+      }
+    } else {
+      if (groupId !== undefined) {
+        throw new Error(`websiteId must be defined if groupId is defined`);
+      }
+
+      queryBuilder.andWhere('completions.website_id IS NULL');
+      queryBuilder.andWhere('completions.group_id IS NULL');
+    }
+
+    const completions = await queryBuilder.getOne();
+    return completions;
+  }
+
+  async findNarrowestOneBy(
+    functionName: string,
+    websiteId: number,
+    groupId: number,
+  ): Promise<SemOpenaiCompletions> {
+    let completions: SemOpenaiCompletions;
+
+    completions = await this.findOneBy(functionName, websiteId, groupId);
+    console.log('findNarrowestOneBy() completions: ', completions);
+    if (completions === null) {
+      completions = await this.findOneBy(functionName, websiteId);
+      if (completions === null) {
+        completions = await this.findOneBy(functionName);
+      }
+    }
+
+    return completions;
+  }
+
+  /*   async findCompletions(
+    websiteId: number,
+    groupId: number,
+  ): Promise<SemOpenaiCompletions[]> {
+    return this.semOpenaiCompletionsRepository.find({
+      where: {
+        website_id: websiteId,
+        group_id: groupId,
+      },
+    });
+  } */
+
+  /*   async createCompletions(
+    openaiCompletionsId: number,
+    // websiteId: number,
+    // groupId: number,
+    content: string,
+  ): Promise<SemProductJSON> {
+    const newProductJSON = this.semProductJSONRepository.create({
+      openai_completions_id: openaiCompletionsId,
+      // website_id: websiteId,
+      // group_id: groupId,
+      content: content,
+    });
+    await this.semProductJSONRepository.save(newProductJSON);
+    return newProductJSON;
+  } */
 }
