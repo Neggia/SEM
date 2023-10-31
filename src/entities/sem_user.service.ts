@@ -1,5 +1,6 @@
 import { Injectable } from '@nestjs/common';
 import { SemUser } from './sem_user.entity';
+import * as bcrypt from 'bcrypt';
 
 @Injectable()
 export class SemUserService {
@@ -10,7 +11,7 @@ export class SemUserService {
       {
         id: 1,
         username: 'admin',
-        password: 'test',
+        password: bcrypt.hashSync('test1234', 10),
       },
     ];
   }
