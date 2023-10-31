@@ -14,4 +14,7 @@ export class SemCurrency {
 
   @Column()
   symbol: string;
+
+  @Column()
+  type: number;
 }

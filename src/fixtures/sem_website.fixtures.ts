@@ -6,6 +6,5 @@ export const SemWebsiteFixtures = [
     process_id: 0,
     last_run: '1698624314',
     last_page: 0,
-    openai_completions_id: 0,
   },
 ];
