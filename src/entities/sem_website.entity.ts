@@ -2,9 +2,10 @@ import {
   Entity,
   PrimaryGeneratedColumn,
   Column,
-  OneToOne,
-  JoinColumn,
+  // OneToOne,
+  // JoinColumn,
   OneToMany,
+  ManyToOne,
 } from 'typeorm';
 import { SemProcess } from '../entities/sem_process.entity';
 import { SemHtmlElement } from '../entities/sem_html_element.entity';
@@ -20,9 +21,11 @@ export class SemWebsite {
   @Column()
   url: string;
 
-  @OneToOne(() => SemProcess)
-  @JoinColumn()
-  process_id: number;
+  // @OneToOne(() => SemProcess)
+  // @JoinColumn()
+  // process_id: number
+  @ManyToOne(() => SemProcess, (process) => process.websites)
+  process: SemProcess;
 
   @Column()
   last_run: string; //timestamp
