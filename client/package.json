@@ -5,6 +5,9 @@
   "dependencies": {
     "@emotion/react": "^11.11.1",
     "@emotion/styled": "^11.11.0",
+    "@ezgrid/grid-core": "^0.0.75",
+    "@ezgrid/grid-export": "^0.0.75",
+    "@ezgrid/grid-react": "^0.0.75",
     "@mui/icons-material": "^5.14.16",
     "@mui/material": "^5.14.16",
     "@testing-library/jest-dom": "^5.17.0",

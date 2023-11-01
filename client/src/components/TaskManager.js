@@ -1,6 +1,7 @@
 import React from 'react';
 import { useNavigate } from 'react-router-dom';
 import { Button } from '@mui/material';
+import TaskView from './TaskView';
 
 function TaskManager() {
   const navigate = useNavigate();
@@ -17,6 +18,7 @@ function TaskManager() {
       <Button onClick={handleBack} variant="contained" color="primary">
         Back to Home
       </Button>
+      <TaskView />
     </div>
   );
 }
