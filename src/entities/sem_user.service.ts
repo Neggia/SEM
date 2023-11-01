@@ -12,6 +12,7 @@ export class SemUserService {
         id: 1,
         username: 'admin',
         password: bcrypt.hashSync('test1234', 10),
+        role: 'admin',
       },
     ];
   }

@@ -10,4 +10,7 @@ export class SemUser {
 
   @Column()
   password: string;
+
+  @Column()
+  role: string;
 }
