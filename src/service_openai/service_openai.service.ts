@@ -38,7 +38,7 @@ export class ServiceOpenaiService {
       const completions =
         await this.semOpenaiCompletionsService.findNarrowestOneBy(
           'isProduct',
-          htmlElement.website_id,
+          0, //htmlElement.website_id, // TODO use relations
           htmlElement.group_id,
         );
 
@@ -74,18 +74,20 @@ export class ServiceOpenaiService {
       const completions =
         await this.semOpenaiCompletionsService.findNarrowestOneBy(
           'getProductJSON',
-          htmlElement.website_id,
+          0, //htmlElement.website_id, // TODO use relations
           htmlElement.group_id,
         );
       if (completions === undefined) {
         throw new Error(
-          `Completions not found for getProductJSON website_id ${htmlElement.website_id} group_id ${htmlElement.group_id}`,
+          `Completions not found for getProductJSON website_id ${
+            0 //htmlElement.website_id, // TODO use relations
+          } group_id ${htmlElement.group_id}`,
         );
       }
       let productJSON: SemProductJSON;
       productJSON = await this.semProductJSONService.findOneBy(
         completions.id,
-        htmlElement.website_id,
+        0, //htmlElement.website_id, // TODO use relations
         htmlElement.group_id,
       );
       if (productJSON) {
@@ -116,7 +118,7 @@ export class ServiceOpenaiService {
       const parseHtmlElementResponseJSON = JSON.parse(parseHtmlElementResponse); // Checks if it is a valid JSON
       productJSON = await this.semProductJSONService.createProductJSON(
         completions.id,
-        htmlElement.website_id,
+        0, //htmlElement.website_id, // TODO use relations
         htmlElement.group_id,
         parseHtmlElementResponse,
       );

@@ -24,17 +24,26 @@ export class SemWebsite {
   // @OneToOne(() => SemProcess)
   // @JoinColumn()
   // process_id: number
-  @ManyToOne(() => SemProcess, (process) => process.websites)
-  process: SemProcess;
 
+  // Timestamp of last start
   @Column()
-  last_run: string; //timestamp
+  last_run: number;
 
   @Column()
   last_page: number;
 
+  @Column()
+  num_pages: number;
+
+  // Butmask
+  @Column()
+  status: number;
+
   // @Column()
   // openai_completions_id: number;
+
+  @ManyToOne(() => SemProcess, (process) => process.websites)
+  process: SemProcess;
 
   @OneToMany(() => SemHtmlElement, (htmlElement) => htmlElement.website)
   htmlElements: SemHtmlElement[];

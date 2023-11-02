@@ -7,6 +7,7 @@ import { SemHtmlElementService } from '../entities/sem_html_element.service';
 import { SemOpenaiCompletions } from '../entities/sem_openai_completions.entity';
 import { SemOpenaiCompletionsService } from '../entities/sem_openai_completions.service';
 import { SemProcess } from '../entities/sem_process.entity';
+import { SemProcessService } from '../entities/sem_process.service';
 import { SemProductJSON } from '../entities/sem_product_json.entity';
 import { SemProductJSONService } from '../entities/sem_product_json.service';
 import { SemProduct } from '../entities/sem_product.entity';
@@ -64,6 +65,7 @@ import { join } from 'path';
     SemOpenaiCompletionsService,
     SemWebsiteService,
     SemProductJSONService,
+    SemProcessService,
   ],
   exports: [
     TypeOrmModule,
@@ -71,6 +73,7 @@ import { join } from 'path';
     SemOpenaiCompletionsService,
     SemWebsiteService,
     SemProductJSONService,
+    SemProcessService,
   ],
 })
 export class DatabaseModule {}

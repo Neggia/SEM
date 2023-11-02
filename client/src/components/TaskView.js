@@ -4,7 +4,7 @@ import ReactDOM from 'react-dom';
 import 'react-tabulator/lib/styles.css'; // import Tabulator styles
 import 'tabulator-tables/dist/css/tabulator.min.css'; // import Tabulator stylesheet
 import { ReactTabulator } from 'react-tabulator';
-import GroupHeader from './GroupHeader';
+// import GroupHeader from './GroupHeader';
 import { FontAwesomeIcon } from '@fortawesome/react-fontawesome';
 import { faPlay, faPause, faStop } from '@fortawesome/free-solid-svg-icons';
 
@@ -193,24 +193,24 @@ const TaskView = () => {
       // renderGroupHeaderButtons(container);
       // return container;
 
-      const playButton =
+      /*       const playButton =
         // '<button onClick={() => console.log("Play")}>Play</button>';
         "<button onClick={handleGroupHeaderPlay}><i className='fas fa-play'></i>Play</button>";
       // '<button onClick={handleClick}><i className="fa-solid fa-play"></i> Play</button>';
       const pauseButton =
         "<button onclick='handleGroupHeaderPause()'><i className='fas fa-pause'></i>Pause</button>";
       const stopButton =
-        "<button onclick='handleGroupHeaderStop()'><i className='fas fa-stop'></i>Stop</button>";
+        "<button onclick='handleGroupHeaderStop()'><i className='fas fa-stop'></i>Stop</button>"; */
 
       return (
         'Process ID ' +
         value +
         "<span style='color:#d00; margin-left:10px;'>( runs every " +
         value * 60 +
-        ' minutes on server x )</span>' +
-        playButton +
-        pauseButton +
-        stopButton
+        ' minutes on server x )</span>'
+        // playButton +
+        // pauseButton +
+        // stopButton
       );
     },
     // groupHeader: (value, count, data, group) => {
@@ -256,7 +256,7 @@ const TaskView = () => {
 
   return (
     <div>
-      <button onClick={addRow}>Add website for process id</button>
+      <button onClick={addRow}>Add new task for process id</button>
       <select value={pid} onChange={(e) => setPid(e.target.value)}>
         <option value="" disabled>
           pid
@@ -267,7 +267,7 @@ const TaskView = () => {
           </option>
         ))}
       </select>
-      <button onClick={deleteRow}>Delete Row</button>
+      <button onClick={deleteRow}>Delete task</button>
       <ReactTabulator
         // ref={tableRef}
         onRef={(ref) => (tableRef = ref)}
