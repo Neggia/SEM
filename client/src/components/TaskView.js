@@ -1,4 +1,4 @@
-import React, { useState, useRef } from 'react';
+import React, { useState, useRef, useEffect } from 'react';
 import ReactDOM from 'react-dom';
 // import { render } from 'react-dom';
 import 'react-tabulator/lib/styles.css'; // import Tabulator styles
@@ -18,7 +18,16 @@ const PlayIcon = () => <FontAwesomeIcon icon={faPlay} />;
 const PauseIcon = () => <FontAwesomeIcon icon={faPause} />;
 const StopIcon = () => <FontAwesomeIcon icon={faStop} />;
 
-const TaskView = () => {
+const TaskView = ({ taskData }) => {
+  const [data, setData] = useState(taskData);
+  // const [processData, setProcessData] = useState(data);
+
+  useEffect(() => {
+    if (taskData) {
+      setData(taskData);
+    }
+  }, [taskData]);
+
   let tableRef = useRef(null);
 
   const allowedPids = [1, 2]; // Define your set of allowed values here
@@ -57,7 +66,7 @@ const TaskView = () => {
   };
 
   const [pid, setPid] = useState(allowedPids[0]);
-  const [data, setData] = useState([
+  /*   const [data, setData] = useState([
     {
       pid: 1,
       website_id: 1,
@@ -83,14 +92,14 @@ const TaskView = () => {
       progress: 50,
     },
     // ... more data
-  ]);
+  ]); */
 
   const columns = [
     { title: 'Process ID', field: 'pid', width: 110 },
     // { title: 'Website', field: 'website_name', width: 150 },
     {
       title: 'Website',
-      field: 'website_name',
+      field: 'name',
       width: 150,
       editor: 'input',
       headerFilter: 'input',
@@ -202,16 +211,15 @@ const TaskView = () => {
       const stopButton =
         "<button onclick='handleGroupHeaderStop()'><i className='fas fa-stop'></i>Stop</button>"; */
 
-      return (
-        'Process ID ' +
-        value +
-        "<span style='color:#d00; margin-left:10px;'>( runs every " +
-        value * 60 +
-        ' minutes on server x )</span>'
-        // playButton +
-        // pauseButton +
-        // stopButton
-      );
+      return 'Process ID';
+      // +
+      // value +
+      // "<span style='color:#d00; margin-left:10px;'>( runs every " +
+      // value * 60 +
+      // ' minutes on server x )</span>'
+      // // playButton +
+      // // pauseButton +
+      // // stopButton
     },
     // groupHeader: (value, count, data, group) => {
     //   const container = document.createElement('div');
