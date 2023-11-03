@@ -1,5 +1,6 @@
 import React, { useState, useRef, useEffect } from 'react';
-import ReactDOM from 'react-dom';
+// import ReactDOM from 'react-dom';
+import { createRoot } from 'react-dom/client';
 // import { render } from 'react-dom';
 import 'react-tabulator/lib/styles.css'; // import Tabulator styles
 import 'tabulator-tables/dist/css/tabulator.min.css'; // import Tabulator stylesheet
@@ -18,19 +19,18 @@ const PlayIcon = () => <FontAwesomeIcon icon={faPlay} />;
 const PauseIcon = () => <FontAwesomeIcon icon={faPause} />;
 const StopIcon = () => <FontAwesomeIcon icon={faStop} />;
 
-const ProcessView = ({ processData }) => {
+const ProcessView = ({ processData, onProcessDataUpdate }) => {
   const [data, setData] = useState(processData);
-  // const [processData, setProcessData] = useState(data);
+  const [lastId, setLastId] = useState(data[data.length - 1].id);
+
+  let tableRef = useRef(null);
 
   useEffect(() => {
     if (processData) {
       setData(processData);
+      setLastId(data[data.length - 1].id);
     }
   }, [processData]);
-
-  let tableRef = useRef(null);
-
-  // const allowedIds = [1, 2]; // Define your set of allowed values here
 
   const buttonFormatter = (cell) => {
     const cellElement = document.createElement('div');
@@ -47,7 +47,9 @@ const ProcessView = ({ processData }) => {
       console.log('Stop clicked for row:', cell.getRow().getData());
     };
 
-    ReactDOM.render(
+    const root = createRoot(cellElement); // Create a root.
+
+    root.render(
       <>
         <button onClick={handlePlay}>
           <PlayIcon />
@@ -59,83 +61,10 @@ const ProcessView = ({ processData }) => {
           <StopIcon />
         </button>
       </>,
-      cellElement,
     );
 
     return cellElement;
   };
-
-  /*   useEffect(() => {
-    async function fetchData() {
-      try {
-        const response = await fetch('http://localhost:3000/process');
-        if (!response.ok) {
-          throw new Error('Network response was not ok ' + response.statusText);
-        }
-        const data = await response.json();
-        console.log('ProcessView data: ', data);
-        setData(data);
-
-        const lastId = data[data.length - 1].id;
-        console.log('ProcessView lastId: ', lastId);
-        setLastId(lastId);
-      } catch (error) {
-        console.error(
-          'There has been a problem with your fetch operation:',
-          error,
-        );
-      }
-    }
-
-    fetchData();
-  }, []); */
-
-  /*   useEffect(() => {
-    // fetch('http://localhost:3000/process')
-    //   .then((response) => response.json())
-    //   .then((data) => setData(data));
-
-    fetch('http://localhost:3000/process')
-      .then((response) => {
-        if (!response.ok) {
-          throw new Error('Network response was not ok ' + response.statusText);
-        }
-
-        console.log('ProcessView response.json(): ', response.json());
-        return response.json();
-      })
-      .then((data) => setData(data))
-      .catch((error) =>
-        console.error(
-          'There has been a problem with your fetch operation:',
-          error,
-        ),
-      );
-
-    console.log('ProcessView data: ', data);
-  }, []); */
-
-  // const [data, setData] = useState([
-  //   {
-  //     id: 1,
-  //     name: 'process1',
-  //     server: 'server1',
-  //     interval: 24,
-  //     last_run: 0,
-  //     last_duration: 0,
-  //     progress: 100,
-  //   },
-  //   {
-  //     id: 2,
-  //     name: 'process2',
-  //     server: 'server2',
-  //     interval: 48,
-  //     last_run: 0,
-  //     last_duration: 0,
-  //     progress: 50,
-  //   },
-  // ]);
-  const [lastId, setLastId] = useState(data[data.length - 1].id);
 
   const columns = [
     { title: 'Process ID', field: 'id', width: 110 },
@@ -219,6 +148,7 @@ const ProcessView = ({ processData }) => {
       progress: 0,
     };
     setData([...data, newRow]);
+    onProcessDataUpdate([...data, newRow]);
     setLastId(lastId + 1);
   };
 
@@ -228,6 +158,7 @@ const ProcessView = ({ processData }) => {
       if (selectedData.length > 0) {
         const newData = data.filter((row) => row.id !== selectedData[0].id);
         setData(newData);
+        onProcessDataUpdate(newData);
         setLastId(lastId - 1);
       } else {
         alert('Please select a row to delete');

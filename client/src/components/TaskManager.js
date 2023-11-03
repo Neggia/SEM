@@ -10,6 +10,7 @@ function TaskManager() {
   const navigate = useNavigate();
   const [processData, setProcessData] = useState(null);
   const [taskData, setTaskData] = useState(null);
+  // const [pids, setPids] = useState(null);
 
   useEffect(() => {
     async function fetchData() {
@@ -31,11 +32,14 @@ function TaskManager() {
         // console.log('ProcessView lastId: ', lastId);
         // setLastId(lastId);
         let tasks = [];
+        let pidsArray = [];
         let tasksResponse;
         let tasksResponseJson;
         for (const process of processResponseJson) {
           tasksResponse = null;
           tasksResponseJson = null;
+
+          pidsArray.push(process.id);
 
           tasksResponse = await fetch(
             'http://localhost:3000/process/' + process.id,
@@ -71,6 +75,7 @@ function TaskManager() {
 
         console.log('TaskManager tasks: ', tasks);
         setTaskData(tasks);
+        // setPids(pidsArray);
       } catch (error) {
         console.error(
           'There has been a problem with your fetch operation:',
@@ -86,6 +91,12 @@ function TaskManager() {
     navigate('/'); // Navigate back to the home page
   };
 
+  // Callback function for ProcessView to update sharedData
+  const handleProcessDataUpdate = (updatedProcessData) => {
+    // setProcessData(updatedProcessData);
+    setProcessData([...updatedProcessData]);
+  };
+
   if (processData === null) {
     return <div>Loading...</div>;
   }
@@ -98,8 +109,18 @@ function TaskManager() {
       <Button onClick={handleBack} variant="contained" color="primary">
         Back to Home
       </Button>
-      {processData && <ProcessView processData={processData} />}
-      {taskData && <TaskView taskData={taskData} />}
+      {processData && (
+        <ProcessView
+          processData={processData}
+          onProcessDataUpdate={handleProcessDataUpdate}
+        />
+      )}
+      {taskData && (
+        <TaskView
+          processData={processData} //pids={pids}
+          taskData={taskData}
+        />
+      )}
       {/* <ReactTabulatorExample /> */}
     </div>
   );

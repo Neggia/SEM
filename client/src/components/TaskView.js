@@ -1,5 +1,6 @@
 import React, { useState, useRef, useEffect } from 'react';
-import ReactDOM from 'react-dom';
+// import ReactDOM from 'react-dom';
+import { createRoot } from 'react-dom/client';
 // import { render } from 'react-dom';
 import 'react-tabulator/lib/styles.css'; // import Tabulator styles
 import 'tabulator-tables/dist/css/tabulator.min.css'; // import Tabulator stylesheet
@@ -18,19 +19,26 @@ const PlayIcon = () => <FontAwesomeIcon icon={faPlay} />;
 const PauseIcon = () => <FontAwesomeIcon icon={faPause} />;
 const StopIcon = () => <FontAwesomeIcon icon={faStop} />;
 
-const TaskView = ({ taskData }) => {
+const TaskView = ({ processData, taskData }) => {
   const [data, setData] = useState(taskData);
+  const [pids, setPids] = useState(null);
+  const [currentPid, setCurrentPid] = useState(null);
   // const [processData, setProcessData] = useState(data);
 
   useEffect(() => {
     if (taskData) {
       setData(taskData);
+
+      let pidsArray = [];
+      for (const process of processData) {
+        pidsArray.push(process.id);
+      }
+      setPids(pidsArray);
+      setCurrentPid(pidsArray[0]);
     }
-  }, [taskData]);
+  }, [processData]);
 
   let tableRef = useRef(null);
-
-  const allowedPids = [1, 2]; // Define your set of allowed values here
 
   const buttonFormatter = (cell) => {
     const cellElement = document.createElement('div');
@@ -47,7 +55,9 @@ const TaskView = ({ taskData }) => {
       console.log('Stop clicked for row:', cell.getRow().getData());
     };
 
-    ReactDOM.render(
+    const root = createRoot(cellElement); // Create a root.
+
+    root.render(
       <>
         <button onClick={handlePlay}>
           <PlayIcon />
@@ -59,44 +69,13 @@ const TaskView = ({ taskData }) => {
           <StopIcon />
         </button>
       </>,
-      cellElement,
     );
 
     return cellElement;
   };
 
-  const [pid, setPid] = useState(allowedPids[0]);
-  /*   const [data, setData] = useState([
-    {
-      pid: 1,
-      website_id: 1,
-      website_name: 'Pagine azzurre 1',
-      url: 'https://www.pagineazzurre1.net',
-      last_run: null,
-      progress: 90,
-    },
-    {
-      pid: 1,
-      website_id: 2,
-      website_name: 'Pagine azzurre 2',
-      url: 'https://www.pagineazzurre2.net',
-      last_run: null,
-      progress: 10,
-    },
-    {
-      pid: 2,
-      website_id: 3,
-      website_name: 'Pagine azzurre 3',
-      url: 'https://www.pagineazzurre3.net',
-      last_run: null,
-      progress: 50,
-    },
-    // ... more data
-  ]); */
-
   const columns = [
     { title: 'Process ID', field: 'pid', width: 110 },
-    // { title: 'Website', field: 'website_name', width: 150 },
     {
       title: 'Website',
       field: 'name',
@@ -104,7 +83,6 @@ const TaskView = ({ taskData }) => {
       editor: 'input',
       headerFilter: 'input',
     },
-    // { title: 'Url', field: 'url', width: 250 },
     {
       title: 'Url',
       field: 'url',
@@ -126,13 +104,6 @@ const TaskView = ({ taskData }) => {
         legendAlign: 'center',
       },
     },
-    /*   {
-    title: 'Age',
-    field: 'age',
-    hozAlign: 'left',
-    formatter: 'number',
-    width: 150,
-  }, */
     {
       title: 'Actions',
       formatter: buttonFormatter,
@@ -238,7 +209,7 @@ const TaskView = ({ taskData }) => {
 
   const addRow = () => {
     const newRow = {
-      pid: pid, // use the state variable here
+      pid: currentPid, // use the state variable here
       website_id: null,
       website_name: '',
       url: '',
@@ -262,14 +233,21 @@ const TaskView = ({ taskData }) => {
     }
   };
 
+  if (pids === null) {
+    return <div>Loading...</div>;
+  }
+
   return (
     <div>
       <button onClick={addRow}>Add new task for process id</button>
-      <select value={pid} onChange={(e) => setPid(e.target.value)}>
+      <select
+        // value={currentPid}
+        onChange={(e) => setCurrentPid(e.target.value)}
+      >
         <option value="" disabled>
           pid
         </option>
-        {allowedPids.map((pid) => (
+        {pids.map((pid) => (
           <option key={pid} value={pid}>
             {pid}
           </option>
