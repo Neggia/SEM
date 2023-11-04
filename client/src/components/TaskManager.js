@@ -3,6 +3,7 @@ import { useNavigate } from 'react-router-dom';
 import { Button } from '@mui/material';
 import ProcessView from './ProcessView';
 import TaskView from './TaskView';
+import OpenaiCompletionsView from './OpenaiCompletionsView';
 
 // import ReactTabulatorExample from './ReactTabulatorExample';
 
@@ -10,12 +11,17 @@ function TaskManager() {
   const navigate = useNavigate();
   const [processData, setProcessData] = useState(null);
   const [taskData, setTaskData] = useState(null);
+  const [openaiCompletionsData, setOpenaiCompletionsData] = useState(null);
+  const [openaiServiceFunctionsData, setOpenaiServiceFunctions] =
+    useState(null);
   // const [pids, setPids] = useState(null);
+
+  const baseUrl = 'http://localhost:3000/';
 
   useEffect(() => {
     async function fetchData() {
       try {
-        const processResponse = await fetch('http://localhost:3000/process');
+        const processResponse = await fetch(baseUrl + 'process');
         if (!processResponse.ok) {
           throw new Error(
             'Network response was not ok ' + processResponse.statusText,
@@ -41,9 +47,7 @@ function TaskManager() {
 
           pidsArray.push(process.id);
 
-          tasksResponse = await fetch(
-            'http://localhost:3000/process/' + process.id,
-          );
+          tasksResponse = await fetch(baseUrl + 'process/' + process.id);
           if (!tasksResponse.ok) {
             throw new Error(
               'Network response was not ok ' + tasksResponse.statusText,
@@ -76,6 +80,41 @@ function TaskManager() {
         console.log('TaskManager tasks: ', tasks);
         setTaskData(tasks);
         // setPids(pidsArray);
+
+        const openaiCompletionsResponse = await fetch(
+          baseUrl + 'openai-completions',
+        );
+        if (!openaiCompletionsResponse.ok) {
+          throw new Error(
+            'Network response was not ok ' +
+              openaiCompletionsResponse.statusText,
+          );
+        }
+        const openaiCompletionsResponseJson =
+          await openaiCompletionsResponse.json();
+        console.log(
+          'TaskManager openaiCompletionsResponseJson: ',
+          openaiCompletionsResponseJson,
+        );
+        setOpenaiCompletionsData(openaiCompletionsResponseJson);
+
+        const openaiServiceFunctionsResponse = await fetch(
+          baseUrl + 'service-openai/get-functions',
+        );
+        if (!openaiServiceFunctionsResponse.ok) {
+          throw new Error(
+            'Network response was not ok ' +
+              openaiServiceFunctionsResponse.statusText,
+          );
+        }
+        const openaiServiceFunctionsResponseJson =
+          await openaiServiceFunctionsResponse.json();
+        console.log(
+          'TaskManager openaiServiceFunctionsResponseJson: ',
+          openaiServiceFunctionsResponseJson,
+        );
+
+        setOpenaiServiceFunctions(openaiServiceFunctionsResponseJson);
       } catch (error) {
         console.error(
           'There has been a problem with your fetch operation:',
@@ -121,7 +160,13 @@ function TaskManager() {
           taskData={taskData}
         />
       )}
-      {/* <ReactTabulatorExample /> */}
+      {taskData && (
+        <OpenaiCompletionsView
+          openaiCompletionsData={openaiCompletionsData}
+          taskData={taskData}
+          openaiServiceFunctionsData={openaiServiceFunctionsData}
+        />
+      )}
     </div>
   );
 }

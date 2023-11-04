@@ -26,6 +26,18 @@ export class ServiceOpenaiService {
     private readonly semProductJSONService: SemHtmlElementStructureService,
   ) {}
 
+  async getFunctions() {
+    try {
+      const fucntions =
+        this.semOpenaiCompletionsService.findDistinctFunctionNames();
+
+      return fucntions;
+    } catch (error) {
+      this.logger.error(`Failed to get openai service functions`, error.stack);
+      throw new Error(`Failed to get openai service functions`);
+    }
+  }
+
   async isProduct(
     htmlElementId: number,
     htmlElement?: SemHtmlElement,

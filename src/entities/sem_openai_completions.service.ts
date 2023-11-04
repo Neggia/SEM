@@ -10,6 +10,18 @@ export class SemOpenaiCompletionsService {
     private readonly semOpenaiCompletionsRepository: Repository<SemOpenaiCompletions>,
   ) {}
 
+  async findDistinctFunctionNames(): Promise<string[]> {
+    // Use the query builder to select distinct function names
+    const distinctFunctionNames = await this.semOpenaiCompletionsRepository
+      .createQueryBuilder('completion')
+      .select('DISTINCT(completion.function_name)', 'function_name')
+      .orderBy('completion.function_name') // Optional: To get them in order
+      .getRawMany();
+
+    // Extract just the function names from the raw results
+    return distinctFunctionNames.map((entry) => entry.function_name);
+  }
+
   findAll(): Promise<SemOpenaiCompletions[]> {
     return this.semOpenaiCompletionsRepository.find({
       relations: ['htmlElementStructures'],

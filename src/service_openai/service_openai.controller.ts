@@ -9,4 +9,9 @@ export class ServiceOpenaiController {
   getProduct(@Query('html_element_id') htmlElementId: number): Promise<any> {
     return this.serviceOpenaiService.getProduct(htmlElementId);
   }
+
+  @Get('get-functions')
+  getFunctions() {
+    return this.serviceOpenaiService.getFunctions();
+  }
 }

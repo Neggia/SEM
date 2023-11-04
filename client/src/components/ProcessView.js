@@ -7,7 +7,12 @@ import 'tabulator-tables/dist/css/tabulator.min.css'; // import Tabulator styles
 import { ReactTabulator } from 'react-tabulator';
 // import GroupHeader from './GroupHeader';
 import { FontAwesomeIcon } from '@fortawesome/react-fontawesome';
-import { faPlay, faPause, faStop } from '@fortawesome/free-solid-svg-icons';
+import {
+  faPlay,
+  faPause,
+  faStop,
+  faFloppyDisk,
+} from '@fortawesome/free-solid-svg-icons';
 
 // import { icon } from '@fortawesome/fontawesome-svg-core/import.macro';
 
@@ -18,6 +23,7 @@ import { faPlay, faPause, faStop } from '@fortawesome/free-solid-svg-icons';
 const PlayIcon = () => <FontAwesomeIcon icon={faPlay} />;
 const PauseIcon = () => <FontAwesomeIcon icon={faPause} />;
 const StopIcon = () => <FontAwesomeIcon icon={faStop} />;
+const SaveIcon = () => <FontAwesomeIcon icon={faFloppyDisk} />;
 
 const ProcessView = ({ processData, onProcessDataUpdate }) => {
   const [data, setData] = useState(processData);
@@ -166,10 +172,15 @@ const ProcessView = ({ processData, onProcessDataUpdate }) => {
     }
   };
 
+  const handleSave = () => {};
+
   return (
     <div>
       <button onClick={addRow}>Add new process</button>
       <button onClick={deleteRow}>Delete process</button>
+      <button onClick={handleSave}>
+        <SaveIcon />
+      </button>
       <ReactTabulator
         // ref={tableRef}
         onRef={(ref) => (tableRef = ref)}
