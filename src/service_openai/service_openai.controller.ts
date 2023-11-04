@@ -5,10 +5,8 @@ import { ServiceOpenaiService } from './service_openai.service';
 export class ServiceOpenaiController {
   constructor(private readonly serviceOpenaiService: ServiceOpenaiService) {}
 
-  @Get('get-product-json')
-  getProductJSON(
-    @Query('html_element_id') htmlElementId: number,
-  ): Promise<any> {
-    return this.serviceOpenaiService.getProductJSON(htmlElementId);
+  @Get('get-product')
+  getProduct(@Query('html_element_id') htmlElementId: number): Promise<any> {
+    return this.serviceOpenaiService.getProduct(htmlElementId);
   }
 }

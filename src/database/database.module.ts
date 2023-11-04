@@ -8,8 +8,8 @@ import { SemOpenaiCompletions } from '../entities/sem_openai_completions.entity'
 import { SemOpenaiCompletionsService } from '../entities/sem_openai_completions.service';
 import { SemProcess } from '../entities/sem_process.entity';
 import { SemProcessService } from '../entities/sem_process.service';
-import { SemProductJSON } from '../entities/sem_product_json.entity';
-import { SemProductJSONService } from '../entities/sem_product_json.service';
+import { SemHtmlElementStructure } from '../entities/sem_html_element_structure.entity';
+import { SemHtmlElementStructureService } from '../entities/sem_html_element_structure.service';
 import { SemProduct } from '../entities/sem_product.entity';
 import { SemWebsite } from '../entities/sem_website.entity';
 import { SemWebsiteService } from '../entities/sem_website.service';
@@ -54,7 +54,7 @@ import { join } from 'path';
       SemCurrency,
       SemHtmlElement,
       SemProcess,
-      SemProductJSON,
+      SemHtmlElementStructure,
       SemProduct,
       SemWebsite,
       SemOpenaiCompletions,
@@ -64,7 +64,7 @@ import { join } from 'path';
     SemHtmlElementService,
     SemOpenaiCompletionsService,
     SemWebsiteService,
-    SemProductJSONService,
+    SemHtmlElementStructureService,
     SemProcessService,
   ],
   exports: [
@@ -72,7 +72,7 @@ import { join } from 'path';
     SemHtmlElementService,
     SemOpenaiCompletionsService,
     SemWebsiteService,
-    SemProductJSONService,
+    SemHtmlElementStructureService,
     SemProcessService,
   ],
 })

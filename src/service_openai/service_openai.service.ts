@@ -4,8 +4,8 @@ import { SemHtmlElementService } from '../entities/sem_html_element.service';
 import { SemOpenaiCompletions } from '../entities/sem_openai_completions.entity';
 import { SemOpenaiCompletionsService } from '../entities/sem_openai_completions.service';
 import { SemWebsiteService } from '../entities/sem_website.service';
-import { SemProductJSON } from '../entities/sem_product_json.entity';
-import { SemProductJSONService } from '../entities/sem_product_json.service';
+import { SemHtmlElementStructure } from '../entities/sem_html_element_structure.entity';
+import { SemHtmlElementStructureService } from '../entities/sem_html_element_structure.service';
 // https://platform.openai.com/docs/guides/gpt/chat-completions-api?lang=node.js
 import { ClientOptions, OpenAI } from 'openai';
 
@@ -23,7 +23,7 @@ export class ServiceOpenaiService {
     private readonly semHtmlElementService: SemHtmlElementService,
     private readonly semOpenaiCompletionsService: SemOpenaiCompletionsService,
     private readonly semWebsiteService: SemWebsiteService,
-    private readonly semProductJSONService: SemProductJSONService,
+    private readonly semProductJSONService: SemHtmlElementStructureService,
   ) {}
 
   async isProduct(
@@ -59,10 +59,10 @@ export class ServiceOpenaiService {
     }
   }
 
-  async getProductJSON(
+  async getProduct(
     htmlElementId: number,
     htmlElement?: SemHtmlElement,
-  ): Promise<SemProductJSON> {
+  ): Promise<SemHtmlElementStructure> {
     try {
       if (htmlElement === undefined) {
         htmlElement = await this.semHtmlElementService.findOne(htmlElementId);
@@ -84,7 +84,7 @@ export class ServiceOpenaiService {
           } group_id ${htmlElement.group_id}`,
         );
       }
-      let productJSON: SemProductJSON;
+      let productJSON: SemHtmlElementStructure;
       productJSON = await this.semProductJSONService.findOneBy(
         completions.id,
         0, //htmlElement.website_id, // TODO use relations

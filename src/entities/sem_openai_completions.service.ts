@@ -11,11 +11,16 @@ export class SemOpenaiCompletionsService {
   ) {}
 
   findAll(): Promise<SemOpenaiCompletions[]> {
-    return this.semOpenaiCompletionsRepository.find();
+    return this.semOpenaiCompletionsRepository.find({
+      relations: ['htmlElementStructures'],
+    });
   }
 
   async findOne(id: number): Promise<SemOpenaiCompletions> {
-    return this.semOpenaiCompletionsRepository.findOne({ where: { id } });
+    return this.semOpenaiCompletionsRepository.findOne({
+      where: { id },
+      relations: ['htmlElementStructures'],
+    });
   }
 
   async findOneBy(

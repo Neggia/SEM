@@ -9,6 +9,7 @@ import { ServiceOpenaiService } from './service_openai/service_openai.service';
 import { ServiceOpenaiController } from './service_openai/service_openai.controller';
 import { FixturesService } from './fixtures/fixtures.service';
 import { AuthModule } from './auth/auth.module';
+import { SemOpenaiCompletionsController } from './entities/sem_openai_completions.controller';
 
 @Module({
   imports: [
@@ -19,7 +20,12 @@ import { AuthModule } from './auth/auth.module';
     DatabaseModule,
     AuthModule,
   ],
-  controllers: [AppController, ServiceOpenaiController, SemProcessController],
+  controllers: [
+    AppController,
+    ServiceOpenaiController,
+    SemProcessController,
+    SemOpenaiCompletionsController,
+  ],
   providers: [AppService, ServiceOpenaiService, FixturesService],
 })
 export class AppModule {}

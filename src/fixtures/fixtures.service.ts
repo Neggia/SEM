@@ -1,6 +1,7 @@
 import { Injectable } from '@nestjs/common';
 // import { InjectRepository } from '@nestjs/typeorm';
 // import { Repository } from 'typeorm';
+import { SemHtmlElementStructureFixtures } from '../fixtures/sem_html_element_structure.fixtures';
 // import { SemHtmlElement } from '../entities/sem_html_element.entity';
 import { SemHtmlElementFixtures } from '../fixtures/sem_html_element.fixtures';
 // import { SemOpenaiCompletions } from '../entities/sem_openai_completions.entity';
@@ -27,12 +28,19 @@ export class FixturesService {
     private readonly entityManager: EntityManager, // inject other dependencies if needed
   ) {}
 
+  private async clearData() {
+    // Add logic here to clear existing data if necessary
+    // Ensure you clear data in the right order to respect foreign key constraints
+  }
+
   async loadFixtures(): Promise<void> {
+    await this.clearData();
     await this.loadEntities(SemProcessFixtures);
     await this.loadEntities(SemWebsiteFixtures);
     await this.loadEntities(SemHtmlElementFixtures);
 
     await this.loadEntities(SemOpenaiCompletionsFixtures);
+    await this.loadEntities(SemHtmlElementStructureFixtures);
     // add other entities as needed, making sure to load dependencies first
   }
 
