@@ -1,7 +1,8 @@
 import { Controller, Get, Param } from '@nestjs/common';
 import { SemProcessService } from './sem_process.service';
+import { CONTROLLER_PROCESS_ID } from '../../client/src/utils/globals';
 
-@Controller('process')
+@Controller(CONTROLLER_PROCESS_ID)
 export class SemProcessController {
   constructor(private readonly semProcessService: SemProcessService) {}
 

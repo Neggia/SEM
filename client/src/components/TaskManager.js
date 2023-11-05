@@ -4,6 +4,14 @@ import { Button } from '@mui/material';
 import ProcessView from './ProcessView';
 import TaskView from './TaskView';
 import OpenaiCompletionsView from './OpenaiCompletionsView';
+import {
+  SERVER_BASE_URL,
+  CONTROLLER_SERVICE_OPENAI_ID,
+  CONTROLLER_SERVICE_OPENAI_GET_PRODUCT_STRUCTURE,
+  CONTROLLER_SERVICE_OPENAI_GET_FUNCTIONS,
+  CONTROLLER_PROCESS_ID,
+  CONTROLLER_OPENAI_COMPLETIONS_ID,
+} from '../utils/globals';
 
 // import ReactTabulatorExample from './ReactTabulatorExample';
 
@@ -16,12 +24,12 @@ function TaskManager() {
     useState(null);
   // const [pids, setPids] = useState(null);
 
-  const baseUrl = 'http://localhost:3000/';
-
   useEffect(() => {
     async function fetchData() {
       try {
-        const processResponse = await fetch(baseUrl + 'process');
+        const processResponse = await fetch(
+          SERVER_BASE_URL + CONTROLLER_PROCESS_ID,
+        );
         if (!processResponse.ok) {
           throw new Error(
             'Network response was not ok ' + processResponse.statusText,
@@ -47,7 +55,9 @@ function TaskManager() {
 
           pidsArray.push(process.id);
 
-          tasksResponse = await fetch(baseUrl + 'process/' + process.id);
+          tasksResponse = await fetch(
+            SERVER_BASE_URL + CONTROLLER_PROCESS_ID + '/' + process.id,
+          );
           if (!tasksResponse.ok) {
             throw new Error(
               'Network response was not ok ' + tasksResponse.statusText,
@@ -62,6 +72,7 @@ function TaskManager() {
                 ...obj,
                 pid: process.id,
                 progress: (obj.last_page / obj.num_pages) * 100,
+                product_structure: '',
               };
             },
           );
@@ -82,7 +93,7 @@ function TaskManager() {
         // setPids(pidsArray);
 
         const openaiCompletionsResponse = await fetch(
-          baseUrl + 'openai-completions',
+          SERVER_BASE_URL + CONTROLLER_OPENAI_COMPLETIONS_ID,
         );
         if (!openaiCompletionsResponse.ok) {
           throw new Error(
@@ -99,7 +110,10 @@ function TaskManager() {
         setOpenaiCompletionsData(openaiCompletionsResponseJson);
 
         const openaiServiceFunctionsResponse = await fetch(
-          baseUrl + 'service-openai/get-functions',
+          SERVER_BASE_URL +
+            CONTROLLER_SERVICE_OPENAI_ID +
+            '/' +
+            CONTROLLER_SERVICE_OPENAI_GET_FUNCTIONS,
         );
         if (!openaiServiceFunctionsResponse.ok) {
           throw new Error(
@@ -154,13 +168,13 @@ function TaskManager() {
           onProcessDataUpdate={handleProcessDataUpdate}
         />
       )}
-      {taskData && (
+      {processData && taskData && (
         <TaskView
           processData={processData} //pids={pids}
           taskData={taskData}
         />
       )}
-      {taskData && (
+      {openaiCompletionsData && taskData && openaiServiceFunctionsData && (
         <OpenaiCompletionsView
           openaiCompletionsData={openaiCompletionsData}
           taskData={taskData}

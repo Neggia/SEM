@@ -24,6 +24,10 @@ export class SemHtmlElementStructure {
   @Column()
   group_id: number;
 
+  // Pagination, product, category, ecc..
+  @Column()
+  type: number;
+
   @Column()
   json: string;
 

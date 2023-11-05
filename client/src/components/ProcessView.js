@@ -131,7 +131,7 @@ const ProcessView = ({ processData, onProcessDataUpdate }) => {
     {
       title: 'Actions',
       formatter: buttonFormatter,
-      width: 100,
+      width: 90,
       hozAlign: 'center',
     },
   ];

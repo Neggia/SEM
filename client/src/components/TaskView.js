@@ -113,10 +113,11 @@ const TaskView = ({ processData, taskData }) => {
     {
       title: 'Actions',
       formatter: buttonFormatter,
-      width: 100,
+      width: 90,
       hozAlign: 'center',
     },
     { title: 'Last run', field: 'last_run', width: 110 },
+    { title: 'Product Structure', field: 'product_structure', width: 200 },
   ];
 
   const handleGroupHeaderPlay = () => {

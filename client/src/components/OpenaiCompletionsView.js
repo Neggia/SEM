@@ -12,6 +12,7 @@ import {
   faPause,
   faStop,
   faFloppyDisk,
+  faSync,
 } from '@fortawesome/free-solid-svg-icons';
 
 // import { icon } from '@fortawesome/fontawesome-svg-core/import.macro';
@@ -24,6 +25,7 @@ const PlayIcon = () => <FontAwesomeIcon icon={faPlay} />;
 const PauseIcon = () => <FontAwesomeIcon icon={faPause} />;
 const StopIcon = () => <FontAwesomeIcon icon={faStop} />;
 const SaveIcon = () => <FontAwesomeIcon icon={faFloppyDisk} />;
+const UpdateIcon = () => <FontAwesomeIcon icon={faSync} />;
 
 const OpenaiCompletionsView = ({
   openaiCompletionsData,
@@ -55,39 +57,46 @@ const OpenaiCompletionsView = ({
 
   let tableRef = useRef(null);
 
-  // const buttonFormatter = (cell) => {
-  //   const cellElement = document.createElement('div');
+  const buttonFormatter = (cell) => {
+    const cellElement = document.createElement('div');
 
-  //   const handlePlay = () => {
-  //     console.log('Play clicked for row:', cell.getRow().getData());
-  //   };
+    // const handlePlay = () => {
+    //   console.log('Play clicked for row:', cell.getRow().getData());
+    // };
 
-  //   const handlePause = () => {
-  //     console.log('Pause clicked for row:', cell.getRow().getData());
-  //   };
+    const handleUpdate = () => {
+      console.log('Update clicked for row:', cell.getRow().getData());
+    };
 
-  //   const handleStop = () => {
-  //     console.log('Stop clicked for row:', cell.getRow().getData());
-  //   };
+    // const handlePause = () => {
+    //   console.log('Pause clicked for row:', cell.getRow().getData());
+    // };
 
-  //   const root = createRoot(cellElement); // Create a root.
+    // const handleStop = () => {
+    //   console.log('Stop clicked for row:', cell.getRow().getData());
+    // };
 
-  //   root.render(
-  //     <>
-  //       <button onClick={handlePlay}>
-  //         <PlayIcon />
-  //       </button>
-  //       <button onClick={handlePause}>
-  //         <PauseIcon />
-  //       </button>
-  //       <button onClick={handleStop}>
-  //         <StopIcon />
-  //       </button>
-  //     </>,
-  //   );
+    const root = createRoot(cellElement); // Create a root.
 
-  //   return cellElement;
-  // };
+    root.render(
+      <>
+        {/* <button onClick={handlePlay}>
+          <PlayIcon />
+        </button> */}
+        <button onClick={handleUpdate}>
+          <UpdateIcon />
+        </button>
+        {/* <button onClick={handlePause}>
+          <PauseIcon />
+        </button>
+        <button onClick={handleStop}>
+          <StopIcon />
+        </button> */}
+      </>,
+    );
+
+    return cellElement;
+  };
 
   const columns = [
     // { title: 'Function', field: 'function_name', width: 110 },
@@ -134,12 +143,12 @@ const OpenaiCompletionsView = ({
     //     legendAlign: 'center',
     //   },
     // },
-    // {
-    //   title: 'Actions',
-    //   formatter: buttonFormatter,
-    //   width: 100,
-    //   hozAlign: 'center',
-    // },
+    {
+      title: 'Update',
+      formatter: buttonFormatter,
+      width: 90,
+      hozAlign: 'center',
+    },
     // { title: 'Last run', field: 'last_run', width: 110 },
   ];
 

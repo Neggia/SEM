@@ -38,7 +38,8 @@ export class ServiceOpenaiService {
     }
   }
 
-  async isProduct(
+  // Check if it's pagination, product, category, ecc.. used to create a SemHtmlElementStructure record
+  async getHtmlElementType(
     htmlElementId: number,
     htmlElement?: SemHtmlElement,
   ): Promise<boolean> {
@@ -49,7 +50,7 @@ export class ServiceOpenaiService {
 
       const completions =
         await this.semOpenaiCompletionsService.findNarrowestOneBy(
-          'isProduct',
+          'getHtmlElementType',
           0, //htmlElement.website_id, // TODO use relations
           htmlElement.group_id,
         );
@@ -62,16 +63,16 @@ export class ServiceOpenaiService {
       return Boolean(parseHtmlElementResponse);
     } catch (error) {
       this.logger.error(
-        `Failed to identify product for HTML element id: ${htmlElement.id}`,
+        `Failed to identify type for HTML element id: ${htmlElement.id}`,
         error.stack,
       );
       throw new Error(
-        `Failed to identify product for HTML element id: ${htmlElement.id}`,
+        `Failed to identify type for HTML element id: ${htmlElement.id}`,
       );
     }
   }
 
-  async getProduct(
+  async getProductStructure(
     htmlElementId: number,
     htmlElement?: SemHtmlElement,
   ): Promise<SemHtmlElementStructure> {
@@ -85,13 +86,13 @@ export class ServiceOpenaiService {
       // );
       const completions =
         await this.semOpenaiCompletionsService.findNarrowestOneBy(
-          'getProductJSON',
+          'getProductStructure',
           0, //htmlElement.website_id, // TODO use relations
           htmlElement.group_id,
         );
       if (completions === undefined) {
         throw new Error(
-          `Completions not found for getProductJSON website_id ${
+          `Completions not found for getProductStructure website_id ${
             0 //htmlElement.website_id, // TODO use relations
           } group_id ${htmlElement.group_id}`,
         );
