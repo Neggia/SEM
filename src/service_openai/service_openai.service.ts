@@ -4,8 +4,8 @@ import { SemHtmlElementService } from '../entities/sem_html_element.service';
 import { SemOpenaiCompletions } from '../entities/sem_openai_completions.entity';
 import { SemOpenaiCompletionsService } from '../entities/sem_openai_completions.service';
 import { SemWebsiteService } from '../entities/sem_website.service';
-import { SemProductJSON } from '../entities/sem_product_json.entity';
-import { SemProductJSONService } from '../entities/sem_product_json.service';
+import { SemHtmlElementStructure } from '../entities/sem_html_element_structure.entity';
+import { SemHtmlElementStructureService } from '../entities/sem_html_element_structure.service';
 // https://platform.openai.com/docs/guides/gpt/chat-completions-api?lang=node.js
 import { ClientOptions, OpenAI } from 'openai';
 
@@ -23,10 +23,23 @@ export class ServiceOpenaiService {
     private readonly semHtmlElementService: SemHtmlElementService,
     private readonly semOpenaiCompletionsService: SemOpenaiCompletionsService,
     private readonly semWebsiteService: SemWebsiteService,
-    private readonly semProductJSONService: SemProductJSONService,
+    private readonly semProductJSONService: SemHtmlElementStructureService,
   ) {}
 
-  async isProduct(
+  async getFunctions() {
+    try {
+      const fucntions =
+        this.semOpenaiCompletionsService.findDistinctFunctionNames();
+
+      return fucntions;
+    } catch (error) {
+      this.logger.error(`Failed to get openai service functions`, error.stack);
+      throw new Error(`Failed to get openai service functions`);
+    }
+  }
+
+  // Check if it's pagination, product, category, ecc.. used to create a SemHtmlElementStructure record
+  async getHtmlElementType(
     htmlElementId: number,
     htmlElement?: SemHtmlElement,
   ): Promise<boolean> {
@@ -37,8 +50,8 @@ export class ServiceOpenaiService {
 
       const completions =
         await this.semOpenaiCompletionsService.findNarrowestOneBy(
-          'isProduct',
-          htmlElement.website_id,
+          'getHtmlElementType',
+          0, //htmlElement.website_id, // TODO use relations
           htmlElement.group_id,
         );
 
@@ -50,19 +63,19 @@ export class ServiceOpenaiService {
       return Boolean(parseHtmlElementResponse);
     } catch (error) {
       this.logger.error(
-        `Failed to identify product for HTML element id: ${htmlElement.id}`,
+        `Failed to identify type for HTML element id: ${htmlElement.id}`,
         error.stack,
       );
       throw new Error(
-        `Failed to identify product for HTML element id: ${htmlElement.id}`,
+        `Failed to identify type for HTML element id: ${htmlElement.id}`,
       );
     }
   }
 
-  async getProductJSON(
+  async getProductStructure(
     htmlElementId: number,
     htmlElement?: SemHtmlElement,
-  ): Promise<SemProductJSON> {
+  ): Promise<SemHtmlElementStructure> {
     try {
       if (htmlElement === undefined) {
         htmlElement = await this.semHtmlElementService.findOne(htmlElementId);
@@ -73,19 +86,21 @@ export class ServiceOpenaiService {
       // );
       const completions =
         await this.semOpenaiCompletionsService.findNarrowestOneBy(
-          'getProductJSON',
-          htmlElement.website_id,
+          'getProductStructure',
+          0, //htmlElement.website_id, // TODO use relations
           htmlElement.group_id,
         );
       if (completions === undefined) {
         throw new Error(
-          `Completions not found for getProductJSON website_id ${htmlElement.website_id} group_id ${htmlElement.group_id}`,
+          `Completions not found for getProductStructure website_id ${
+            0 //htmlElement.website_id, // TODO use relations
+          } group_id ${htmlElement.group_id}`,
         );
       }
-      let productJSON: SemProductJSON;
+      let productJSON: SemHtmlElementStructure;
       productJSON = await this.semProductJSONService.findOneBy(
         completions.id,
-        htmlElement.website_id,
+        0, //htmlElement.website_id, // TODO use relations
         htmlElement.group_id,
       );
       if (productJSON) {
@@ -116,7 +131,7 @@ export class ServiceOpenaiService {
       const parseHtmlElementResponseJSON = JSON.parse(parseHtmlElementResponse); // Checks if it is a valid JSON
       productJSON = await this.semProductJSONService.createProductJSON(
         completions.id,
-        htmlElement.website_id,
+        0, //htmlElement.website_id, // TODO use relations
         htmlElement.group_id,
         parseHtmlElementResponse,
       );

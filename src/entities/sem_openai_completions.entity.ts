@@ -1,4 +1,5 @@
-import { Entity, PrimaryGeneratedColumn, Column } from 'typeorm';
+import { Entity, PrimaryGeneratedColumn, Column, OneToMany } from 'typeorm';
+import { SemHtmlElementStructure } from './sem_html_element_structure.entity';
 
 @Entity()
 export class SemOpenaiCompletions {
@@ -22,4 +23,10 @@ export class SemOpenaiCompletions {
 
   // @Column()
   // parameters: string;
+
+  @OneToMany(
+    () => SemHtmlElementStructure,
+    (htmlElementStructure) => htmlElementStructure.openaiCompletions,
+  )
+  htmlElementStructures: SemHtmlElementStructure[];
 }

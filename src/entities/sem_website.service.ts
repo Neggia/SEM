@@ -11,10 +11,15 @@ export class SemWebsiteService {
   ) {}
 
   findAll(): Promise<SemWebsite[]> {
-    return this.semWebsiteRepository.find();
+    return this.semWebsiteRepository.find({
+      relations: ['process', 'htmlElements'],
+    });
   }
 
   async findOne(id: number): Promise<SemWebsite> {
-    return this.semWebsiteRepository.findOne({ where: { id } });
+    return this.semWebsiteRepository.findOne({
+      where: { id },
+      relations: ['process', 'htmlElements'],
+    });
   }
 }
