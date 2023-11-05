@@ -1,13 +1,16 @@
 import { Entity, PrimaryGeneratedColumn, Column } from 'typeorm';
 
 @Entity()
-export class SemProductJson {
+export class SemUser {
   @PrimaryGeneratedColumn()
   id: number;
 
-  @Column()
-  name: string;
+  @Column({ unique: true })
+  username: string;
 
   @Column()
-  email: string;
+  password: string;
+
+  @Column()
+  role: string;
 }
