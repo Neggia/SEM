@@ -1,10 +1,16 @@
 import { Controller, Get, Query } from '@nestjs/common';
 import { ServiceOpenaiService } from './service_openai.service';
-import {
+// import {
+//   CONTROLLER_SERVICE_OPENAI_ID,
+//   CONTROLLER_SERVICE_OPENAI_GET_PRODUCT_STRUCTURE,
+//   CONTROLLER_SERVICE_OPENAI_GET_FUNCTIONS,
+// } from '../../client/src/utils/globals';
+
+const {
   CONTROLLER_SERVICE_OPENAI_ID,
   CONTROLLER_SERVICE_OPENAI_GET_PRODUCT_STRUCTURE,
   CONTROLLER_SERVICE_OPENAI_GET_FUNCTIONS,
-} from '../../client/src/utils/globals';
+} = require('../../client/src/utils/globals');
 
 @Controller(CONTROLLER_SERVICE_OPENAI_ID)
 export class ServiceOpenaiController {
