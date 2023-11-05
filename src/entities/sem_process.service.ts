@@ -11,7 +11,7 @@ export class SemProcessService {
   ) {}
 
   findAll(): Promise<SemProcess[]> {
-    return this.semProcessRepository.find();
+    return this.semProcessRepository.find({ relations: ['websites'] });
   }
 
   async findOne(id: number): Promise<SemProcess> {
