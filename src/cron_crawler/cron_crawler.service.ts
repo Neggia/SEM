@@ -3,6 +3,9 @@ import { Cron, CronExpression } from '@nestjs/schedule';
 import * as puppeteer from 'puppeteer';
 import * as robotsParser from 'robots-txt-parser';
 import { SemProcessService } from '../entities/sem_process.service';
+import { InjectQueue } from '@nestjs/bull';
+import { Queue } from 'bull';
+import { CrawlProcessor } from './crawl_processor';
 
 @Injectable()
 export class CronCrawlerService {
@@ -12,7 +15,23 @@ export class CronCrawlerService {
     allowOnNeutral: false, // If true, will allow access to undefined paths
   });
 
-  constructor(private readonly semProcessService: SemProcessService) {}
+  constructor(
+    private readonly semProcessService: SemProcessService,
+    @InjectQueue('crawlQueue') private readonly crawlQueue: Queue,
+  ) {}
+
+  async addCrawlTask(url: string) {
+    const urlObj = new URL(url);
+    const baseUrl = `${urlObj.hostname}`; // `${urlObj.protocol}//${urlObj.hostname}`;
+    const crawlDelay = await this.getCrawlDelay(url);
+
+    await this.crawlQueue.add({
+      baseUrl,
+      crawlDelay,
+      // url,
+      // ... other crawl task data
+    });
+  }
 
   @Cron(CronExpression.EVERY_HOUR) // Runs every hour, adjust as needed
   async handleCron() {
@@ -22,6 +41,11 @@ export class CronCrawlerService {
       const processArray = await this.semProcessService.findAll();
       for (const process of processArray) {
         console.log('process:', process);
+        for (const website of process.websites) {
+          console.log('website.url:', website.url);
+
+          await this.addCrawlTask(website.url);
+        }
       }
 
       this.logger.debug('Crawler job completed successfully');
@@ -34,6 +58,17 @@ export class CronCrawlerService {
     const robotsUrl = new URL('/robots.txt', url).href;
     await this.robotsAgent.useRobotsFor(robotsUrl);
     return this.robotsAgent.canCrawl(url);
+  }
+
+  async getCrawlDelay(url: string): Promise<number> {
+    if (process.env.NODE_ENV === 'test') {
+      return 5;
+    }
+
+    // TODO check if crawDelay already extracted and don't fetch again
+    const robotsUrl = new URL('/robots.txt', url).href;
+    await this.robotsAgent.useRobotsFor(robotsUrl);
+    return this.robotsAgent.getCrawlDelay();
   }
 
   async crawl(url: string) {

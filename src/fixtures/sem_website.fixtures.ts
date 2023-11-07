@@ -7,7 +7,7 @@ export const SemWebsiteFixtures: Fixture = {
     {
       id: 0,
       name: 'website0',
-      url: 'wwww.website0.com/products',
+      url: 'https://wwww.website.com/products/0',
       process: 0,
       last_run: 1698624314,
       last_page: 4,
@@ -18,7 +18,7 @@ export const SemWebsiteFixtures: Fixture = {
     {
       id: 1,
       name: 'website1',
-      url: 'wwww.website1.com/products',
+      url: 'https://wwww.website.com/products/1',
       process: 0,
       last_run: 1698624314,
       last_page: 8,
