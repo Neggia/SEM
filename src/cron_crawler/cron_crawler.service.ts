@@ -3,9 +3,7 @@ import { Cron, CronExpression } from '@nestjs/schedule';
 import * as puppeteer from 'puppeteer';
 import * as robotsParser from 'robots-txt-parser';
 import { SemProcessService } from '../entities/sem_process.service';
-import { InjectQueue } from '@nestjs/bull';
-import { Queue } from 'bull';
-import { CrawlProcessor } from './crawl_processor';
+import { CrawlQueueService } from '../crawl_queue/crawl_queue.service';
 
 @Injectable()
 export class CronCrawlerService {
@@ -17,21 +15,8 @@ export class CronCrawlerService {
 
   constructor(
     private readonly semProcessService: SemProcessService,
-    @InjectQueue('crawlQueue') private readonly crawlQueue: Queue,
+    private readonly semCrawlQueueService: CrawlQueueService, // @InjectQueue('crawlQueue') private readonly crawlQueue: Queue,
   ) {}
-
-  async addCrawlTask(url: string) {
-    const urlObj = new URL(url);
-    const baseUrl = `${urlObj.hostname}`; // `${urlObj.protocol}//${urlObj.hostname}`;
-    const crawlDelay = await this.getCrawlDelay(url);
-
-    await this.crawlQueue.add({
-      baseUrl,
-      crawlDelay,
-      // url,
-      // ... other crawl task data
-    });
-  }
 
   @Cron(CronExpression.EVERY_HOUR) // Runs every hour, adjust as needed
   async handleCron() {
@@ -44,7 +29,7 @@ export class CronCrawlerService {
         for (const website of process.websites) {
           console.log('website.url:', website.url);
 
-          await this.addCrawlTask(website.url);
+          await this.semCrawlQueueService.addCrawlJob(website.url);
         }
       }
 

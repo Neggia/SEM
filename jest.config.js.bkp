@@ -1,0 +1,32 @@
+module.exports = {
+  moduleFileExtensions: ['js', 'json', 'ts'],
+  rootDir: 'src',
+  testRegex: '.*\\.spec\\.ts$',
+  transform: {
+    '^.+\\.(t|j)s$': 'ts-jest',
+  },
+  collectCoverageFrom: ['**/*.(t|j)s'],
+  coverageDirectory: '../coverage',
+  testEnvironment: 'node',
+  coverageThreshold: {
+    global: {
+      branches: 80,
+      functions: 80,
+      lines: 80,
+      statements: -10,
+    },
+  },
+  testTimeout: 30000, // Optionally set test timeout if your tests have long-running async operations
+  // Setup global test environment, if needed
+  //   globalSetup: '<rootDir>/test/jest-global-setup.ts',
+  //   globals: {
+  //     'ts-jest': {
+  //       tsconfig: '<rootDir>/tsconfig.spec.json',
+  //     },
+  //   },
+  moduleNameMapper: {
+    // If you have paths set up in tsconfig, set them up here as well
+  },
+  // If you're using `ioredis-mock`, you might want to add a setup file that initializes it before tests
+  setupFiles: ['<rootDir>/common/mocks/redis_mock.provider.ts'],
+};
