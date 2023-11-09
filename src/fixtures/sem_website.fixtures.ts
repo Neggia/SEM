@@ -6,8 +6,8 @@ export const SemWebsiteFixtures: Fixture = {
   data: [
     {
       id: 0,
-      name: 'website0',
-      url: 'wwww.website0.com/products',
+      name: 'pagineazzurre',
+      url: 'https://www.pagineazzurre.net/',
       process: 0,
       last_run: 1698624314,
       last_page: 4,
@@ -17,8 +17,8 @@ export const SemWebsiteFixtures: Fixture = {
     },
     {
       id: 1,
-      name: 'website1',
-      url: 'wwww.website1.com/products',
+      name: 'giuna',
+      url: 'https://online.sinerville.com/mod/data/view.php?id=49',
       process: 0,
       last_run: 1698624314,
       last_page: 8,
