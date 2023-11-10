@@ -37,7 +37,7 @@ export class FixturesService {
     await this.clearData();
     await this.loadEntities(SemProcessFixtures);
     await this.loadEntities(SemWebsiteFixtures);
-    await this.loadEntities(SemHtmlElementFixtures);
+    // await this.loadEntities(SemHtmlElementFixtures);
 
     await this.loadEntities(SemOpenaiCompletionsFixtures);
     await this.loadEntities(SemHtmlElementStructureFixtures);

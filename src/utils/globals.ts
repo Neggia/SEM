@@ -1,0 +1,4 @@
+export const HTML_ELEMENT_TYPE_UNKNOWN = 0;
+export const HTML_ELEMENT_TYPE_PRODUCT = 1;
+export const HTML_ELEMENT_TYPE_CATEGORY = 2;
+export const HTML_ELEMENT_TYPE_PAGINATION = 3;

@@ -7,12 +7,22 @@ import * as fs from 'fs';
 import * as path from 'path';
 import * as appRoot from 'app-root-path';
 import { SemProcessService } from '../entities/sem_process.service';
+import { SemWebsite } from '../entities/sem_website.entity';
+import { SemHtmlElementService } from '../entities/sem_html_element.service';
+import { SemWebsiteService } from '../entities/sem_website.service';
+import { ServiceOpenaiService } from '../service_openai/service_openai.service';
+import {
+  HTML_ELEMENT_TYPE_PRODUCT,
+  HTML_ELEMENT_TYPE_CATEGORY,
+  HTML_ELEMENT_TYPE_PAGINATION,
+} from '../utils/globals';
 
 interface TagStructure {
   tag: string;
   classes?: string[];
   children?: TagStructure[];
   html: string;
+  groupId?: number;
 }
 
 @Injectable()
@@ -23,7 +33,12 @@ export class CronCrawlerService {
     allowOnNeutral: false, // If true, will allow access to undefined paths
   });
 
-  constructor(private readonly semProcessService: SemProcessService) {}
+  constructor(
+    private readonly semProcessService: SemProcessService,
+    private readonly semHtmlElementService: SemHtmlElementService,
+    private readonly semWebsiteService: SemWebsiteService,
+    private readonly serviceOpenaiService: ServiceOpenaiService,
+  ) {}
 
   @Cron(CronExpression.EVERY_HOUR) // Runs every hour, adjust as needed
   async handleCron() {
@@ -37,7 +52,7 @@ export class CronCrawlerService {
           console.log('website.url:', website.url);
           // Test
           if (website.url === 'https://www.pagineazzurre.net/') {
-            await this.crawl(website.url);
+            await this.crawl(website);
           }
         }
       }
@@ -54,7 +69,18 @@ export class CronCrawlerService {
     return this.robotsAgent.canCrawl(url);
   }
 
-  async crawl(url: string) {
+  async crawl(website: SemWebsite) {
+    const isDebug = process.env.NODE_DEBUG === 'true';
+    // const isDebug = process.execArgv.some(
+    //   (arg) => arg.includes('--inspect') || arg.includes('--debug'),
+    // );
+    console.log('isDebug: ', isDebug);
+    if (!isDebug) {
+      return;
+    }
+
+    const url = website.url;
+
     const canCrawl = await this.shouldCrawl(url);
     if (!canCrawl) {
       console.warn(`Crawling is disallowed by robots.txt: ${url}`);
@@ -132,15 +158,36 @@ export class CronCrawlerService {
         }, []);
       };
 
-      // Function to recursively deduplicate all structures
-      const deduplicateStructure = (structure: TagStructure): TagStructure => {
-        if (structure.children) {
-          // Deduplicate children
-          const deduplicatedChildren = removeDuplicates(
-            structure.children.map(deduplicateStructure),
-          );
-          return { ...structure, children: deduplicatedChildren };
+      let globalGroupId = 0; // Counter for unique groupId
+
+      // Function to recursively deduplicate all structures and assign unique groupId
+      const deduplicateStructure = async (
+        structure: TagStructure,
+        website: SemWebsite,
+      ): Promise<TagStructure> => {
+        // Assign a unique groupId to the current structure if it doesn't have one
+        if (structure.groupId === undefined) {
+          structure.groupId = ++globalGroupId;
         }
+
+        // Create a record for the current structure
+        await this.semHtmlElementService.createHtmlElement(
+          structure.groupId,
+          structure.html,
+          website,
+        );
+
+        // If the structure has children, process them recursively
+        if (structure.children) {
+          // First, remove duplicates from the children
+          const uniqueChildren = removeDuplicates(structure.children);
+
+          // Then, process each unique child asynchronously and wait for all to complete
+          structure.children = await Promise.all(
+            uniqueChildren.map((child) => deduplicateStructure(child, website)),
+          );
+        }
+
         return structure;
       };
 
@@ -148,82 +195,66 @@ export class CronCrawlerService {
       const bodyStructure = getTagStructure($('body')[0]);
 
       // Deduplicate the body structure
-      const deduplicatedBodyStructure = deduplicateStructure(bodyStructure);
-
-      /*       // This is a placeholder for an array of all elements
-      const elements = $('body').find('*').toArray();
-
-      // This is a simplified example of a comparison function
-      const areElementsSimilar = (elementA, elementB) => {
-        // Compare tagName, class, and structure
-        // This is a naive implementation; you might need something more robust
-        return (
-          elementA.tagName === elementB.tagName &&
-          $(elementA).attr('class') === $(elementB).attr('class') &&
-          $(elementA).children().length === $(elementB).children().length
-        );
-      };
-
-      // Group similar elements
-      const groups = elements.reduce((acc, element, index, array) => {
-        // Check if the element is already part of a group
-        const existingGroup = acc.find((group) =>
-          group.some((member) => areElementsSimilar(member, element)),
-        );
-
-        if (existingGroup) {
-          // If it is similar to a group, add to that group
-          existingGroup.push(element);
-        } else {
-          // If not, create a new group
-          acc.push([element]);
-        }
-
-        return acc;
-      }, []);
-
-      // Log group info
-      // console.log(
-      //   groups.map((group) => ({
-      //     count: group.length,
-      //     tagName: group[0].tagName,
-      //     class: $(group[0]).attr('class'),
-      //   })),
-      // );
-      const groupsData = groups.map((group) => {
-        const element = group[0]; // Assuming the 'top' element is the first in the group
-        return {
-          count: group.length,
-          tagName: element.tagName,
-          class: $(element).attr('class'),
-          html: $(element).html(), // Get the HTML of the top element
-        };
-      }); */
-
-      // Convert your data to a string format, typically JSON for complex data
-      const groupsDataString = JSON.stringify(
-        deduplicatedBodyStructure, //bodyStructure, //groupsData,
-        null,
-        2,
+      const deduplicatedBodyStructure = await deduplicateStructure(
+        bodyStructure,
+        website,
       );
 
-      const urlObj = new URL(url);
-      const baseUrl = `${urlObj.hostname}`;
-      // Define your subfolder path and file name
-      const logsSubfolder = 'logs'; // Replace with your subfolder name
-      const logFilename = baseUrl + '.output.json'; // Replace with your file name
+      if (process.env.NODE_ENV === 'test') {
+        // Convert your data to a string format, typically JSON for complex data
+        const groupsDataString = JSON.stringify(
+          deduplicatedBodyStructure,
+          null,
+          2,
+        );
 
-      // Check if the subfolder exists; if not, create it
-      const subfolderPath = path.join(appRoot.path, logsSubfolder);
-      if (!fs.existsSync(subfolderPath)) {
-        fs.mkdirSync(subfolderPath, { recursive: true });
+        const urlObj = new URL(url);
+        const baseUrl = `${urlObj.hostname}`;
+        // Define your subfolder path and file name
+        const logsSubfolder = 'logs'; // Replace with your subfolder name
+        const logFilename = baseUrl + '.output.json'; // Replace with your file name
+
+        // Check if the subfolder exists; if not, create it
+        const subfolderPath = path.join(appRoot.path, logsSubfolder);
+        if (!fs.existsSync(subfolderPath)) {
+          fs.mkdirSync(subfolderPath, { recursive: true });
+        }
+
+        // Define the full path for the file
+        const filePath = path.join(subfolderPath, logFilename);
+
+        // Write the string to a file
+        fs.writeFileSync(filePath, groupsDataString);
       }
 
-      // Define the full path for the file
-      const filePath = path.join(subfolderPath, logFilename);
+      // htmlElements sorted by group_id in descending order, from innermost to outermost
+      const updatedWebsite = await this.semWebsiteService.findOne(website.id);
+      const updatedHtmlElements = updatedWebsite.htmlElements.sort(
+        (a, b) => b.group_id - a.group_id,
+      );
 
-      // Write the string to a file
-      fs.writeFileSync(filePath, groupsDataString);
+      let lastHtmlElementType;
+      let lastGroupId;
+
+      for (const updatedHtmlElement of updatedHtmlElements) {
+        console.log('htmlElement.group_id: ', updatedHtmlElement.group_id);
+
+        const htmlElementType =
+          await this.serviceOpenaiService.getHtmlElementType(
+            updatedHtmlElement.id,
+            updatedHtmlElement,
+          );
+        if (
+          htmlElementType !== HTML_ELEMENT_TYPE_PRODUCT &&
+          lastHtmlElementType === HTML_ELEMENT_TYPE_PRODUCT
+        ) {
+          // Previous HTML should be the complete product
+          console.log('Product htmlElement.group_id: ', lastGroupId);
+        }
+
+        lastHtmlElementType = htmlElementType;
+        lastGroupId = updatedHtmlElement.group_id;
+      }
     } catch (error) {
       console.error(`Failed to crawl: ${url}`, error);
     } finally {

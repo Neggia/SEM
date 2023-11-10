@@ -8,6 +8,12 @@ import { SemHtmlElementStructure } from '../entities/sem_html_element_structure.
 import { SemHtmlElementStructureService } from '../entities/sem_html_element_structure.service';
 // https://platform.openai.com/docs/guides/gpt/chat-completions-api?lang=node.js
 import { ClientOptions, OpenAI } from 'openai';
+import {
+  HTML_ELEMENT_TYPE_UNKNOWN,
+  HTML_ELEMENT_TYPE_PRODUCT,
+  HTML_ELEMENT_TYPE_CATEGORY,
+  HTML_ELEMENT_TYPE_PAGINATION,
+} from '../utils/globals';
 
 const clientOptions: ClientOptions = {
   // organization: 'sem', //"org-w9hB1JYytvgitGSx9pzTsfP8",
@@ -42,7 +48,7 @@ export class ServiceOpenaiService {
   async getHtmlElementType(
     htmlElementId: number,
     htmlElement?: SemHtmlElement,
-  ): Promise<boolean> {
+  ): Promise<number> {
     try {
       if (htmlElement === undefined) {
         htmlElement = await this.semHtmlElementService.findOne(htmlElementId);
@@ -55,12 +61,18 @@ export class ServiceOpenaiService {
           htmlElement.group_id,
         );
 
+      if (htmlElement.content == '') {
+        return HTML_ELEMENT_TYPE_UNKNOWN;
+      }
       const parseHtmlElementResponse = await this.parseHtmlElement(
         htmlElement.content,
         completions,
       );
+      if (isNaN(Number(parseHtmlElementResponse))) {
+        return HTML_ELEMENT_TYPE_UNKNOWN;
+      }
 
-      return Boolean(parseHtmlElementResponse);
+      return Number(parseHtmlElementResponse);
     } catch (error) {
       this.logger.error(
         `Failed to identify type for HTML element id: ${htmlElement.id}`,
