@@ -6,6 +6,8 @@ import { SemHtmlElement } from '../entities/sem_html_element.entity';
 import { SemHtmlElementService } from '../entities/sem_html_element.service';
 import { SemOpenaiCompletions } from '../entities/sem_openai_completions.entity';
 import { SemOpenaiCompletionsService } from '../entities/sem_openai_completions.service';
+import { SemOpenaiCompletionsRequest } from '../entities/sem_openai_completions_request.entity';
+import { SemOpenaiCompletionsRequestService } from '../entities/sem_openai_completions_request.service';
 import { SemProcess } from '../entities/sem_process.entity';
 import { SemProcessService } from '../entities/sem_process.service';
 import { SemHtmlElementStructure } from '../entities/sem_html_element_structure.entity';
@@ -58,11 +60,13 @@ import { join } from 'path';
       SemProduct,
       SemWebsite,
       SemOpenaiCompletions,
+      SemOpenaiCompletionsRequest,
     ]),
   ],
   providers: [
     SemHtmlElementService,
     SemOpenaiCompletionsService,
+    SemOpenaiCompletionsRequestService,
     SemWebsiteService,
     SemHtmlElementStructureService,
     SemProcessService,
@@ -71,6 +75,7 @@ import { join } from 'path';
     TypeOrmModule,
     SemHtmlElementService,
     SemOpenaiCompletionsService,
+    SemOpenaiCompletionsRequestService,
     SemWebsiteService,
     SemHtmlElementStructureService,
     SemProcessService,

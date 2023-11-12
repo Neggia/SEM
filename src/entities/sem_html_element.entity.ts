@@ -23,6 +23,9 @@ export class SemHtmlElement {
   group_id: number;
 
   @Column()
+  selector: string;
+
+  @Column()
   content: string;
 
   // Get type from entity associated, for example an existing SemProductJSON record for same website_id/group_id

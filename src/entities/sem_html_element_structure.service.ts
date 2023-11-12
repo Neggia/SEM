@@ -2,22 +2,24 @@ import { Injectable } from '@nestjs/common';
 import { InjectRepository } from '@nestjs/typeorm';
 import { Repository } from 'typeorm';
 import { SemHtmlElementStructure } from './sem_html_element_structure.entity';
+import { SemOpenaiCompletions } from './sem_openai_completions.entity';
+import { SemWebsite } from './sem_website.entity';
 
 @Injectable()
 export class SemHtmlElementStructureService {
   constructor(
     @InjectRepository(SemHtmlElementStructure)
-    private readonly semProductJSONRepository: Repository<SemHtmlElementStructure>,
+    private readonly semHtmlElementStructure: Repository<SemHtmlElementStructure>,
   ) {}
 
   findAll(): Promise<SemHtmlElementStructure[]> {
-    return this.semProductJSONRepository.find({
+    return this.semHtmlElementStructure.find({
       relations: ['openaiCompletions'],
     });
   }
 
   async findOne(id: number): Promise<SemHtmlElementStructure> {
-    return this.semProductJSONRepository.findOne({
+    return this.semHtmlElementStructure.findOne({
       where: { id },
       relations: ['openaiCompletions'],
     });
@@ -35,10 +37,12 @@ export class SemHtmlElementStructureService {
 
   async findOneBy(
     openaiCompletionsId: number,
-    websiteId: number,
+    website: SemWebsite,
     groupId: number,
   ): Promise<SemHtmlElementStructure> {
-    return this.semProductJSONRepository.findOne({
+    const websiteId = website.id;
+
+    return this.semHtmlElementStructure.findOne({
       where: {
         // openai_completions_id: openaiCompletionsId,
         website_id: websiteId,
@@ -47,19 +51,21 @@ export class SemHtmlElementStructureService {
     });
   }
 
-  async createProductJSON(
-    openaiCompletionsId: number,
+  async createHtmlElementStructure(
     websiteId: number,
     groupId: number,
+    type: number,
     json: string,
+    openaiCompletions: SemOpenaiCompletions,
   ): Promise<SemHtmlElementStructure> {
-    const newProductJSON = this.semProductJSONRepository.create({
-      // openai_completions_id: openaiCompletionsId,
+    const newHtmlElementStructure = this.semHtmlElementStructure.create({
       website_id: websiteId,
       group_id: groupId,
       json: json,
+      type: type,
+      openaiCompletions: openaiCompletions,
     });
-    await this.semProductJSONRepository.save(newProductJSON);
-    return newProductJSON;
+    await this.semHtmlElementStructure.save(newHtmlElementStructure);
+    return newHtmlElementStructure;
   }
 }

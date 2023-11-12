@@ -3,16 +3,18 @@ import { SemHtmlElement } from '../entities/sem_html_element.entity';
 import { SemHtmlElementService } from '../entities/sem_html_element.service';
 import { SemOpenaiCompletions } from '../entities/sem_openai_completions.entity';
 import { SemOpenaiCompletionsService } from '../entities/sem_openai_completions.service';
-import { SemWebsiteService } from '../entities/sem_website.service';
+import { SemOpenaiCompletionsRequestService } from '../entities/sem_openai_completions_request.service';
+// import { SemWebsiteService } from '../entities/sem_website.service';
 import { SemHtmlElementStructure } from '../entities/sem_html_element_structure.entity';
 import { SemHtmlElementStructureService } from '../entities/sem_html_element_structure.service';
 // https://platform.openai.com/docs/guides/gpt/chat-completions-api?lang=node.js
 import { ClientOptions, OpenAI } from 'openai';
 import {
+  hashString,
   HTML_ELEMENT_TYPE_UNKNOWN,
-  HTML_ELEMENT_TYPE_PRODUCT,
-  HTML_ELEMENT_TYPE_CATEGORY,
-  HTML_ELEMENT_TYPE_PAGINATION,
+  // HTML_ELEMENT_TYPE_PRODUCT,
+  // HTML_ELEMENT_TYPE_CATEGORY,
+  // HTML_ELEMENT_TYPE_PAGINATION,
 } from '../utils/globals';
 
 const clientOptions: ClientOptions = {
@@ -28,8 +30,9 @@ export class ServiceOpenaiService {
   constructor(
     private readonly semHtmlElementService: SemHtmlElementService,
     private readonly semOpenaiCompletionsService: SemOpenaiCompletionsService,
-    private readonly semWebsiteService: SemWebsiteService,
-    private readonly semProductJSONService: SemHtmlElementStructureService,
+    private readonly semOpenaiCompletionsRequestService: SemOpenaiCompletionsRequestService,
+    // private readonly semWebsiteService: SemWebsiteService,
+    private readonly semHtmlElementStructureService: SemHtmlElementStructureService,
   ) {}
 
   async getFunctions() {
@@ -50,14 +53,14 @@ export class ServiceOpenaiService {
     htmlElement?: SemHtmlElement,
   ): Promise<number> {
     try {
-      if (htmlElement === undefined) {
+      if (htmlElement === undefined || htmlElement.website === undefined) {
         htmlElement = await this.semHtmlElementService.findOne(htmlElementId);
       }
 
       const completions =
         await this.semOpenaiCompletionsService.findNarrowestOneBy(
           'getHtmlElementType',
-          0, //htmlElement.website_id, // TODO use relations
+          htmlElement.website,
           htmlElement.group_id,
         );
 
@@ -65,7 +68,7 @@ export class ServiceOpenaiService {
         return HTML_ELEMENT_TYPE_UNKNOWN;
       }
       const parseHtmlElementResponse = await this.parseHtmlElement(
-        htmlElement.content,
+        htmlElement,
         completions,
       );
       if (isNaN(Number(parseHtmlElementResponse))) {
@@ -99,7 +102,7 @@ export class ServiceOpenaiService {
       const completions =
         await this.semOpenaiCompletionsService.findNarrowestOneBy(
           'getProductStructure',
-          0, //htmlElement.website_id, // TODO use relations
+          htmlElement.website, // TODO use relations
           htmlElement.group_id,
         );
       if (completions === undefined) {
@@ -110,9 +113,9 @@ export class ServiceOpenaiService {
         );
       }
       let productJSON: SemHtmlElementStructure;
-      productJSON = await this.semProductJSONService.findOneBy(
+      productJSON = await this.semHtmlElementStructureService.findOneBy(
         completions.id,
-        0, //htmlElement.website_id, // TODO use relations
+        htmlElement.website,
         htmlElement.group_id,
       );
       if (productJSON) {
@@ -137,16 +140,19 @@ export class ServiceOpenaiService {
       // }
 
       const parseHtmlElementResponse = await this.parseHtmlElement(
-        htmlElement.content,
+        htmlElement,
         completions,
       );
       const parseHtmlElementResponseJSON = JSON.parse(parseHtmlElementResponse); // Checks if it is a valid JSON
-      productJSON = await this.semProductJSONService.createProductJSON(
-        completions.id,
-        0, //htmlElement.website_id, // TODO use relations
-        htmlElement.group_id,
-        parseHtmlElementResponse,
-      );
+      productJSON =
+        await this.semHtmlElementStructureService.createHtmlElementStructure(
+          // completions.id,
+          0, //htmlElement.website_id, // TODO use relations
+          htmlElement.group_id,
+          1,
+          parseHtmlElementResponse,
+          completions,
+        );
       console.log(
         'ServiceOpenaiService.getProductJSON() productJSON: ',
         productJSON,
@@ -165,7 +171,7 @@ export class ServiceOpenaiService {
   }
 
   async parseHtmlElement(
-    htmlElement: string,
+    htmlElement: SemHtmlElement,
     completions: SemOpenaiCompletions,
     // completionsId: number,
   ): Promise<string> {
@@ -188,25 +194,46 @@ export class ServiceOpenaiService {
         completionsJSON.messages[completionsMessageIndex].content =
           completionsJSON.messages[completionsMessageIndex].content.replace(
             '<html_element>',
-            htmlElement,
+            htmlElement.content,
           );
         console.log('Updated completionsJSON: ', completionsJSON);
       }
 
-      // The system message helps set the behavior of the assistant
-      const completionsResponse = await openai.chat.completions.create({
+      const body = {
         messages: completionsJSON.messages,
         // messages: [
         //   { role: 'system', content: 'You are a helpful assistant.' },
         //   { role: 'user', content: 'Tell me the result of 2 x 2' },
         // ],
         model: completionsJSON.model, //"gpt-3.5-turbo",
-      });
-      console.log('parseHtmlElement() completion: ', completionsResponse);
-      const reply: string = completionsResponse.choices[0].message.content;
-      console.log('parseHtmlElement() reply: ', reply);
+      };
+      const bodyString = JSON.stringify(body);
+      const bodyHash = hashString(bodyString);
+      const semOpenaiCompletionsRequest =
+        await this.semOpenaiCompletionsRequestService.findOneBy(
+          htmlElement.website,
+          bodyHash,
+          completions,
+        );
+      if (semOpenaiCompletionsRequest !== null) {
+        console.log(
+          `OpenaiCompletionsRequest fetched from cache with hash ${bodyHash} for website id ${htmlElement.website.id} and completions id ${completions.id}`,
+        );
+        return semOpenaiCompletionsRequest.response;
+      }
 
-      return reply;
+      // The system message helps set the behavior of the assistant
+      const completionsResponse = await openai.chat.completions.create(body);
+      console.log('parseHtmlElement() completion: ', completionsResponse);
+      const response: string = completionsResponse.choices[0].message.content;
+      console.log('parseHtmlElement() response: ', response);
+      await this.semOpenaiCompletionsRequestService.createOpenaiCompletionsRequest(
+        htmlElement.website,
+        response,
+        completions,
+      );
+
+      return response;
     } catch (error) {
       this.logger.error(
         `Failed to parse HTML element: ${htmlElement}`,

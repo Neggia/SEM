@@ -11,10 +11,11 @@ import { SemWebsite } from '../entities/sem_website.entity';
 import { SemHtmlElementService } from '../entities/sem_html_element.service';
 import { SemWebsiteService } from '../entities/sem_website.service';
 import { ServiceOpenaiService } from '../service_openai/service_openai.service';
+import { SemHtmlElementStructureService } from '../entities/sem_html_element_structure.service';
 import {
   HTML_ELEMENT_TYPE_PRODUCT,
-  HTML_ELEMENT_TYPE_CATEGORY,
-  HTML_ELEMENT_TYPE_PAGINATION,
+  // HTML_ELEMENT_TYPE_CATEGORY,
+  // HTML_ELEMENT_TYPE_PAGINATION,
 } from '../utils/globals';
 
 interface TagStructure {
@@ -23,6 +24,7 @@ interface TagStructure {
   children?: TagStructure[];
   html: string;
   groupId?: number;
+  selector: string;
 }
 
 @Injectable()
@@ -37,6 +39,7 @@ export class CronCrawlerService {
     private readonly semProcessService: SemProcessService,
     private readonly semHtmlElementService: SemHtmlElementService,
     private readonly semWebsiteService: SemWebsiteService,
+    private readonly semHtmlElementStructureService: SemHtmlElementStructureService,
     private readonly serviceOpenaiService: ServiceOpenaiService,
   ) {}
 
@@ -75,9 +78,9 @@ export class CronCrawlerService {
     //   (arg) => arg.includes('--inspect') || arg.includes('--debug'),
     // );
     console.log('isDebug: ', isDebug);
-    if (!isDebug) {
-      return;
-    }
+    // if (!isDebug) {
+    //   return;
+    // }
 
     const url = website.url;
 
@@ -98,23 +101,36 @@ export class CronCrawlerService {
       const html = await page.content();
       const $ = cheerio.load(html);
 
-      // Function to recursively traverse the DOM and record the tag structure with classes and HTML
-      const getTagStructure = (element: cheerio.Element): TagStructure => {
+      // Function to recursively traverse the DOM and record the tag structure with classes, HTML, and selector
+      const getTagStructure = (
+        element: cheerio.Element,
+        parentSelector?: string,
+      ): TagStructure => {
+        const tag = element.tagName;
+        const classes = $(element).attr('class')
+          ? $(element).attr('class').split(/\s+/)
+          : [];
+        const classSelector = classes.length ? '.' + classes.join('.') : '';
+        const currentSelector = `${
+          parentSelector ? parentSelector + ' > ' : ''
+        }${tag}${classSelector}`;
+
         const structure: TagStructure = {
-          tag: element.tagName,
-          html: $(element).html() || '', // Get the HTML content or an empty string if none
+          tag,
+          html: $(element).html() || '',
+          selector: currentSelector,
         };
 
-        // Get the element's classes
-        const classList = $(element).attr('class');
-        if (classList) {
-          structure.classes = classList.split(/\s+/);
+        if (classes.length) {
+          structure.classes = classes;
         }
 
         // If the element has children, recurse
         const children = $(element).children().toArray();
         if (children.length > 0) {
-          structure.children = children.map((child) => getTagStructure(child));
+          structure.children = children.map((child) =>
+            getTagStructure(child, currentSelector),
+          );
         }
 
         return structure;
@@ -173,6 +189,7 @@ export class CronCrawlerService {
         // Create a record for the current structure
         await this.semHtmlElementService.createHtmlElement(
           structure.groupId,
+          structure.selector,
           structure.html,
           website,
         );
@@ -227,6 +244,10 @@ export class CronCrawlerService {
         fs.writeFileSync(filePath, groupsDataString);
       }
 
+      if (!isDebug) {
+        return;
+      }
+
       // htmlElements sorted by group_id in descending order, from innermost to outermost
       const updatedWebsite = await this.semWebsiteService.findOne(website.id);
       const updatedHtmlElements = updatedWebsite.htmlElements.sort(
@@ -250,6 +271,13 @@ export class CronCrawlerService {
         ) {
           // Previous HTML should be the complete product
           console.log('Product htmlElement.group_id: ', lastGroupId);
+
+          // Create a record for product structure
+          const productStructure =
+            await this.serviceOpenaiService.getProductStructure(
+              updatedHtmlElement.id,
+              updatedHtmlElement,
+            );
         }
 
         lastHtmlElementType = htmlElementType;

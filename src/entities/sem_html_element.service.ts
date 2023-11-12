@@ -12,21 +12,28 @@ export class SemHtmlElementService {
   ) {}
 
   findAll(): Promise<SemHtmlElement[]> {
-    return this.semHtmlElementRepository.find();
+    return this.semHtmlElementRepository.find({
+      relations: ['website'],
+    });
   }
 
   async findOne(id: number): Promise<SemHtmlElement> {
-    return this.semHtmlElementRepository.findOne({ where: { id } });
+    return this.semHtmlElementRepository.findOne({
+      where: { id },
+      relations: ['website'],
+    });
   }
 
   async createHtmlElement(
     groupId: number,
+    selector: string,
     content: string,
     website: SemWebsite,
   ): Promise<SemHtmlElement> {
     // Create a new instance of SemHtmlElement
     const htmlElement = new SemHtmlElement();
     htmlElement.group_id = groupId;
+    htmlElement.selector = selector;
     htmlElement.content = content;
     htmlElement.website = website;
 
