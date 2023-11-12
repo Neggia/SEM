@@ -40,4 +40,8 @@ export class SemHtmlElementService {
     // Save the new HTML element in the database
     return await this.semHtmlElementRepository.save(htmlElement);
   }
+
+  async deleteHtmlElementsByWebsite(website: SemWebsite): Promise<void> {
+    await this.semHtmlElementRepository.delete({ website: website });
+  }
 }

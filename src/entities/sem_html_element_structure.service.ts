@@ -68,4 +68,8 @@ export class SemHtmlElementStructureService {
     await this.semHtmlElementStructure.save(newHtmlElementStructure);
     return newHtmlElementStructure;
   }
+
+  // async clearTableData(): Promise<void> {
+  //   await this.semHtmlElementStructure.clear();
+  // }
 }

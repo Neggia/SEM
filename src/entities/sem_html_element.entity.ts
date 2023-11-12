@@ -1,22 +1,10 @@
-import {
-  Entity,
-  PrimaryGeneratedColumn,
-  Column,
-  // OneToOne,
-  // JoinColumn,
-  ManyToOne,
-} from 'typeorm';
+import { Entity, PrimaryGeneratedColumn, Column, ManyToOne } from 'typeorm';
 import { SemWebsite } from '../entities/sem_website.entity';
 
 @Entity()
 export class SemHtmlElement {
   @PrimaryGeneratedColumn()
   id: number;
-
-  // @OneToOne(() => SemWebsite)
-  // @JoinColumn()
-  // @Column()
-  // website_id: number; //SemWebsite;
 
   // Elements with the same structure have the same group_id and are parsed just once
   @Column()

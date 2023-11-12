@@ -4,7 +4,7 @@ import { Repository } from 'typeorm';
 import { SemOpenaiCompletions } from '../entities/sem_openai_completions.entity';
 import { SemOpenaiCompletionsRequest } from '../entities/sem_openai_completions_request.entity';
 import { SemWebsite } from './sem_website.entity';
-import { hashString } from '../utils/globals';
+// import { hashString } from '../utils/globals';
 
 @Injectable()
 export class SemOpenaiCompletionsRequestService {
@@ -43,6 +43,7 @@ export class SemOpenaiCompletionsRequestService {
 
   async createOpenaiCompletionsRequest(
     website: SemWebsite,
+    bodyHash: string,
     response: string,
     openaiCompletions: SemOpenaiCompletions,
   ): Promise<SemOpenaiCompletionsRequest> {
@@ -51,7 +52,7 @@ export class SemOpenaiCompletionsRequestService {
     // Create a new instance of SemOpenaiCompletionsRequest
     const openaiCompletionsRequest = new SemOpenaiCompletionsRequest();
     openaiCompletionsRequest.website_id = websiteId;
-    openaiCompletionsRequest.bodyHash = hashString(openaiCompletions.body);
+    openaiCompletionsRequest.bodyHash = bodyHash;
     openaiCompletionsRequest.response = response;
     openaiCompletionsRequest.openaiCompletions = openaiCompletions;
 

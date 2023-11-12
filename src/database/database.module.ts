@@ -16,6 +16,9 @@ import { SemProduct } from '../entities/sem_product.entity';
 import { SemWebsite } from '../entities/sem_website.entity';
 import { SemWebsiteService } from '../entities/sem_website.service';
 import { join } from 'path';
+import * as appRoot from 'app-root-path';
+import * as path from 'path';
+import * as fs from 'fs';
 
 @Module({
   imports: [
@@ -23,14 +26,24 @@ import { join } from 'path';
       imports: [ConfigModule],
       useFactory: (configService: ConfigService) => {
         const dbName = configService.get<string>('DB_NAME');
-        console.log('DB_NAME:', dbName);
+        console.log('DB_NAME: ', dbName);
         if (!dbName) {
           throw new Error(
             'DB_NAME is not defined in the environment variables',
           );
         }
-        const databasePath = join(__dirname, '..', 'database', dbName);
-        console.log('databasePath:', databasePath);
+        const databaseSubfolder = 'data';
+
+        // Check if the subfolder exists; if not, create it
+        const databaseSubfolderPath = path.join(
+          appRoot.path,
+          databaseSubfolder,
+        );
+        if (!fs.existsSync(databaseSubfolderPath)) {
+          fs.mkdirSync(databaseSubfolderPath, { recursive: true });
+        }
+        const databasePath = join(databaseSubfolderPath, dbName);
+        console.log('databasePath: ', databasePath);
 
         return {
           type: 'sqlite',

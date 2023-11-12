@@ -176,6 +176,8 @@ export class CronCrawlerService {
 
       let globalGroupId = 0; // Counter for unique groupId
 
+      await this.semHtmlElementService.deleteHtmlElementsByWebsite(website);
+
       // Function to recursively deduplicate all structures and assign unique groupId
       const deduplicateStructure = async (
         structure: TagStructure,
@@ -227,9 +229,8 @@ export class CronCrawlerService {
 
         const urlObj = new URL(url);
         const baseUrl = `${urlObj.hostname}`;
-        // Define your subfolder path and file name
-        const logsSubfolder = 'logs'; // Replace with your subfolder name
-        const logFilename = baseUrl + '.output.json'; // Replace with your file name
+        const logsSubfolder = 'logs';
+        const logFilename = baseUrl + '.output.json';
 
         // Check if the subfolder exists; if not, create it
         const subfolderPath = path.join(appRoot.path, logsSubfolder);

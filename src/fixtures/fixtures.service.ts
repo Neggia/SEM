@@ -1,14 +1,16 @@
 import { Injectable } from '@nestjs/common';
 // import { InjectRepository } from '@nestjs/typeorm';
 // import { Repository } from 'typeorm';
-import { SemHtmlElementStructureFixtures } from '../fixtures/sem_html_element_structure.fixtures';
-// import { SemHtmlElement } from '../entities/sem_html_element.entity';
-import { SemHtmlElementFixtures } from '../fixtures/sem_html_element.fixtures';
-// import { SemOpenaiCompletions } from '../entities/sem_openai_completions.entity';
+// import { SemHtmlElementStructureFixtures } from '../fixtures/sem_html_element_structure.fixtures';
+import { SemHtmlElement } from '../entities/sem_html_element.entity';
+import { SemHtmlElementStructure } from '../entities/sem_html_element_structure.entity';
+// import { SemHtmlElementFixtures } from '../fixtures/sem_html_element.fixtures';
+import { SemOpenaiCompletions } from '../entities/sem_openai_completions.entity';
+import { SemOpenaiCompletionsRequest } from '../entities/sem_openai_completions_request.entity';
 import { SemOpenaiCompletionsFixtures } from '../fixtures/sem_openai_completions.fixtures';
-// import { SemProcess } from '../entities/sem_process.entity';
+import { SemProcess } from '../entities/sem_process.entity';
 import { SemProcessFixtures } from '../fixtures/sem_process.fixtures';
-// import { SemWebsite } from '../entities/sem_website.entity';
+import { SemWebsite } from '../entities/sem_website.entity';
 import { SemWebsiteFixtures } from '../fixtures/sem_website.fixtures';
 import { EntityManager, EntityTarget } from 'typeorm';
 import { InjectEntityManager } from '@nestjs/typeorm';
@@ -28,19 +30,31 @@ export class FixturesService {
     private readonly entityManager: EntityManager, // inject other dependencies if needed
   ) {}
 
+  private async clearEntityData(entityType: EntityTarget<any>) {
+    const repository = this.entityManager.getRepository(entityType);
+    await repository.clear();
+  }
+
   private async clearData() {
     // Add logic here to clear existing data if necessary
     // Ensure you clear data in the right order to respect foreign key constraints
+    // await this.clearEntityData(SemHtmlElementStructure);
+    // await this.clearEntityData(SemHtmlElement);
+    // await this.clearEntityData(SemWebsite);
+    // await this.clearEntityData(SemProcess);
+    // await this.clearEntityData(SemOpenaiCompletionsRequest);
+    // await this.clearEntityData(SemOpenaiCompletions);
   }
 
   async loadFixtures(): Promise<void> {
     await this.clearData();
+
     await this.loadEntities(SemProcessFixtures);
     await this.loadEntities(SemWebsiteFixtures);
     // await this.loadEntities(SemHtmlElementFixtures);
 
     await this.loadEntities(SemOpenaiCompletionsFixtures);
-    await this.loadEntities(SemHtmlElementStructureFixtures);
+    // await this.loadEntities(SemHtmlElementStructureFixtures);
     // add other entities as needed, making sure to load dependencies first
   }
 
@@ -53,9 +67,15 @@ export class FixturesService {
       if (fixture.relations) {
         for (const relation of fixture.relations) {
           if (data[relation]) {
-            entity[relation] = data[relation].map((id) =>
-              this.entityMap.get(id),
-            );
+            // Check if the relation data is an array (one-to-many/many-to-many)
+            if (Array.isArray(data[relation])) {
+              entity[relation] = data[relation].map((id) =>
+                this.entityMap.get(id),
+              );
+            } else {
+              // For many-to-one/one-to-one relations, assign directly
+              entity[relation] = this.entityMap.get(data[relation]);
+            }
           }
         }
       }
