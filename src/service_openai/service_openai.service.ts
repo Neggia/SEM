@@ -17,6 +17,15 @@ import {
   // HTML_ELEMENT_TYPE_PAGINATION,
 } from '../utils/globals';
 
+export interface ProductStructure {
+  url: string;
+  thumbnail: string;
+  title: string;
+  description: string;
+  price_01: string;
+  price_02: string;
+}
+
 const clientOptions: ClientOptions = {
   // organization: 'sem', //"org-w9hB1JYytvgitGSx9pzTsfP8",
   apiKey: process.env.OPENAI_API_KEY,
@@ -88,6 +97,27 @@ export class ServiceOpenaiService {
     }
   }
 
+  isValidProductStructure(parseHtmlElementResponse: string): boolean {
+    try {
+      const parseHtmlElementResponseJSON: ProductStructure = JSON.parse(
+        parseHtmlElementResponse,
+      );
+
+      if (
+        parseHtmlElementResponseJSON.url !== null &&
+        parseHtmlElementResponseJSON.title !== null &&
+        parseHtmlElementResponseJSON.thumbnail !== null &&
+        parseHtmlElementResponseJSON.price_01 !== null
+      ) {
+        return true;
+      }
+
+      return false;
+    } catch (error) {
+      return false;
+    }
+  }
+
   async getProductStructure(
     htmlElementId: number,
     htmlElement?: SemHtmlElement,
@@ -120,29 +150,15 @@ export class ServiceOpenaiService {
       if (productJSON) {
         return productJSON;
       }
-      // for (const completion of completions) {
-      //   const parseCompletionsParametersJSON = JSON.parse(
-      //     completion.parameters,
-      //   );
-      //   const htmlElement = parseCompletionsParametersJSON['<html_element>'];
-      //   if (htmlElement === htmlElement.content) {
-      //     // Already parsed
-      //     const productJSON =
-      //       await this.semProductJSONService.findByCompletionsId(completion.id);
-      //     if (productJSON === undefined) {
-      //       throw new Error(
-      //         `SemProductJSON not found for openai_completions_id ${completion.id}`,
-      //       );
-      //     }
-      //     return productJSON;
-      //   }
-      // }
 
       const parseHtmlElementResponse = await this.parseHtmlElement(
         htmlElement,
         completions,
       );
-      const parseHtmlElementResponseJSON = JSON.parse(parseHtmlElementResponse); // Checks if it is a valid JSON
+
+      if (!this.isValidProductStructure(parseHtmlElementResponse)) {
+        return null;
+      }
 
       productJSON =
         await this.semHtmlElementStructureService.createHtmlElementStructure(

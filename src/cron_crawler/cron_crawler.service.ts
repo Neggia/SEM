@@ -255,8 +255,6 @@ export class CronCrawlerService {
         (a, b) => b.group_id - a.group_id,
       );
 
-      // let lastHtmlElementType;
-      // let lastGroupId;
       let productStructure;
 
       productStructure =
@@ -270,13 +268,13 @@ export class CronCrawlerService {
             continue; // No need to parse whole body, only subsections
           }
 
-          if (
-            isDebug &&
-            updatedHtmlElement.selector ===
-              'body > div > div.grid-container > main > div > div > div.row.center.cards-container > div.card.card--tile'
-          ) {
-            debugger;
-          }
+          // if (
+          //   isDebug &&
+          //   updatedHtmlElement.selector ===
+          //     'body > div > div.grid-container > main > div > div > div.row.center.cards-container > div.card.card--tile'
+          // ) {
+          //   debugger;
+          // }
 
           console.log('htmlElement.group_id: ', updatedHtmlElement.group_id);
 
@@ -285,18 +283,12 @@ export class CronCrawlerService {
               updatedHtmlElement.id,
               updatedHtmlElement,
             );
-          if (
-            htmlElementType === HTML_ELEMENT_TYPE_PRODUCT
-            // htmlElementType !== HTML_ELEMENT_TYPE_PRODUCT &&
-            // lastHtmlElementType === HTML_ELEMENT_TYPE_PRODUCT
-          ) {
-            // // Previous HTML should be the complete product
+          if (htmlElementType === HTML_ELEMENT_TYPE_PRODUCT) {
             console.log(
               'Product htmlElement.group_id: ',
               updatedHtmlElement.group_id,
-            ); //lastGroupId);
+            );
 
-            // Create a record for product structure
             productStructure =
               await this.serviceOpenaiService.getProductStructure(
                 updatedHtmlElement.id,
@@ -307,9 +299,6 @@ export class CronCrawlerService {
           if (productStructure !== null && productStructure !== undefined) {
             break;
           }
-
-          // lastHtmlElementType = htmlElementType;
-          // lastGroupId = updatedHtmlElement.group_id;
         }
       }
     } catch (error) {
