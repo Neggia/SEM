@@ -51,6 +51,21 @@ export class SemHtmlElementStructureService {
     });
   }
 
+  async findOneByWebsiteAndType(
+    website: SemWebsite,
+    type: number,
+  ): Promise<SemHtmlElementStructure> {
+    const websiteId = website.id;
+
+    return this.semHtmlElementStructure.findOne({
+      where: {
+        // openai_completions_id: openaiCompletionsId,
+        website_id: websiteId,
+        type: type,
+      },
+    });
+  }
+
   async createHtmlElementStructure(
     websiteId: number,
     groupId: number,

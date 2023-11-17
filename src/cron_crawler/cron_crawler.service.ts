@@ -78,9 +78,9 @@ export class CronCrawlerService {
     //   (arg) => arg.includes('--inspect') || arg.includes('--debug'),
     // );
     console.log('isDebug: ', isDebug);
-    // if (!isDebug) {
-    //   return;
-    // }
+    if (!isDebug) {
+      return;
+    }
 
     const url = website.url;
 
@@ -245,9 +245,9 @@ export class CronCrawlerService {
         fs.writeFileSync(filePath, groupsDataString);
       }
 
-      if (!isDebug) {
-        return;
-      }
+      // if (!isDebug) {
+      //   return;
+      // }
 
       // htmlElements sorted by group_id in descending order, from innermost to outermost
       const updatedWebsite = await this.semWebsiteService.findOne(website.id);
@@ -255,34 +255,62 @@ export class CronCrawlerService {
         (a, b) => b.group_id - a.group_id,
       );
 
-      let lastHtmlElementType;
-      let lastGroupId;
+      // let lastHtmlElementType;
+      // let lastGroupId;
+      let productStructure;
 
-      for (const updatedHtmlElement of updatedHtmlElements) {
-        console.log('htmlElement.group_id: ', updatedHtmlElement.group_id);
+      productStructure =
+        await this.semHtmlElementStructureService.findOneByWebsiteAndType(
+          website,
+          HTML_ELEMENT_TYPE_PRODUCT,
+        );
+      if (productStructure === null) {
+        for (const updatedHtmlElement of updatedHtmlElements) {
+          if (updatedHtmlElement.selector === 'body') {
+            continue; // No need to parse whole body, only subsections
+          }
 
-        const htmlElementType =
-          await this.serviceOpenaiService.getHtmlElementType(
-            updatedHtmlElement.id,
-            updatedHtmlElement,
-          );
-        if (
-          htmlElementType !== HTML_ELEMENT_TYPE_PRODUCT &&
-          lastHtmlElementType === HTML_ELEMENT_TYPE_PRODUCT
-        ) {
-          // Previous HTML should be the complete product
-          console.log('Product htmlElement.group_id: ', lastGroupId);
+          if (
+            isDebug &&
+            updatedHtmlElement.selector ===
+              'body > div > div.grid-container > main > div > div > div.row.center.cards-container > div.card.card--tile'
+          ) {
+            debugger;
+          }
 
-          // Create a record for product structure
-          const productStructure =
-            await this.serviceOpenaiService.getProductStructure(
+          console.log('htmlElement.group_id: ', updatedHtmlElement.group_id);
+
+          const htmlElementType =
+            await this.serviceOpenaiService.getHtmlElementType(
               updatedHtmlElement.id,
               updatedHtmlElement,
             );
-        }
+          if (
+            htmlElementType === HTML_ELEMENT_TYPE_PRODUCT
+            // htmlElementType !== HTML_ELEMENT_TYPE_PRODUCT &&
+            // lastHtmlElementType === HTML_ELEMENT_TYPE_PRODUCT
+          ) {
+            // // Previous HTML should be the complete product
+            console.log(
+              'Product htmlElement.group_id: ',
+              updatedHtmlElement.group_id,
+            ); //lastGroupId);
 
-        lastHtmlElementType = htmlElementType;
-        lastGroupId = updatedHtmlElement.group_id;
+            // Create a record for product structure
+            productStructure =
+              await this.serviceOpenaiService.getProductStructure(
+                updatedHtmlElement.id,
+                updatedHtmlElement,
+              );
+          }
+
+          if (productStructure !== null && productStructure !== undefined) {
+            break;
+          }
+
+          // lastHtmlElementType = htmlElementType;
+          // lastGroupId = updatedHtmlElement.group_id;
+        }
       }
     } catch (error) {
       console.error(`Failed to crawl: ${url}`, error);

@@ -81,6 +81,7 @@ export class ServiceOpenaiService {
         `Failed to identify type for HTML element id: ${htmlElement.id}`,
         error.stack,
       );
+      // debugger;
       throw new Error(
         `Failed to identify type for HTML element id: ${htmlElement.id}`,
       );
@@ -162,9 +163,9 @@ export class ServiceOpenaiService {
         `Failed to get product JSON for HTML element id: ${htmlElement.id}`,
         error.stack,
       );
-      throw new Error(
-        `Failed to get product JSON for HTML element id: ${htmlElement.id}`,
-      );
+      // throw new Error(
+      //   `Failed to get product JSON for HTML element id: ${htmlElement.id}`,
+      // );
     }
   }
 
