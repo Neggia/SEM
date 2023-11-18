@@ -10,8 +10,15 @@ import { SemProcessService } from '../entities/sem_process.service';
 import { SemWebsite } from '../entities/sem_website.entity';
 import { SemHtmlElementService } from '../entities/sem_html_element.service';
 import { SemWebsiteService } from '../entities/sem_website.service';
-import { ServiceOpenaiService } from '../service_openai/service_openai.service';
+import {
+  ServiceOpenaiService,
+  ProductHtmlElementStructure,
+} from '../service_openai/service_openai.service';
 import { SemHtmlElementStructureService } from '../entities/sem_html_element_structure.service';
+import {
+  SemProductService,
+  ProductStructure,
+} from '../entities/sem_product.service';
 import {
   HTML_ELEMENT_TYPE_PRODUCT,
   // HTML_ELEMENT_TYPE_CATEGORY,
@@ -41,6 +48,7 @@ export class CronCrawlerService {
     private readonly semWebsiteService: SemWebsiteService,
     private readonly semHtmlElementStructureService: SemHtmlElementStructureService,
     private readonly serviceOpenaiService: ServiceOpenaiService,
+    private readonly semProductService: SemProductService,
   ) {}
 
   @Cron(CronExpression.EVERY_HOUR) // Runs every hour, adjust as needed
@@ -255,14 +263,14 @@ export class CronCrawlerService {
         (a, b) => b.group_id - a.group_id,
       );
 
-      let productStructure;
+      let productHtmlElementStructure;
 
-      productStructure =
+      productHtmlElementStructure =
         await this.semHtmlElementStructureService.findOneByWebsiteAndType(
           website,
           HTML_ELEMENT_TYPE_PRODUCT,
         );
-      if (productStructure === null) {
+      if (productHtmlElementStructure === null) {
         for (const updatedHtmlElement of updatedHtmlElements) {
           if (updatedHtmlElement.selector === 'body') {
             continue; // No need to parse whole body, only subsections
@@ -276,7 +284,7 @@ export class CronCrawlerService {
           //   debugger;
           // }
 
-          console.log('htmlElement.group_id: ', updatedHtmlElement.group_id);
+          // console.log('htmlElement.group_id: ', updatedHtmlElement.group_id);
 
           const htmlElementType =
             await this.serviceOpenaiService.getHtmlElementType(
@@ -289,18 +297,130 @@ export class CronCrawlerService {
               updatedHtmlElement.group_id,
             );
 
-            productStructure =
+            productHtmlElementStructure =
               await this.serviceOpenaiService.getProductStructure(
                 updatedHtmlElement.id,
                 updatedHtmlElement,
               );
           }
 
-          if (productStructure !== null && productStructure !== undefined) {
+          if (
+            productHtmlElementStructure !== null &&
+            productHtmlElementStructure !== undefined
+          ) {
             break;
           }
         }
       }
+
+      const productHtmlElementStructureJSON: ProductHtmlElementStructure =
+        JSON.parse(productHtmlElementStructure.json);
+      let productStructure: ProductStructure;
+
+      const extractFromElement = (
+        $,
+        element,
+        selector: string,
+        attr?: string,
+      ): string => {
+        try {
+          if (selector) {
+            const selectedElement = $(element).find(selector);
+            return attr ? selectedElement.attr(attr) : selectedElement.text();
+          }
+        } catch (error) {
+          console.error(`Failed extractFromElement: ${selector}`, error);
+        }
+      };
+
+      const extractFirstNumberIncludingDecimalAndNegative = (str) => {
+        const match = str.match(/-?\d+(\.\d+)?/);
+        return match ? Number(match[0]) : null;
+      };
+
+      const productElements = $(productHtmlElementStructure.selector).get();
+
+      // Loop through product elements
+      // $(productHtmlElementStructure.selector).each((index, element) => {
+      for (const productElement of productElements) {
+        // 'element' refers to the current item in the loop
+        // You can use $(element) to wrap it with Cheerio and use jQuery-like methods
+
+        productStructure = {
+          url: '',
+          thumbnailUrl: '',
+          title: '',
+          description: '',
+          description_long: '',
+          price_01: 0,
+          currency_01: '',
+          price_02: 0,
+          currency_02: '',
+          category: '',
+        };
+        productStructure.title = extractFromElement(
+          $,
+          productElement,
+          productHtmlElementStructureJSON.title,
+        );
+        productStructure.description = extractFromElement(
+          $,
+          productElement,
+          productHtmlElementStructureJSON.description,
+        );
+        // TODO Check if url or data
+        productStructure.thumbnailUrl = extractFromElement(
+          $,
+          productElement,
+          productHtmlElementStructureJSON.thumbnail,
+          'src',
+        );
+        productStructure.price_01 =
+          extractFirstNumberIncludingDecimalAndNegative(
+            extractFromElement(
+              $,
+              productElement,
+              productHtmlElementStructureJSON.price_01,
+            ),
+          );
+        productStructure.currency_01 = extractFromElement(
+          $,
+          productElement,
+          productHtmlElementStructureJSON.currency_01,
+        );
+        if (!productStructure.currency_01) {
+          productStructure.currency_01 =
+            productHtmlElementStructureJSON.currency_01;
+        }
+        productStructure.price_02 =
+          extractFirstNumberIncludingDecimalAndNegative(
+            extractFromElement(
+              $,
+              productElement,
+              productHtmlElementStructureJSON.price_02,
+            ),
+          );
+        productStructure.currency_02 = extractFromElement(
+          $,
+          productElement,
+          productHtmlElementStructureJSON.currency_02,
+        );
+        if (!productStructure.currency_02) {
+          productStructure.currency_02 =
+            productHtmlElementStructureJSON.currency_02;
+        }
+        productStructure.url =
+          website.url +
+          extractFromElement(
+            $,
+            productElement,
+            productHtmlElementStructureJSON.url,
+            'href',
+          );
+
+        await this.semProductService.createProduct(productStructure);
+      }
+      // });
     } catch (error) {
       console.error(`Failed to crawl: ${url}`, error);
     } finally {

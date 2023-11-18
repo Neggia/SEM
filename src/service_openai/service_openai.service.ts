@@ -17,13 +17,15 @@ import {
   // HTML_ELEMENT_TYPE_PAGINATION,
 } from '../utils/globals';
 
-export interface ProductStructure {
+export interface ProductHtmlElementStructure {
   url: string;
-  thumbnail: string;
+  thumbnail: string; // Check if url or data
   title: string;
   description: string;
   price_01: string;
+  currency_01: string;
   price_02: string;
+  currency_02: string;
 }
 
 const clientOptions: ClientOptions = {
@@ -99,15 +101,15 @@ export class ServiceOpenaiService {
 
   isValidProductStructure(parseHtmlElementResponse: string): boolean {
     try {
-      const parseHtmlElementResponseJSON: ProductStructure = JSON.parse(
-        parseHtmlElementResponse,
-      );
+      const parseHtmlElementResponseJSON: ProductHtmlElementStructure =
+        JSON.parse(parseHtmlElementResponse);
 
       if (
         parseHtmlElementResponseJSON.url !== null &&
         parseHtmlElementResponseJSON.title !== null &&
         parseHtmlElementResponseJSON.thumbnail !== null &&
-        parseHtmlElementResponseJSON.price_01 !== null
+        parseHtmlElementResponseJSON.price_01 !== null &&
+        parseHtmlElementResponseJSON.currency_01 !== null
       ) {
         return true;
       }
@@ -143,9 +145,10 @@ export class ServiceOpenaiService {
       }
       let productJSON: SemHtmlElementStructure;
       productJSON = await this.semHtmlElementStructureService.findOneBy(
-        completions.id,
+        // completions.id,
         htmlElement.website,
-        htmlElement.group_id,
+        // htmlElement.group_id,
+        htmlElement.selector,
       );
       if (productJSON) {
         return productJSON;
@@ -163,7 +166,8 @@ export class ServiceOpenaiService {
       productJSON =
         await this.semHtmlElementStructureService.createHtmlElementStructure(
           htmlElement.website.id,
-          htmlElement.group_id,
+          // htmlElement.group_id,
+          htmlElement.selector,
           HTML_ELEMENT_TYPE_PRODUCT,
           parseHtmlElementResponse,
           completions,

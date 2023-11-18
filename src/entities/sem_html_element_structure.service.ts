@@ -36,9 +36,10 @@ export class SemHtmlElementStructureService {
   // }
 
   async findOneBy(
-    openaiCompletionsId: number,
+    // openaiCompletionsId: number,
     website: SemWebsite,
-    groupId: number,
+    // groupId: number,
+    selector: string,
   ): Promise<SemHtmlElementStructure> {
     const websiteId = website.id;
 
@@ -46,7 +47,8 @@ export class SemHtmlElementStructureService {
       where: {
         // openai_completions_id: openaiCompletionsId,
         website_id: websiteId,
-        group_id: groupId,
+        // group_id: groupId,
+        selector: selector,
       },
     });
   }
@@ -68,14 +70,16 @@ export class SemHtmlElementStructureService {
 
   async createHtmlElementStructure(
     websiteId: number,
-    groupId: number,
+    // groupId: number,
+    selector: string,
     type: number,
     json: string,
     openaiCompletions: SemOpenaiCompletions,
   ): Promise<SemHtmlElementStructure> {
     const newHtmlElementStructure = this.semHtmlElementStructure.create({
       website_id: websiteId,
-      group_id: groupId,
+      // group_id: groupId,
+      selector: selector,
       json: json,
       type: type,
       openaiCompletions: openaiCompletions,

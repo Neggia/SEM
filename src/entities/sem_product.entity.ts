@@ -12,8 +12,8 @@ export class SemProduct {
   @PrimaryGeneratedColumn()
   id: number;
 
-  @Column()
-  html_element_id: number;
+  // @Column()
+  // html_element_id: number;
 
   @Column()
   url: string;
@@ -24,10 +24,10 @@ export class SemProduct {
   @Column()
   title: string;
 
-  @Column()
+  @Column({ nullable: true })
   description: string;
 
-  @Column()
+  @Column({ nullable: true })
   description_long: string;
 
   @Column()

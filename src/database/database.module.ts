@@ -13,6 +13,7 @@ import { SemProcessService } from '../entities/sem_process.service';
 import { SemHtmlElementStructure } from '../entities/sem_html_element_structure.entity';
 import { SemHtmlElementStructureService } from '../entities/sem_html_element_structure.service';
 import { SemProduct } from '../entities/sem_product.entity';
+import { SemProductService } from '../entities/sem_product.service';
 import { SemWebsite } from '../entities/sem_website.entity';
 import { SemWebsiteService } from '../entities/sem_website.service';
 import { join } from 'path';
@@ -83,6 +84,7 @@ import * as fs from 'fs';
     SemWebsiteService,
     SemHtmlElementStructureService,
     SemProcessService,
+    SemProductService,
   ],
   exports: [
     TypeOrmModule,
@@ -92,6 +94,7 @@ import * as fs from 'fs';
     SemWebsiteService,
     SemHtmlElementStructureService,
     SemProcessService,
+    SemProductService,
   ],
 })
 export class DatabaseModule {}
