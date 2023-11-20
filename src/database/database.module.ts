@@ -2,6 +2,7 @@ import { Module } from '@nestjs/common';
 import { TypeOrmModule } from '@nestjs/typeorm';
 import { ConfigModule, ConfigService } from '@nestjs/config';
 import { SemCurrency } from '../entities/sem_currency.entity';
+import { SemCurrencyService } from '../entities/sem_currency.service';
 import { SemHtmlElement } from '../entities/sem_html_element.entity';
 import { SemHtmlElementService } from '../entities/sem_html_element.service';
 import { SemOpenaiCompletions } from '../entities/sem_openai_completions.entity';
@@ -85,6 +86,7 @@ import * as fs from 'fs';
     SemHtmlElementStructureService,
     SemProcessService,
     SemProductService,
+    SemCurrencyService,
   ],
   exports: [
     TypeOrmModule,
@@ -95,6 +97,7 @@ import * as fs from 'fs';
     SemHtmlElementStructureService,
     SemProcessService,
     SemProductService,
+    SemCurrencyService,
   ],
 })
 export class DatabaseModule {}

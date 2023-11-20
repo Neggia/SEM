@@ -18,7 +18,7 @@ export class SemProduct {
   @Column()
   url: string;
 
-  @Column('blob')
+  @Column('blob', { nullable: true })
   thumbnail: Buffer;
 
   @Column()
@@ -43,7 +43,7 @@ export class SemProduct {
   @Column()
   currency_02_id: number;
 
-  @Column()
+  @Column({ nullable: true })
   category_id: number;
 
   // Soft delete, use the softRemove or softDelete method. To recover a soft-deleted entity, you can use the recover method.

@@ -11,9 +11,9 @@ export interface ProductStructure {
   description: string;
   description_long: string;
   price_01: number;
-  currency_01: string;
+  currency_01_id: number;
   price_02: number;
-  currency_02: string;
+  currency_02_id: number;
   category: string;
 }
 
@@ -33,6 +33,14 @@ export class SemProductService {
   async findOne(id: number): Promise<SemProduct> {
     return this.semProductRepository.findOne({
       where: { id },
+    });
+  }
+
+  async findOneByUrl(url: string): Promise<SemProduct> {
+    return this.semProductRepository.findOne({
+      where: {
+        url: url,
+      },
     });
   }
 
@@ -60,11 +68,19 @@ export class SemProductService {
       title: productStructure.title,
       description: productStructure.description,
       price_01: productStructure.price_01,
-      // currency_01_id: 1,
+      currency_01_id: productStructure.currency_01_id,
       price_02: productStructure.price_02,
-      // currency_02_id: 1,
+      currency_02_id: productStructure.currency_02_id,
     });
     await this.semProductRepository.save(newProduct);
     return newProduct;
+  }
+
+  async softDelete(id: number) {
+    await this.semProductRepository.softDelete(id);
+  }
+
+  async delete(id: number) {
+    await this.semProductRepository.delete(id);
   }
 }

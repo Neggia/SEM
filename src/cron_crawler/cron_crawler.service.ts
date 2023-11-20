@@ -6,6 +6,8 @@ import * as cheerio from 'cheerio';
 import * as fs from 'fs';
 import * as path from 'path';
 import * as appRoot from 'app-root-path';
+import { SemCurrency } from '../entities/sem_currency.entity';
+import { SemCurrencyService } from '../entities/sem_currency.service';
 import { SemProcessService } from '../entities/sem_process.service';
 import { SemWebsite } from '../entities/sem_website.entity';
 import { SemHtmlElementService } from '../entities/sem_html_element.service';
@@ -23,6 +25,7 @@ import {
   HTML_ELEMENT_TYPE_PRODUCT,
   // HTML_ELEMENT_TYPE_CATEGORY,
   // HTML_ELEMENT_TYPE_PAGINATION,
+  entitiesMatch,
 } from '../utils/globals';
 
 interface TagStructure {
@@ -49,6 +52,7 @@ export class CronCrawlerService {
     private readonly semHtmlElementStructureService: SemHtmlElementStructureService,
     private readonly serviceOpenaiService: ServiceOpenaiService,
     private readonly semProductService: SemProductService,
+    private readonly semCurrencyService: SemCurrencyService,
   ) {}
 
   @Cron(CronExpression.EVERY_HOUR) // Runs every hour, adjust as needed
@@ -338,6 +342,40 @@ export class CronCrawlerService {
         return match ? Number(match[0]) : null;
       };
 
+      const isValidSelector = ($, selector) => {
+        try {
+          $(selector);
+          return true;
+        } catch (e) {
+          return false;
+        }
+      };
+
+      const getCurrency = async (
+        $,
+        productElement,
+        currencyString: string,
+      ): Promise<SemCurrency> => {
+        let currencyStringTemp: string;
+
+        if (isValidSelector($, currencyString)) {
+          currencyStringTemp = extractFromElement(
+            $,
+            productElement,
+            currencyString,
+          );
+        }
+        if (!currencyStringTemp) {
+          currencyStringTemp = currencyString;
+        }
+        const currency: SemCurrency =
+          await this.semCurrencyService.getCurrencyFromString(
+            currencyStringTemp,
+          );
+
+        return currency;
+      };
+
       const productElements = $(productHtmlElementStructure.selector).get();
 
       // Loop through product elements
@@ -347,27 +385,30 @@ export class CronCrawlerService {
         // You can use $(element) to wrap it with Cheerio and use jQuery-like methods
 
         productStructure = {
-          url: '',
-          thumbnailUrl: '',
-          title: '',
-          description: '',
-          description_long: '',
-          price_01: 0,
-          currency_01: '',
-          price_02: 0,
-          currency_02: '',
-          category: '',
+          url: null,
+          thumbnailUrl: null,
+          title: null,
+          description: null,
+          description_long: null,
+          price_01: null,
+          currency_01_id: null,
+          price_02: null,
+          currency_02_id: null,
+          category: null,
         };
+
         productStructure.title = extractFromElement(
           $,
           productElement,
           productHtmlElementStructureJSON.title,
         );
+
         productStructure.description = extractFromElement(
           $,
           productElement,
           productHtmlElementStructureJSON.description,
         );
+
         // TODO Check if url or data
         productStructure.thumbnailUrl = extractFromElement(
           $,
@@ -375,6 +416,15 @@ export class CronCrawlerService {
           productHtmlElementStructureJSON.thumbnail,
           'src',
         );
+        if (
+          productStructure.thumbnailUrl.startsWith('/') &&
+          !productStructure.thumbnailUrl.startsWith(website.url)
+        ) {
+          // If it's an url and it's relative, not absolute
+          productStructure.thumbnailUrl =
+            website.url + productStructure.thumbnailUrl;
+        }
+
         productStructure.price_01 =
           extractFirstNumberIncludingDecimalAndNegative(
             extractFromElement(
@@ -383,15 +433,14 @@ export class CronCrawlerService {
               productHtmlElementStructureJSON.price_01,
             ),
           );
-        productStructure.currency_01 = extractFromElement(
+
+        const currency_01 = await getCurrency(
           $,
           productElement,
           productHtmlElementStructureJSON.currency_01,
         );
-        if (!productStructure.currency_01) {
-          productStructure.currency_01 =
-            productHtmlElementStructureJSON.currency_01;
-        }
+        productStructure.currency_01_id = currency_01.id;
+
         productStructure.price_02 =
           extractFirstNumberIncludingDecimalAndNegative(
             extractFromElement(
@@ -400,15 +449,14 @@ export class CronCrawlerService {
               productHtmlElementStructureJSON.price_02,
             ),
           );
-        productStructure.currency_02 = extractFromElement(
+
+        const currency_02 = await getCurrency(
           $,
           productElement,
           productHtmlElementStructureJSON.currency_02,
         );
-        if (!productStructure.currency_02) {
-          productStructure.currency_02 =
-            productHtmlElementStructureJSON.currency_02;
-        }
+        productStructure.currency_02_id = currency_02.id;
+
         productStructure.url =
           website.url +
           extractFromElement(
@@ -418,7 +466,24 @@ export class CronCrawlerService {
             'href',
           );
 
-        await this.semProductService.createProduct(productStructure);
+        let productAlreadyExist: boolean = false;
+
+        // Url must be unique
+        const product = await this.semProductService.findOneByUrl(
+          productStructure.url,
+        );
+        if (product) {
+          if (entitiesMatch(product, productStructure, { exclude: ['id'] })) {
+            // Product already existing in database
+            productAlreadyExist = true;
+          } else {
+            // Delete previous product with same url
+            await this.semProductService.delete(product.id);
+          }
+        }
+        if (!productAlreadyExist) {
+          await this.semProductService.createProduct(productStructure);
+        }
       }
       // });
     } catch (error) {

@@ -2,6 +2,7 @@ import { Injectable } from '@nestjs/common';
 // import { InjectRepository } from '@nestjs/typeorm';
 // import { Repository } from 'typeorm';
 // import { SemHtmlElementStructureFixtures } from '../fixtures/sem_html_element_structure.fixtures';
+import { SemProduct } from '../entities/sem_product.entity';
 import { SemHtmlElement } from '../entities/sem_html_element.entity';
 import { SemHtmlElementStructure } from '../entities/sem_html_element_structure.entity';
 // import { SemHtmlElementFixtures } from '../fixtures/sem_html_element.fixtures';
@@ -38,6 +39,7 @@ export class FixturesService {
   private async clearData() {
     // Add logic here to clear existing data if necessary
     // Ensure you clear data in the right order to respect foreign key constraints
+    // await this.clearEntityData(SemProduct);
     // await this.clearEntityData(SemHtmlElementStructure);
     // await this.clearEntityData(SemHtmlElement);
     // await this.clearEntityData(SemWebsite);
