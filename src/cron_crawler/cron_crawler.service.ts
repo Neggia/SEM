@@ -337,9 +337,10 @@ export class CronCrawlerService {
         }
       };
 
-      const extractFirstNumberIncludingDecimalAndNegative = (str) => {
-        const match = str.match(/-?\d+(\.\d+)?/);
-        return match ? Number(match[0]) : null;
+      const extractNumbers = (str) => {
+        const sanitizedStr = str.replace(/null/g, '0');
+        const matches = sanitizedStr.match(/\d+/g) || [];
+        return matches.map(Number);
       };
 
       const isValidSelector = ($, selector) => {
@@ -377,6 +378,7 @@ export class CronCrawlerService {
       };
 
       const productElements = $(productHtmlElementStructure.selector).get();
+      let numbers = [];
 
       // Loop through product elements
       // $(productHtmlElementStructure.selector).each((index, element) => {
@@ -425,14 +427,15 @@ export class CronCrawlerService {
             website.url + productStructure.thumbnailUrl;
         }
 
-        productStructure.price_01 =
-          extractFirstNumberIncludingDecimalAndNegative(
-            extractFromElement(
-              $,
-              productElement,
-              productHtmlElementStructureJSON.price_01,
-            ),
-          );
+        numbers = [];
+        numbers = extractNumbers(
+          extractFromElement(
+            $,
+            productElement,
+            productHtmlElementStructureJSON.price_01,
+          ),
+        );
+        productStructure.price_01 = numbers.length > 0 ? numbers[0] : 0;
 
         const currency_01 = await getCurrency(
           $,
@@ -441,14 +444,15 @@ export class CronCrawlerService {
         );
         productStructure.currency_01_id = currency_01.id;
 
-        productStructure.price_02 =
-          extractFirstNumberIncludingDecimalAndNegative(
-            extractFromElement(
-              $,
-              productElement,
-              productHtmlElementStructureJSON.price_02,
-            ),
-          );
+        numbers = [];
+        numbers = extractNumbers(
+          extractFromElement(
+            $,
+            productElement,
+            productHtmlElementStructureJSON.price_02,
+          ),
+        );
+        productStructure.price_02 = numbers.length > 1 ? numbers[1] : 0;
 
         const currency_02 = await getCurrency(
           $,
