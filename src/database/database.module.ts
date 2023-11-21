@@ -2,18 +2,25 @@ import { Module } from '@nestjs/common';
 import { TypeOrmModule } from '@nestjs/typeorm';
 import { ConfigModule, ConfigService } from '@nestjs/config';
 import { SemCurrency } from '../entities/sem_currency.entity';
+import { SemCurrencyService } from '../entities/sem_currency.service';
 import { SemHtmlElement } from '../entities/sem_html_element.entity';
 import { SemHtmlElementService } from '../entities/sem_html_element.service';
 import { SemOpenaiCompletions } from '../entities/sem_openai_completions.entity';
 import { SemOpenaiCompletionsService } from '../entities/sem_openai_completions.service';
+import { SemOpenaiCompletionsRequest } from '../entities/sem_openai_completions_request.entity';
+import { SemOpenaiCompletionsRequestService } from '../entities/sem_openai_completions_request.service';
 import { SemProcess } from '../entities/sem_process.entity';
 import { SemProcessService } from '../entities/sem_process.service';
 import { SemHtmlElementStructure } from '../entities/sem_html_element_structure.entity';
 import { SemHtmlElementStructureService } from '../entities/sem_html_element_structure.service';
 import { SemProduct } from '../entities/sem_product.entity';
+import { SemProductService } from '../entities/sem_product.service';
 import { SemWebsite } from '../entities/sem_website.entity';
 import { SemWebsiteService } from '../entities/sem_website.service';
 import { join } from 'path';
+import * as appRoot from 'app-root-path';
+import * as path from 'path';
+import * as fs from 'fs';
 
 @Module({
   imports: [
@@ -21,14 +28,24 @@ import { join } from 'path';
       imports: [ConfigModule],
       useFactory: (configService: ConfigService) => {
         const dbName = configService.get<string>('DB_NAME');
-        console.log('DB_NAME:', dbName);
+        console.log('DB_NAME: ', dbName);
         if (!dbName) {
           throw new Error(
             'DB_NAME is not defined in the environment variables',
           );
         }
-        const databasePath = join(__dirname, '..', 'database', dbName);
-        console.log('databasePath:', databasePath);
+        const databaseSubfolder = 'data';
+
+        // Check if the subfolder exists; if not, create it
+        const databaseSubfolderPath = path.join(
+          appRoot.path,
+          databaseSubfolder,
+        );
+        if (!fs.existsSync(databaseSubfolderPath)) {
+          fs.mkdirSync(databaseSubfolderPath, { recursive: true });
+        }
+        const databasePath = join(databaseSubfolderPath, dbName);
+        console.log('databasePath: ', databasePath);
 
         return {
           type: 'sqlite',
@@ -58,22 +75,29 @@ import { join } from 'path';
       SemProduct,
       SemWebsite,
       SemOpenaiCompletions,
+      SemOpenaiCompletionsRequest,
     ]),
   ],
   providers: [
     SemHtmlElementService,
     SemOpenaiCompletionsService,
+    SemOpenaiCompletionsRequestService,
     SemWebsiteService,
     SemHtmlElementStructureService,
     SemProcessService,
+    SemProductService,
+    SemCurrencyService,
   ],
   exports: [
     TypeOrmModule,
     SemHtmlElementService,
     SemOpenaiCompletionsService,
+    SemOpenaiCompletionsRequestService,
     SemWebsiteService,
     SemHtmlElementStructureService,
     SemProcessService,
+    SemProductService,
+    SemCurrencyService,
   ],
 })
 export class DatabaseModule {}

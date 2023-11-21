@@ -1,5 +1,6 @@
 import { Entity, PrimaryGeneratedColumn, Column, OneToMany } from 'typeorm';
 import { SemHtmlElementStructure } from './sem_html_element_structure.entity';
+import { SemOpenaiCompletionsRequest } from '../entities/sem_openai_completions_request.entity';
 
 @Entity()
 export class SemOpenaiCompletions {
@@ -29,4 +30,10 @@ export class SemOpenaiCompletions {
     (htmlElementStructure) => htmlElementStructure.openaiCompletions,
   )
   htmlElementStructures: SemHtmlElementStructure[];
+
+  @OneToMany(
+    () => SemOpenaiCompletionsRequest,
+    (openaiCompletionsRequest) => openaiCompletionsRequest.openaiCompletions,
+  )
+  openaiCompletionsRequests: SemOpenaiCompletionsRequest[];
 }

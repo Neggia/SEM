@@ -3,11 +3,30 @@ import { SemHtmlElement } from '../entities/sem_html_element.entity';
 import { SemHtmlElementService } from '../entities/sem_html_element.service';
 import { SemOpenaiCompletions } from '../entities/sem_openai_completions.entity';
 import { SemOpenaiCompletionsService } from '../entities/sem_openai_completions.service';
-import { SemWebsiteService } from '../entities/sem_website.service';
+import { SemOpenaiCompletionsRequestService } from '../entities/sem_openai_completions_request.service';
+// import { SemWebsiteService } from '../entities/sem_website.service';
 import { SemHtmlElementStructure } from '../entities/sem_html_element_structure.entity';
 import { SemHtmlElementStructureService } from '../entities/sem_html_element_structure.service';
 // https://platform.openai.com/docs/guides/gpt/chat-completions-api?lang=node.js
 import { ClientOptions, OpenAI } from 'openai';
+import {
+  hashString,
+  HTML_ELEMENT_TYPE_UNKNOWN,
+  HTML_ELEMENT_TYPE_PRODUCT,
+  // HTML_ELEMENT_TYPE_CATEGORY,
+  // HTML_ELEMENT_TYPE_PAGINATION,
+} from '../utils/globals';
+
+export interface ProductHtmlElementStructure {
+  url: string;
+  thumbnail: string; // Check if url or data
+  title: string;
+  description: string;
+  price_01: string;
+  currency_01: string;
+  price_02: string;
+  currency_02: string;
+}
 
 const clientOptions: ClientOptions = {
   // organization: 'sem', //"org-w9hB1JYytvgitGSx9pzTsfP8",
@@ -22,8 +41,9 @@ export class ServiceOpenaiService {
   constructor(
     private readonly semHtmlElementService: SemHtmlElementService,
     private readonly semOpenaiCompletionsService: SemOpenaiCompletionsService,
-    private readonly semWebsiteService: SemWebsiteService,
-    private readonly semProductJSONService: SemHtmlElementStructureService,
+    private readonly semOpenaiCompletionsRequestService: SemOpenaiCompletionsRequestService,
+    // private readonly semWebsiteService: SemWebsiteService,
+    private readonly semHtmlElementStructureService: SemHtmlElementStructureService,
   ) {}
 
   async getFunctions() {
@@ -42,33 +62,61 @@ export class ServiceOpenaiService {
   async getHtmlElementType(
     htmlElementId: number,
     htmlElement?: SemHtmlElement,
-  ): Promise<boolean> {
+  ): Promise<number> {
     try {
-      if (htmlElement === undefined) {
+      if (htmlElement === undefined || htmlElement.website === undefined) {
         htmlElement = await this.semHtmlElementService.findOne(htmlElementId);
       }
 
       const completions =
         await this.semOpenaiCompletionsService.findNarrowestOneBy(
           'getHtmlElementType',
-          0, //htmlElement.website_id, // TODO use relations
+          htmlElement.website,
           htmlElement.group_id,
         );
 
+      if (htmlElement.content == '') {
+        return HTML_ELEMENT_TYPE_UNKNOWN;
+      }
       const parseHtmlElementResponse = await this.parseHtmlElement(
-        htmlElement.content,
+        htmlElement,
         completions,
       );
+      if (isNaN(Number(parseHtmlElementResponse))) {
+        return HTML_ELEMENT_TYPE_UNKNOWN;
+      }
 
-      return Boolean(parseHtmlElementResponse);
+      return Number(parseHtmlElementResponse);
     } catch (error) {
       this.logger.error(
         `Failed to identify type for HTML element id: ${htmlElement.id}`,
         error.stack,
       );
+      // debugger;
       throw new Error(
         `Failed to identify type for HTML element id: ${htmlElement.id}`,
       );
+    }
+  }
+
+  isValidProductStructure(parseHtmlElementResponse: string): boolean {
+    try {
+      const parseHtmlElementResponseJSON: ProductHtmlElementStructure =
+        JSON.parse(parseHtmlElementResponse);
+
+      if (
+        parseHtmlElementResponseJSON.url !== null &&
+        parseHtmlElementResponseJSON.title !== null &&
+        parseHtmlElementResponseJSON.thumbnail !== null &&
+        parseHtmlElementResponseJSON.price_01 !== null &&
+        parseHtmlElementResponseJSON.currency_01 !== null
+      ) {
+        return true;
+      }
+
+      return false;
+    } catch (error) {
+      return false;
     }
   }
 
@@ -77,7 +125,7 @@ export class ServiceOpenaiService {
     htmlElement?: SemHtmlElement,
   ): Promise<SemHtmlElementStructure> {
     try {
-      if (htmlElement === undefined) {
+      if (htmlElement === undefined || htmlElement.website === undefined) {
         htmlElement = await this.semHtmlElementService.findOne(htmlElementId);
       }
 
@@ -87,54 +135,43 @@ export class ServiceOpenaiService {
       const completions =
         await this.semOpenaiCompletionsService.findNarrowestOneBy(
           'getProductStructure',
-          0, //htmlElement.website_id, // TODO use relations
+          htmlElement.website,
           htmlElement.group_id,
         );
       if (completions === undefined) {
         throw new Error(
-          `Completions not found for getProductStructure website_id ${
-            0 //htmlElement.website_id, // TODO use relations
-          } group_id ${htmlElement.group_id}`,
+          `Completions not found for getProductStructure website_id ${htmlElement.website.id} group_id ${htmlElement.group_id}`,
         );
       }
       let productJSON: SemHtmlElementStructure;
-      productJSON = await this.semProductJSONService.findOneBy(
-        completions.id,
-        0, //htmlElement.website_id, // TODO use relations
-        htmlElement.group_id,
+      productJSON = await this.semHtmlElementStructureService.findOneBy(
+        // completions.id,
+        htmlElement.website,
+        // htmlElement.group_id,
+        htmlElement.selector,
       );
       if (productJSON) {
         return productJSON;
       }
-      // for (const completion of completions) {
-      //   const parseCompletionsParametersJSON = JSON.parse(
-      //     completion.parameters,
-      //   );
-      //   const htmlElement = parseCompletionsParametersJSON['<html_element>'];
-      //   if (htmlElement === htmlElement.content) {
-      //     // Already parsed
-      //     const productJSON =
-      //       await this.semProductJSONService.findByCompletionsId(completion.id);
-      //     if (productJSON === undefined) {
-      //       throw new Error(
-      //         `SemProductJSON not found for openai_completions_id ${completion.id}`,
-      //       );
-      //     }
-      //     return productJSON;
-      //   }
-      // }
 
       const parseHtmlElementResponse = await this.parseHtmlElement(
-        htmlElement.content,
+        htmlElement,
         completions,
       );
-      const parseHtmlElementResponseJSON = JSON.parse(parseHtmlElementResponse); // Checks if it is a valid JSON
-      productJSON = await this.semProductJSONService.createProductJSON(
-        completions.id,
-        0, //htmlElement.website_id, // TODO use relations
-        htmlElement.group_id,
-        parseHtmlElementResponse,
-      );
+
+      if (!this.isValidProductStructure(parseHtmlElementResponse)) {
+        return null;
+      }
+
+      productJSON =
+        await this.semHtmlElementStructureService.createHtmlElementStructure(
+          htmlElement.website.id,
+          // htmlElement.group_id,
+          htmlElement.selector,
+          HTML_ELEMENT_TYPE_PRODUCT,
+          parseHtmlElementResponse,
+          completions,
+        );
       console.log(
         'ServiceOpenaiService.getProductJSON() productJSON: ',
         productJSON,
@@ -146,14 +183,14 @@ export class ServiceOpenaiService {
         `Failed to get product JSON for HTML element id: ${htmlElement.id}`,
         error.stack,
       );
-      throw new Error(
-        `Failed to get product JSON for HTML element id: ${htmlElement.id}`,
-      );
+      // throw new Error(
+      //   `Failed to get product JSON for HTML element id: ${htmlElement.id}`,
+      // );
     }
   }
 
   async parseHtmlElement(
-    htmlElement: string,
+    htmlElement: SemHtmlElement,
     completions: SemOpenaiCompletions,
     // completionsId: number,
   ): Promise<string> {
@@ -176,25 +213,47 @@ export class ServiceOpenaiService {
         completionsJSON.messages[completionsMessageIndex].content =
           completionsJSON.messages[completionsMessageIndex].content.replace(
             '<html_element>',
-            htmlElement,
+            htmlElement.content,
           );
         console.log('Updated completionsJSON: ', completionsJSON);
       }
 
-      // The system message helps set the behavior of the assistant
-      const completionsResponse = await openai.chat.completions.create({
+      const body = {
         messages: completionsJSON.messages,
         // messages: [
         //   { role: 'system', content: 'You are a helpful assistant.' },
         //   { role: 'user', content: 'Tell me the result of 2 x 2' },
         // ],
         model: completionsJSON.model, //"gpt-3.5-turbo",
-      });
-      console.log('parseHtmlElement() completion: ', completionsResponse);
-      const reply: string = completionsResponse.choices[0].message.content;
-      console.log('parseHtmlElement() reply: ', reply);
+      };
+      const bodyString = JSON.stringify(body);
+      const bodyHash = hashString(bodyString);
+      const semOpenaiCompletionsRequest =
+        await this.semOpenaiCompletionsRequestService.findOneBy(
+          htmlElement.website,
+          bodyHash,
+          completions,
+        );
+      if (semOpenaiCompletionsRequest !== null) {
+        console.log(
+          `OpenaiCompletionsRequest fetched from cache with hash ${bodyHash} for website id ${htmlElement.website.id} and completions id ${completions.id}`,
+        );
+        return semOpenaiCompletionsRequest.response;
+      }
 
-      return reply;
+      // The system message helps set the behavior of the assistant
+      const completionsResponse = await openai.chat.completions.create(body);
+      console.log('parseHtmlElement() completion: ', completionsResponse);
+      const response: string = completionsResponse.choices[0].message.content;
+      console.log('parseHtmlElement() response: ', response);
+      await this.semOpenaiCompletionsRequestService.createOpenaiCompletionsRequest(
+        htmlElement.website,
+        bodyHash,
+        response,
+        completions,
+      );
+
+      return response;
     } catch (error) {
       this.logger.error(
         `Failed to parse HTML element: ${htmlElement}`,

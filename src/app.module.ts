@@ -1,5 +1,6 @@
 import { Module } from '@nestjs/common';
 import { ConfigModule } from '@nestjs/config';
+import { ScheduleModule } from '@nestjs/schedule';
 import { AppController } from './app.controller';
 import { AppService } from './app.service';
 import { DatabaseModule } from './database/database.module';
@@ -10,6 +11,7 @@ import { ServiceOpenaiController } from './service_openai/service_openai.control
 import { FixturesService } from './fixtures/fixtures.service';
 import { AuthModule } from './auth/auth.module';
 import { SemOpenaiCompletionsController } from './entities/sem_openai_completions.controller';
+import { CronCrawlerService } from './cron_crawler/cron_crawler.service';
 
 @Module({
   imports: [
@@ -19,6 +21,7 @@ import { SemOpenaiCompletionsController } from './entities/sem_openai_completion
     }),
     DatabaseModule,
     AuthModule,
+    ScheduleModule.forRoot(),
   ],
   controllers: [
     AppController,
@@ -26,6 +29,11 @@ import { SemOpenaiCompletionsController } from './entities/sem_openai_completion
     SemProcessController,
     SemOpenaiCompletionsController,
   ],
-  providers: [AppService, ServiceOpenaiService, FixturesService],
+  providers: [
+    AppService,
+    ServiceOpenaiService,
+    FixturesService,
+    CronCrawlerService,
+  ],
 })
 export class AppModule {}
