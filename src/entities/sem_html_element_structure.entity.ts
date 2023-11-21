@@ -21,8 +21,11 @@ export class SemHtmlElementStructure {
   @Column()
   website_id: number;
 
+  // @Column()
+  // group_id: number; // This could become wrong if html_entity get crawled again and group_id change
+
   @Column()
-  group_id: number;
+  selector: string;
 
   // Pagination, product, category, ecc..
   @Column()

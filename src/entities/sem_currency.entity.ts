@@ -6,15 +6,18 @@ export class SemCurrency {
   @PrimaryGeneratedColumn()
   id: number;
 
-  @Column()
+  @Column({ nullable: true })
   name: string;
 
-  @Column()
+  @Column({ nullable: true })
   ticker: string;
 
-  @Column()
+  @Column({ nullable: true })
   symbol: string;
 
-  @Column()
+  @Column({ nullable: true })
   type: number;
+
+  @Column({ nullable: true })
+  decimals: number;
 }

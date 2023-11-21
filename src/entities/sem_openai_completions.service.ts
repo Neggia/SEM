@@ -2,6 +2,7 @@ import { Injectable } from '@nestjs/common';
 import { InjectRepository } from '@nestjs/typeorm';
 import { Repository } from 'typeorm';
 import { SemOpenaiCompletions } from '../entities/sem_openai_completions.entity';
+import { SemWebsite } from '../entities/sem_website.entity';
 
 @Injectable()
 export class SemOpenaiCompletionsService {
@@ -24,22 +25,24 @@ export class SemOpenaiCompletionsService {
 
   findAll(): Promise<SemOpenaiCompletions[]> {
     return this.semOpenaiCompletionsRepository.find({
-      relations: ['htmlElementStructures'],
+      relations: ['htmlElementStructures', 'openaiCompletionsRequests'],
     });
   }
 
   async findOne(id: number): Promise<SemOpenaiCompletions> {
     return this.semOpenaiCompletionsRepository.findOne({
       where: { id },
-      relations: ['htmlElementStructures'],
+      relations: ['htmlElementStructures', 'openaiCompletionsRequests'],
     });
   }
 
   async findOneBy(
     functionName: string,
-    websiteId?: number,
+    website?: SemWebsite,
     groupId?: number,
   ): Promise<SemOpenaiCompletions> {
+    const websiteId = website?.id;
+
     const queryBuilder = this.semOpenaiCompletionsRepository
       .createQueryBuilder('completions')
       .where('completions.function_name = :functionName', { functionName });
@@ -69,15 +72,15 @@ export class SemOpenaiCompletionsService {
 
   async findNarrowestOneBy(
     functionName: string,
-    websiteId: number,
+    website: SemWebsite,
     groupId: number,
   ): Promise<SemOpenaiCompletions> {
     let completions: SemOpenaiCompletions;
 
-    completions = await this.findOneBy(functionName, websiteId, groupId);
+    completions = await this.findOneBy(functionName, website, groupId);
     console.log('findNarrowestOneBy() completions: ', completions);
     if (completions === null) {
-      completions = await this.findOneBy(functionName, websiteId);
+      completions = await this.findOneBy(functionName, website);
       if (completions === null) {
         completions = await this.findOneBy(functionName);
       }
