@@ -5,6 +5,7 @@ import { AppController } from './app.controller';
 import { AppService } from './app.service';
 import { DatabaseModule } from './database/database.module';
 // import { SemProcessService } from './entities/sem_process.service';
+import { SemProductController } from './entities/sem_product.controller';
 import { SemProcessController } from './entities/sem_process.controller';
 import { ServiceOpenaiService } from './service_openai/service_openai.service';
 import { ServiceOpenaiController } from './service_openai/service_openai.controller';
@@ -28,6 +29,7 @@ import { CronCrawlerService } from './cron_crawler/cron_crawler.service';
     ServiceOpenaiController,
     SemProcessController,
     SemOpenaiCompletionsController,
+    SemProductController,
   ],
   providers: [
     AppService,
