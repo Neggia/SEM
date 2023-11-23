@@ -1,10 +1,18 @@
 import React, { useState, useEffect } from 'react';
 import ProductGrid from './ProductGrid';
-import { SERVER_BASE_URL, CONTROLLER_PRODUCT_ID } from '../utils/globals';
+import {
+  SERVER_BASE_URL,
+  CONTROLLER_PRODUCT_ID,
+  VIEW_PRODUCT_ITEMS_PER_PAGE,
+} from '../utils/globals';
+import Pagination from '@mui/material/Pagination';
 // import { fetchProducts } from '../api'; // Assume you have an API function to fetch products
 
 const ProductsView = () => {
   const [products, setProducts] = useState([]);
+  const [currentPage, setCurrentPage] = useState(1);
+  const [itemsPerPage, setItemsPerPage] = useState(VIEW_PRODUCT_ITEMS_PER_PAGE);
+  const [totalPages, setTotalPages] = useState(1);
   const [searchTerm, setSearchTerm] = useState('');
   const [selectedCategory, setSelectedCategory] = useState('');
 
@@ -12,7 +20,9 @@ const ProductsView = () => {
     async function fetchData() {
       try {
         const productResponse = await fetch(
-          SERVER_BASE_URL + CONTROLLER_PRODUCT_ID,
+          SERVER_BASE_URL +
+            CONTROLLER_PRODUCT_ID +
+            `?page=${currentPage}&limit=${itemsPerPage}`,
         );
         if (!productResponse.ok) {
           throw new Error(
@@ -24,7 +34,8 @@ const ProductsView = () => {
           'TaskManager processDataResponseJson: ',
           productResponseJson,
         );
-        setProducts(productResponseJson);
+        setProducts(productResponseJson.data);
+        setTotalPages(productResponseJson.lastPage);
       } catch (error) {
         console.error(
           'There has been a problem with your fetch operation:',
@@ -34,7 +45,7 @@ const ProductsView = () => {
     }
 
     fetchData();
-  }, []);
+  }, [currentPage, itemsPerPage]);
 
   const handleSearchChange = (event) => {
     setSearchTerm(event.target.value);
@@ -47,12 +58,19 @@ const ProductsView = () => {
   };
 
   return (
-    <ProductGrid
-      products={products}
-      onSearch={handleSearchChange}
-      onFilterChange={handleCategoryChange}
-      categories={['Category 1', 'Category 2', 'Category 3']} // Example categories
-    />
+    <>
+      <ProductGrid
+        products={products}
+        onSearch={handleSearchChange}
+        onFilterChange={handleCategoryChange}
+        categories={['Category 1', 'Category 2', 'Category 3']} // Example categories
+      />
+      <Pagination
+        count={totalPages}
+        page={currentPage}
+        onChange={(event, page) => setCurrentPage(page)}
+      />
+    </>
   );
 };
 

@@ -26,6 +26,7 @@ import {
   // HTML_ELEMENT_TYPE_CATEGORY,
   // HTML_ELEMENT_TYPE_PAGINATION,
   entitiesMatch,
+  removeTrailingSlash,
 } from '../utils/globals';
 
 interface TagStructure {
@@ -66,7 +67,7 @@ export class CronCrawlerService {
         for (const website of process.websites) {
           console.log('website.url:', website.url);
           // Test
-          if (website.url === 'https://www.pagineazzurre.net/') {
+          if (website.url === 'https://www.pagineazzurre.net') {
             await this.crawl(website);
           }
         }
@@ -94,7 +95,7 @@ export class CronCrawlerService {
       return;
     }
 
-    const url = website.url;
+    const url = removeTrailingSlash(website.url);
 
     const canCrawl = await this.shouldCrawl(url);
     if (!canCrawl) {
@@ -420,11 +421,13 @@ export class CronCrawlerService {
         );
         if (
           productStructure.thumbnailUrl.startsWith('/') &&
-          !productStructure.thumbnailUrl.startsWith(website.url)
+          !productStructure.thumbnailUrl.startsWith(
+            removeTrailingSlash(website.url),
+          )
         ) {
           // If it's an url and it's relative, not absolute
           productStructure.thumbnailUrl =
-            website.url + productStructure.thumbnailUrl;
+            removeTrailingSlash(website.url) + productStructure.thumbnailUrl;
         }
 
         numbers = [];
@@ -462,7 +465,7 @@ export class CronCrawlerService {
         productStructure.currency_02_id = currency_02.id;
 
         productStructure.url =
-          website.url +
+          removeTrailingSlash(website.url) +
           extractFromElement(
             $,
             productElement,

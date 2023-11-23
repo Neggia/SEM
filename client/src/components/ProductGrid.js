@@ -7,6 +7,7 @@ import Typography from '@mui/material/Typography';
 import TextField from '@mui/material/TextField';
 import Select from '@mui/material/Select';
 import MenuItem from '@mui/material/MenuItem';
+import { arrayToDataUrl } from '../utils/globals';
 
 const ProductGrid = ({ products, onSearch, onFilterChange, categories }) => {
   return (
@@ -29,12 +30,17 @@ const ProductGrid = ({ products, onSearch, onFilterChange, categories }) => {
         {products.map((product) => (
           <Grid item xs={12} sm={6} md={4} key={product.id}>
             <Card>
-              <CardMedia
-                component="img"
-                height="140"
-                image={product.imageUrl}
-                alt={product.title}
-              />
+              <a href={product.url} target="_blank" rel="noopener noreferrer">
+                <CardMedia
+                  component="img"
+                  height="140"
+                  image={arrayToDataUrl(
+                    product.thumbnail ? product.thumbnail.data : null,
+                  )} // Convert buffer to data URL
+                  alt={product.title}
+                />
+              </a>
+
               <CardContent>
                 <Typography gutterBottom variant="h5" component="h2">
                   {product.title}

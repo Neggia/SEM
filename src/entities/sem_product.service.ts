@@ -2,6 +2,9 @@ import { Injectable } from '@nestjs/common';
 import { InjectRepository } from '@nestjs/typeorm';
 import { Repository } from 'typeorm';
 import { SemProduct } from '../entities/sem_product.entity';
+const {
+  VIEW_PRODUCT_ITEMS_PER_PAGE,
+} = require('../../client/src/utils/globals');
 // import * as axios from 'axios';
 
 export interface ProductStructure {
@@ -17,6 +20,13 @@ export interface ProductStructure {
   category: string;
 }
 
+export interface PaginatedResult<T> {
+  data: T[];
+  total: number;
+  page: number;
+  lastPage: number;
+}
+
 const axios = require('axios');
 
 @Injectable()
@@ -26,8 +36,21 @@ export class SemProductService {
     private readonly semProductRepository: Repository<SemProduct>,
   ) {}
 
-  findAll(): Promise<SemProduct[]> {
-    return this.semProductRepository.find();
+  async findAll(
+    page = 1,
+    limit = VIEW_PRODUCT_ITEMS_PER_PAGE,
+  ): Promise<PaginatedResult<SemProduct>> {
+    const [results, total] = await this.semProductRepository.findAndCount({
+      skip: (page - 1) * limit,
+      take: limit,
+    });
+
+    return {
+      data: results,
+      total,
+      page,
+      lastPage: Math.ceil(total / limit),
+    };
   }
 
   async findOne(id: number): Promise<SemProduct> {
