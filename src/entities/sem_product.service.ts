@@ -4,6 +4,7 @@ import { Repository } from 'typeorm';
 import { SemProduct } from '../entities/sem_product.entity';
 const {
   VIEW_PRODUCT_ITEMS_PER_PAGE,
+  VIEW_PRODUCT_SEARCH_TITLES_LIMIT,
 } = require('../../client/src/utils/globals');
 // import * as axios from 'axios';
 
@@ -24,7 +25,7 @@ export interface PaginatedResult<T> {
   data: T[];
   total: number;
   page: number;
-  lastPage: number;
+  totalPages: number;
 }
 
 const axios = require('axios');
@@ -37,20 +38,47 @@ export class SemProductService {
   ) {}
 
   async findAll(
-    page = 1,
-    limit = VIEW_PRODUCT_ITEMS_PER_PAGE,
+    page: number = 1,
+    limit: number = VIEW_PRODUCT_ITEMS_PER_PAGE,
+    search?: string,
   ): Promise<PaginatedResult<SemProduct>> {
-    const [results, total] = await this.semProductRepository.findAndCount({
-      skip: (page - 1) * limit,
-      take: limit,
-    });
+    const query = this.semProductRepository.createQueryBuilder('product');
+
+    if (search) {
+      query.where('product.title LIKE :search', { search: `%${search}%` });
+    }
+
+    const [results, total] = await query
+      .skip((page - 1) * limit)
+      .take(limit)
+      .getManyAndCount();
+
+    const totalPages = Math.ceil(total / limit);
 
     return {
       data: results,
       total,
       page,
-      lastPage: Math.ceil(total / limit),
+      totalPages,
     };
+  }
+
+  async findTitlesBySearch(
+    search: string,
+    // limit: number = VIEW_PRODUCT_SEARCH_TITLES_LIMIT,
+  ): Promise<string[]> {
+    const query = this.semProductRepository.createQueryBuilder('product');
+
+    if (search) {
+      query.where('product.title LIKE :search', { search: `%${search}%` });
+    }
+
+    const products = await query
+      .select('product.title')
+      .limit(VIEW_PRODUCT_SEARCH_TITLES_LIMIT)
+      .getMany();
+
+    return products.map((product) => product.title);
   }
 
   async findOne(id: number): Promise<SemProduct> {

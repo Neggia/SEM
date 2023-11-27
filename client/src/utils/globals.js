@@ -9,8 +9,10 @@ const CONTROLLER_OPENAI_COMPLETIONS_ID = 'openai-completions';
 const CONTROLLER_PROCESS_ID = 'process';
 
 const CONTROLLER_PRODUCT_ID = 'product';
+const CONTROLLER_PRODUCT_TITLE = '/title';
 
 const VIEW_PRODUCT_ITEMS_PER_PAGE = 10;
+const VIEW_PRODUCT_SEARCH_TITLES_LIMIT = 5;
 
 function arrayBufferToBase64(buffer) {
   let binary = '';
@@ -48,6 +50,8 @@ module.exports = {
   CONTROLLER_OPENAI_COMPLETIONS_ID,
   CONTROLLER_PROCESS_ID,
   CONTROLLER_PRODUCT_ID,
+  CONTROLLER_PRODUCT_TITLE,
   VIEW_PRODUCT_ITEMS_PER_PAGE,
+  VIEW_PRODUCT_SEARCH_TITLES_LIMIT,
   arrayToDataUrl,
 };

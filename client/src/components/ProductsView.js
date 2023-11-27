@@ -4,6 +4,7 @@ import {
   SERVER_BASE_URL,
   CONTROLLER_PRODUCT_ID,
   VIEW_PRODUCT_ITEMS_PER_PAGE,
+  CONTROLLER_PRODUCT_TITLE,
 } from '../utils/globals';
 import Pagination from '@mui/material/Pagination';
 // import { fetchProducts } from '../api'; // Assume you have an API function to fetch products
@@ -22,7 +23,7 @@ const ProductsView = () => {
         const productResponse = await fetch(
           SERVER_BASE_URL +
             CONTROLLER_PRODUCT_ID +
-            `?page=${currentPage}&limit=${itemsPerPage}`,
+            `?page=${currentPage}&limit=${itemsPerPage}&search=${searchTerm}`,
         );
         if (!productResponse.ok) {
           throw new Error(
@@ -35,7 +36,7 @@ const ProductsView = () => {
           productResponseJson,
         );
         setProducts(productResponseJson.data);
-        setTotalPages(productResponseJson.lastPage);
+        setTotalPages(productResponseJson.totalPages);
       } catch (error) {
         console.error(
           'There has been a problem with your fetch operation:',
@@ -48,8 +49,32 @@ const ProductsView = () => {
   }, [currentPage, itemsPerPage]);
 
   const handleSearchChange = (event) => {
-    setSearchTerm(event.target.value);
-    // You can also add logic to filter products based on the search term
+    async function fetchData() {
+      try {
+        const fetchUrl =
+          SERVER_BASE_URL +
+          CONTROLLER_PRODUCT_ID +
+          CONTROLLER_PRODUCT_TITLE +
+          `?&search=${event.target.value}`;
+        const searchChangeResponse = await fetch(fetchUrl);
+        if (!searchChangeResponse.ok) {
+          throw new Error(
+            'Network response was not ok ' + searchChangeResponse.statusText,
+          );
+        }
+        const searchChangeResponseJson = await searchChangeResponse.json();
+        console.log('searchChangeResponseJson: ', searchChangeResponseJson);
+
+        setSearchTerm(event.target.value);
+      } catch (error) {
+        console.error(
+          'There has been a problem with your fetch operation:',
+          error,
+        );
+      }
+    }
+
+    fetchData();
   };
 
   const handleCategoryChange = (event) => {
