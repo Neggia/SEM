@@ -29,3 +29,7 @@ export function entitiesMatch(entity1, entity2, options = { exclude: [] }) {
   }
   return true;
 }
+
+export function removeTrailingSlash(url) {
+  return url.replace(/\/$/, '');
+}

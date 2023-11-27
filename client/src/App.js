@@ -5,13 +5,22 @@ import { BrowserRouter as Router, Route, Routes } from 'react-router-dom';
 import TaskManager from './components/TaskManager';
 import { UserProvider } from './context/UserContext';
 import PrivateRoute from './components/PrivateRoute';
+import ProductsView from './components/ProductsView';
 
 function App() {
   return (
     <UserProvider>
       <Router>
         <Routes>
-          <Route path="/" element={<Login />} />
+          <Route
+            path="/"
+            element={
+              <>
+                <Login />
+                <ProductsView />
+              </>
+            }
+          />
           <Route
             path="/tasks"
             element={

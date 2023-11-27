@@ -7,7 +7,7 @@ export const SemWebsiteFixtures: Fixture = {
     {
       id: 1,
       name: 'pagineazzurre',
-      url: 'https://www.pagineazzurre.net/',
+      url: 'https://www.pagineazzurre.net',
       process: 1,
       last_run: 1698624314,
       last_page: 4,
