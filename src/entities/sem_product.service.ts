@@ -66,7 +66,7 @@ export class SemProductService {
   async findTitlesBySearch(
     search: string,
     // limit: number = VIEW_PRODUCT_SEARCH_TITLES_LIMIT,
-  ): Promise<string[]> {
+  ): Promise<{ id: number; title: string; url: string }[]> {
     const query = this.semProductRepository.createQueryBuilder('product');
 
     if (search) {
@@ -74,11 +74,15 @@ export class SemProductService {
     }
 
     const products = await query
-      .select('product.title')
+      .select(['product.id', 'product.title', 'product.url'])
       .limit(VIEW_PRODUCT_SEARCH_TITLES_LIMIT)
       .getMany();
 
-    return products.map((product) => product.title);
+    return products.map((product) => ({
+      id: product.id,
+      title: product.title,
+      url: product.url,
+    }));
   }
 
   async findOne(id: number): Promise<SemProduct> {

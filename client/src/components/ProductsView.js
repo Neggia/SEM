@@ -17,9 +17,14 @@ import {
   Typography,
   Pagination,
   Menu,
+  Button,
 } from '@mui/material';
 import { arrayToDataUrl } from '../utils/globals';
+import { FontAwesomeIcon } from '@fortawesome/react-fontawesome';
+import { faMagnifyingGlass } from '@fortawesome/free-solid-svg-icons';
 // import { fetchProducts } from '../api'; // Assume you have an API function to fetch products
+
+const SearchIcon = () => <FontAwesomeIcon icon={faMagnifyingGlass} />;
 
 const ProductsView = () => {
   const [products, setProducts] = useState([]);
@@ -36,34 +41,31 @@ const ProductsView = () => {
 
   let searchDebounceTimeout = null;
 
-  useEffect(() => {
-    async function fetchData() {
-      try {
-        const productResponse = await fetch(
-          SERVER_BASE_URL +
-            CONTROLLER_PRODUCT_ID +
-            `?page=${currentPage}&limit=${itemsPerPage}&search=${searchTerm}`,
-        );
-        if (!productResponse.ok) {
-          throw new Error(
-            'Network response was not ok ' + productResponse.statusText,
-          );
-        }
-        const productResponseJson = await productResponse.json();
-        console.log(
-          'TaskManager processDataResponseJson: ',
-          productResponseJson,
-        );
-        setProducts(productResponseJson.data);
-        setTotalPages(productResponseJson.totalPages);
-      } catch (error) {
-        console.error(
-          'There has been a problem with your fetch operation:',
-          error,
+  const fetchData = async () => {
+    try {
+      const productResponse = await fetch(
+        SERVER_BASE_URL +
+          CONTROLLER_PRODUCT_ID +
+          `?page=${currentPage}&limit=${itemsPerPage}&search=${searchTerm}`,
+      );
+      if (!productResponse.ok) {
+        throw new Error(
+          'Network response was not ok ' + productResponse.statusText,
         );
       }
+      const productResponseJson = await productResponse.json();
+      console.log('TaskManager processDataResponseJson: ', productResponseJson);
+      setProducts(productResponseJson.data);
+      setTotalPages(productResponseJson.totalPages);
+    } catch (error) {
+      console.error(
+        'There has been a problem with your fetch operation:',
+        error,
+      );
     }
+  };
 
+  useEffect(() => {
     fetchData();
   }, [currentPage, itemsPerPage]);
 
@@ -97,6 +99,7 @@ const ProductsView = () => {
         );
       }
       const searchChangeResponseJson = await searchChangeResponse.json();
+      console.log('searchChangeResponseJson', searchChangeResponseJson);
 
       setSearchResults(searchChangeResponseJson); // Assuming this is an array
       if (searchChangeResponseJson.length > 0) {
@@ -146,6 +149,18 @@ const ProductsView = () => {
             ))}
           </Select>
           {/* Additional Filters */}
+          <Button
+            variant="contained" // Use 'contained' for a filled button
+            color="primary" // Use the theme's primary color
+            onClick={() => fetchData()}
+            startIcon={<SearchIcon />}
+            style={{
+              height: '100%', // Adjust the height as needed
+              marginLeft: 8, // Add some margin if needed
+            }}
+          >
+            Search
+          </Button>
         </Grid>
         {products.map((product) => (
           <Grid item xs={12} sm={6} md={4} key={product.id}>
@@ -185,9 +200,24 @@ const ProductsView = () => {
             horizontal: 'left',
           }}
         >
-          {searchResults.map((result, index) => (
-            <MenuItem key={index} onClick={() => selectSearchResult(result)}>
-              {result}
+          {searchResults.map((product, index) => (
+            <MenuItem key={index}>
+              <button
+                onClick={() => window.open(product.url, '_blank')}
+                style={{
+                  background: 'none',
+                  border: 'none',
+                  padding: 0,
+                  margin: 0,
+                  color: 'inherit',
+                  textTransform: 'none',
+                  width: '100%',
+                  textAlign: 'left',
+                  cursor: 'pointer',
+                }}
+              >
+                {product.title}
+              </button>
             </MenuItem>
           ))}
         </Menu>
