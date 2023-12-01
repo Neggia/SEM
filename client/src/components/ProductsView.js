@@ -1,5 +1,6 @@
 import React, { useState, useEffect, useRef } from 'react';
 // import ProductGrid from './ProductGrid';
+import CurrencySelect from './CurrencySelect';
 import {
   SERVER_BASE_URL,
   CONTROLLER_PRODUCT_ID,
@@ -18,6 +19,7 @@ import {
   Pagination,
   Menu,
   Button,
+  Box,
 } from '@mui/material';
 import { arrayToDataUrl } from '../utils/globals';
 import { FontAwesomeIcon } from '@fortawesome/react-fontawesome';
@@ -33,6 +35,7 @@ const ProductsView = () => {
   const [totalPages, setTotalPages] = useState(1);
   const [searchTerm, setSearchTerm] = useState('');
   const [selectedCategory, setSelectedCategory] = useState('');
+  const [selectedCurrencies, setSelectedCurrencies] = useState([]);
   const [searchResults, setSearchResults] = useState([]);
   const [anchorEl, setAnchorEl] = useState(null);
   const searchFieldRef = useRef(null);
@@ -43,6 +46,8 @@ const ProductsView = () => {
 
   const fetchData = async () => {
     try {
+      console.log('ProductsView selectedCurrencies: ', selectedCurrencies);
+
       const productResponse = await fetch(
         SERVER_BASE_URL +
           CONTROLLER_PRODUCT_ID +
@@ -54,7 +59,7 @@ const ProductsView = () => {
         );
       }
       const productResponseJson = await productResponse.json();
-      console.log('TaskManager processDataResponseJson: ', productResponseJson);
+      console.log('ProductsView productResponseJson: ', productResponseJson);
       setProducts(productResponseJson.data);
       setTotalPages(productResponseJson.totalPages);
     } catch (error) {
@@ -132,35 +137,45 @@ const ProductsView = () => {
     <>
       <Grid container spacing={2}>
         <Grid item xs={12}>
-          <TextField
-            label="Search"
-            onChange={handleSearchChange}
-            variant="outlined"
-            inputRef={searchFieldRef} // Assign the ref to the TextField
-          />
-          <Select onChange={handleCategoryChange} defaultValue="" displayEmpty>
-            <MenuItem value="">
-              <em>None</em>
-            </MenuItem>
-            {categories.map((category) => (
-              <MenuItem key={category} value={category}>
-                {category}
+          <Box display="flex" alignItems="center">
+            <TextField
+              label="Search"
+              onChange={handleSearchChange}
+              variant="outlined"
+              inputRef={searchFieldRef} // Assign the ref to the TextField
+            />
+            <Select
+              onChange={handleCategoryChange}
+              defaultValue=""
+              displayEmpty
+            >
+              <MenuItem value="">
+                <em>None</em>
               </MenuItem>
-            ))}
-          </Select>
-          {/* Additional Filters */}
-          <Button
-            variant="contained" // Use 'contained' for a filled button
-            color="primary" // Use the theme's primary color
-            onClick={() => fetchData()}
-            startIcon={<SearchIcon />}
-            style={{
-              height: '100%', // Adjust the height as needed
-              marginLeft: 8, // Add some margin if needed
-            }}
-          >
-            Search
-          </Button>
+              {categories.map((category) => (
+                <MenuItem key={category} value={category}>
+                  {category}
+                </MenuItem>
+              ))}
+            </Select>
+            {/* Additional Filters */}
+            <CurrencySelect
+              selectedItems={selectedCurrencies}
+              setSelectedItems={setSelectedCurrencies}
+            />
+            <Button
+              variant="contained" // Use 'contained' for a filled button
+              color="primary" // Use the theme's primary color
+              onClick={() => fetchData()}
+              startIcon={<SearchIcon />}
+              style={{
+                height: '100%', // Adjust the height as needed
+                marginLeft: 8, // Add some margin if needed
+              }}
+            >
+              Search
+            </Button>
+          </Box>
         </Grid>
         {products.map((product) => (
           <Grid item xs={12} sm={6} md={4} key={product.id}>
