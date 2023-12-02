@@ -35,6 +35,7 @@ const ProductsView = () => {
   const [totalPages, setTotalPages] = useState(1);
   const [searchTerm, setSearchTerm] = useState('');
   const [selectedCategory, setSelectedCategory] = useState('');
+  const [currencies, setCurrencies] = useState([]);
   const [selectedCurrencies, setSelectedCurrencies] = useState([]);
   const [searchResults, setSearchResults] = useState([]);
   const [anchorEl, setAnchorEl] = useState(null);
@@ -126,6 +127,16 @@ const ProductsView = () => {
     setAnchorEl(null);
   };
 
+  // Function to get currency string by ID
+  const getCurrencyStringById = (currencyId) => {
+    const currency = currencies.find((c) => c.id === currencyId);
+    return currency
+      ? [currency.name, currency.symbol, currency.ticker]
+          .filter(Boolean)
+          .join(' ')
+      : 'Unknown currency';
+  };
+
   const handleCategoryChange = (event) => {
     setSelectedCategory(event.target.value);
     // Filter products based on category
@@ -160,6 +171,7 @@ const ProductsView = () => {
             </Select>
             {/* Additional Filters */}
             <CurrencySelect
+              setCurrencies={setCurrencies}
               selectedItems={selectedCurrencies}
               setSelectedItems={setSelectedCurrencies}
             />
@@ -195,6 +207,24 @@ const ProductsView = () => {
                 <Typography gutterBottom variant="h5" component="h2">
                   {product.title}
                 </Typography>
+                {/* Displaying price information only if it's greater than 0 */}
+                {(product.price_01 || product.price_01 === 0) &&
+                  product.price_01 > 0 && (
+                    <Typography variant="body1" color="textSecondary">
+                      Price: {product.price_01}{' '}
+                      {getCurrencyStringById(product.currency_01_id)}
+                    </Typography>
+                  )}
+                {(product.price_02 || product.price_02 === 0) &&
+                  product.price_02 > 0 && (
+                    <Typography variant="body1" color="textSecondary">
+                      {product.price_01 > 0
+                        ? 'Alternate/additional Price:'
+                        : 'Price:'}{' '}
+                      {product.price_02}{' '}
+                      {getCurrencyStringById(product.currency_02_id)}
+                    </Typography>
+                  )}
                 {/* Additional Product Info */}
               </CardContent>
             </Card>

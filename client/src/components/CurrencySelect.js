@@ -2,7 +2,7 @@ import React, { useState, useEffect } from 'react';
 import { Button, Menu, MenuItem, Checkbox } from '@mui/material';
 import { SERVER_BASE_URL, CONTROLLER_CURRENCY_ID } from '../utils/globals';
 
-const CurrencySelect = ({ selectedItems, setSelectedItems }) => {
+const CurrencySelect = ({ setCurrencies, selectedItems, setSelectedItems }) => {
   const [anchorEl, setAnchorEl] = useState(null);
   //   const [selectedItems, setSelectedItems] = useState([]);
   const [items, setItems] = useState([]);
@@ -23,6 +23,7 @@ const CurrencySelect = ({ selectedItems, setSelectedItems }) => {
         currencyResponseJson,
       );
       setItems(currencyResponseJson);
+      setCurrencies(currencyResponseJson);
     } catch (error) {
       console.error(
         'There has been a problem with your fetch operation:',
