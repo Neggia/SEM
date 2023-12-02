@@ -63,6 +63,8 @@ export class CronCrawlerService {
       // Your crawler logic here
       const processArray = await this.semProcessService.findAll();
       for (const process of processArray) {
+        // TODO add checking scheduling time from table
+
         console.log('process:', process);
         for (const website of process.websites) {
           console.log('website.url:', website.url);
@@ -491,6 +493,7 @@ export class CronCrawlerService {
         if (!productAlreadyExist) {
           await this.semProductService.createProduct(productStructure);
         }
+        // TODO should delete products that no longer exist
       }
       // });
     } catch (error) {

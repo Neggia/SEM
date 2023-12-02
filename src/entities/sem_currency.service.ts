@@ -7,21 +7,21 @@ import { SemCurrency } from '../entities/sem_currency.entity';
 export class SemCurrencyService {
   constructor(
     @InjectRepository(SemCurrency)
-    private readonly semCurrencytRepository: Repository<SemCurrency>,
+    private readonly semCurrencyRepository: Repository<SemCurrency>,
   ) {}
 
   findAll(): Promise<SemCurrency[]> {
-    return this.semCurrencytRepository.find();
+    return this.semCurrencyRepository.find();
   }
 
   async findOne(id: number): Promise<SemCurrency> {
-    return this.semCurrencytRepository.findOne({
+    return this.semCurrencyRepository.findOne({
       where: { id },
     });
   }
 
   async findOneBySymbol(symbol: string): Promise<SemCurrency> {
-    return this.semCurrencytRepository.findOne({
+    return this.semCurrencyRepository.findOne({
       where: {
         symbol: symbol,
       },
@@ -29,7 +29,7 @@ export class SemCurrencyService {
   }
 
   async findOneByTicker(ticker: string): Promise<SemCurrency> {
-    return this.semCurrencytRepository.findOne({
+    return this.semCurrencyRepository.findOne({
       where: {
         ticker: ticker,
       },
@@ -37,7 +37,7 @@ export class SemCurrencyService {
   }
 
   async findOneByName(name: string): Promise<SemCurrency> {
-    return this.semCurrencytRepository.findOne({
+    return this.semCurrencyRepository.findOne({
       where: {
         name: name,
       },
@@ -81,6 +81,6 @@ export class SemCurrencyService {
     currency.ticker = ticker;
     currency.symbol = symbol;
 
-    return await this.semCurrencytRepository.save(currency);
+    return await this.semCurrencyRepository.save(currency);
   }
 }
