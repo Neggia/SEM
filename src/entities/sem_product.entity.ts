@@ -4,6 +4,7 @@ import {
   Column,
   Unique,
   DeleteDateColumn,
+  Index,
 } from 'typeorm';
 
 @Entity()
@@ -21,6 +22,8 @@ export class SemProduct {
   @Column('blob', { nullable: true })
   thumbnail: Buffer;
 
+  @Index() // Simple index on the 'title' column
+  // @Index({ fulltext: true }) // Full-text index
   @Column()
   title: string;
 
