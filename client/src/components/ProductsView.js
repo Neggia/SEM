@@ -4,6 +4,7 @@ import CurrencySelect from './CurrencySelect';
 import {
   SERVER_BASE_URL,
   CONTROLLER_PRODUCT_ID,
+  CONTROLLER_CATEGORY_ID,
   VIEW_PRODUCT_ITEMS_PER_PAGE,
   CONTROLLER_PRODUCT_TITLE,
 } from '../utils/globals';
@@ -34,6 +35,7 @@ const ProductsView = () => {
   const [itemsPerPage, setItemsPerPage] = useState(VIEW_PRODUCT_ITEMS_PER_PAGE);
   const [totalPages, setTotalPages] = useState(1);
   const [searchTerm, setSearchTerm] = useState('');
+  const [categories, setCategories] = useState([]);
   const [selectedCategory, setSelectedCategory] = useState('');
   const [currencies, setCurrencies] = useState([]);
   const [selectedCurrencies, setSelectedCurrencies] = useState([]);
@@ -45,14 +47,18 @@ const ProductsView = () => {
 
   let searchDebounceTimeout = null;
 
-  const fetchData = async () => {
+  const fetchProductData = async () => {
     try {
       console.log('ProductsView selectedCurrencies: ', selectedCurrencies);
+      const currenciesQueryString = `&currencies=${selectedCurrencies.join(
+        ',',
+      )}`;
 
       const productResponse = await fetch(
         SERVER_BASE_URL +
           CONTROLLER_PRODUCT_ID +
-          `?page=${currentPage}&limit=${itemsPerPage}&search=${searchTerm}`,
+          `?page=${currentPage}&limit=${itemsPerPage}&search=${searchTerm}&category_id=${selectedCategory}` +
+          currenciesQueryString,
       );
       if (!productResponse.ok) {
         throw new Error(
@@ -71,8 +77,37 @@ const ProductsView = () => {
     }
   };
 
+  const fetchCategoryData = async () => {
+    try {
+      if (categories.length > 0) {
+        return;
+      }
+
+      const categoriesResponse = await fetch(
+        SERVER_BASE_URL + CONTROLLER_CATEGORY_ID,
+      );
+      if (!categoriesResponse.ok) {
+        throw new Error(
+          'Network response was not ok ' + categoriesResponse.statusText,
+        );
+      }
+      const categoriesResponseJson = await categoriesResponse.json();
+      console.log(
+        'ProductsView categoriesResponseJson: ',
+        categoriesResponseJson,
+      );
+      setCategories(categoriesResponseJson);
+    } catch (error) {
+      console.error(
+        'There has been a problem with your fetch operation:',
+        error,
+      );
+    }
+  };
+
   useEffect(() => {
-    fetchData();
+    fetchProductData();
+    fetchCategoryData();
   }, [currentPage, itemsPerPage]);
 
   const handleSearchChange = (event) => {
@@ -142,19 +177,11 @@ const ProductsView = () => {
     // Filter products based on category
   };
 
-  const categories = ['Category 1', 'Category 2', 'Category 3'];
-
   return (
     <>
       <Grid container spacing={2}>
         <Grid item xs={12}>
           <Box display="flex" alignItems="center">
-            <TextField
-              label="Search"
-              onChange={handleSearchChange}
-              variant="outlined"
-              inputRef={searchFieldRef} // Assign the ref to the TextField
-            />
             <Select
               onChange={handleCategoryChange}
               defaultValue=""
@@ -164,21 +191,29 @@ const ProductsView = () => {
                 <em>None</em>
               </MenuItem>
               {categories.map((category) => (
-                <MenuItem key={category} value={category}>
-                  {category}
+                <MenuItem key={category.id} value={category.id}>
+                  {category.name}
                 </MenuItem>
               ))}
             </Select>
-            {/* Additional Filters */}
+
+            <TextField
+              label="Search"
+              onChange={handleSearchChange}
+              variant="outlined"
+              inputRef={searchFieldRef} // Assign the ref to the TextField
+            />
+
             <CurrencySelect
               setCurrencies={setCurrencies}
               selectedItems={selectedCurrencies}
               setSelectedItems={setSelectedCurrencies}
             />
+
             <Button
               variant="contained" // Use 'contained' for a filled button
               color="primary" // Use the theme's primary color
-              onClick={() => fetchData()}
+              onClick={() => fetchProductData()}
               startIcon={<SearchIcon />}
               style={{
                 height: '100%', // Adjust the height as needed
