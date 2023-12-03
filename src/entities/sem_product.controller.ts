@@ -15,8 +15,9 @@ export class SemProductController {
     @Query('page') page: number,
     @Query('limit') limit: number,
     @Query('search') search?: string,
+    @Query('category_id') category_id?: number,
   ) {
-    return this.semProductService.findAll(page, limit, search);
+    return this.semProductService.findAll(page, limit, search, category_id);
   }
 
   @Get(CONTROLLER_PRODUCT_TITLE)

@@ -41,11 +41,19 @@ export class SemProductService {
     page: number = 1,
     limit: number = VIEW_PRODUCT_ITEMS_PER_PAGE,
     search?: string,
+    category_id?: number,
   ): Promise<PaginatedResult<SemProduct>> {
     const query = this.semProductRepository.createQueryBuilder('product');
 
     if (search) {
       query.where('product.title LIKE :search', { search: `%${search}%` });
+    }
+    if (category_id) {
+      if (search) {
+        query.andWhere('product.category_id = :category_id', { category_id });
+      } else {
+        query.where('product.category_id = :category_id', { category_id });
+      }
     }
 
     const [results, total] = await query
