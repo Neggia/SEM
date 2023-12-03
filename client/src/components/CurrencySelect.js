@@ -24,6 +24,12 @@ const CurrencySelect = ({ setCurrencies, selectedItems, setSelectedItems }) => {
       );
       setItems(currencyResponseJson);
       setCurrencies(currencyResponseJson);
+
+      // Initialize selectedItems with all currency IDs
+      const allCurrencyIds = currencyResponseJson.map(
+        (currency) => currency.id,
+      );
+      setSelectedItems(allCurrencyIds);
     } catch (error) {
       console.error(
         'There has been a problem with your fetch operation:',

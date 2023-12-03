@@ -41,11 +41,32 @@ export class SemProductService {
     page: number = 1,
     limit: number = VIEW_PRODUCT_ITEMS_PER_PAGE,
     search?: string,
+    category_id?: number,
+    currencies?: string,
   ): Promise<PaginatedResult<SemProduct>> {
     const query = this.semProductRepository.createQueryBuilder('product');
 
     if (search) {
       query.where('product.title LIKE :search', { search: `%${search}%` });
+    }
+    if (category_id) {
+      const categoryCondition = 'product.category_id = :category_id';
+
+      if (search) {
+        query.andWhere(categoryCondition, { category_id });
+      } else {
+        query.where(categoryCondition, { category_id });
+      }
+    }
+    if (currencies) {
+      const currencyIds = currencies.split(',').map(Number);
+      const currencyCondition = `((product.currency_01_id IN (:...currencyIds) AND product.price_01 > 0) OR (product.currency_02_id IN (:...currencyIds) AND product.price_02 > 0))`;
+
+      if (search || category_id) {
+        query.andWhere(currencyCondition, { currencyIds });
+      } else {
+        query.where(currencyCondition, { currencyIds });
+      }
     }
 
     const [results, total] = await query

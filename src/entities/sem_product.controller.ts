@@ -15,8 +15,16 @@ export class SemProductController {
     @Query('page') page: number,
     @Query('limit') limit: number,
     @Query('search') search?: string,
+    @Query('category_id') category_id?: number,
+    @Query('currencies') currencies?: string,
   ) {
-    return this.semProductService.findAll(page, limit, search);
+    return this.semProductService.findAll(
+      page,
+      limit,
+      search,
+      category_id,
+      currencies,
+    );
   }
 
   @Get(CONTROLLER_PRODUCT_TITLE)
