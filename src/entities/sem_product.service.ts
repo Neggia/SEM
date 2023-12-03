@@ -18,7 +18,7 @@ export interface ProductStructure {
   currency_01_id: number;
   price_02: number;
   currency_02_id: number;
-  category: string;
+  category_id: number;
 }
 
 export interface PaginatedResult<T> {
@@ -126,6 +126,7 @@ export class SemProductService {
       currency_01_id: productStructure.currency_01_id,
       price_02: productStructure.price_02,
       currency_02_id: productStructure.currency_02_id,
+      category_id: productStructure.category_id,
     });
     await this.semProductRepository.save(newProduct);
     return newProduct;

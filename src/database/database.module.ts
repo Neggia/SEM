@@ -1,6 +1,8 @@
 import { Module } from '@nestjs/common';
 import { TypeOrmModule } from '@nestjs/typeorm';
 import { ConfigModule, ConfigService } from '@nestjs/config';
+import { SemCategory } from '../entities/sem_category.entity';
+import { SemCategoryService } from '../entities/sem_category.service';
 import { SemCurrency } from '../entities/sem_currency.entity';
 import { SemCurrencyService } from '../entities/sem_currency.service';
 import { SemHtmlElement } from '../entities/sem_html_element.entity';
@@ -68,6 +70,7 @@ import * as fs from 'fs';
       inject: [ConfigService],
     }),
     TypeOrmModule.forFeature([
+      SemCategory,
       SemCurrency,
       SemHtmlElement,
       SemProcess,
@@ -87,6 +90,7 @@ import * as fs from 'fs';
     SemProcessService,
     SemProductService,
     SemCurrencyService,
+    SemCategoryService,
   ],
   exports: [
     TypeOrmModule,
@@ -98,6 +102,7 @@ import * as fs from 'fs';
     SemProcessService,
     SemProductService,
     SemCurrencyService,
+    SemCategoryService,
   ],
 })
 export class DatabaseModule {}
