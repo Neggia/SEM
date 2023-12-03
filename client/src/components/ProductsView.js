@@ -50,11 +50,15 @@ const ProductsView = () => {
   const fetchProductData = async () => {
     try {
       console.log('ProductsView selectedCurrencies: ', selectedCurrencies);
+      const currenciesQueryString = `&currencies=${selectedCurrencies.join(
+        ',',
+      )}`;
 
       const productResponse = await fetch(
         SERVER_BASE_URL +
           CONTROLLER_PRODUCT_ID +
-          `?page=${currentPage}&limit=${itemsPerPage}&search=${searchTerm}&category_id=${selectedCategory}`,
+          `?page=${currentPage}&limit=${itemsPerPage}&search=${searchTerm}&category_id=${selectedCategory}` +
+          currenciesQueryString,
       );
       if (!productResponse.ok) {
         throw new Error(
