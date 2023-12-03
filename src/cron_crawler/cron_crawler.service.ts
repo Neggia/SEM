@@ -8,6 +8,7 @@ import * as path from 'path';
 import * as appRoot from 'app-root-path';
 import { SemCurrency } from '../entities/sem_currency.entity';
 import { SemCurrencyService } from '../entities/sem_currency.service';
+import { SemCategoryService } from '../entities/sem_category.service';
 import { SemProcessService } from '../entities/sem_process.service';
 import { SemWebsite } from '../entities/sem_website.entity';
 import { SemHtmlElementService } from '../entities/sem_html_element.service';
@@ -54,6 +55,7 @@ export class CronCrawlerService {
     private readonly serviceOpenaiService: ServiceOpenaiService,
     private readonly semProductService: SemProductService,
     private readonly semCurrencyService: SemCurrencyService,
+    private readonly semCategoryService: SemCategoryService,
   ) {}
 
   @Cron(CronExpression.EVERY_HOUR) // Runs every hour, adjust as needed
@@ -399,7 +401,7 @@ export class CronCrawlerService {
           currency_01_id: null,
           price_02: null,
           currency_02_id: null,
-          category: null,
+          category_id: null,
         };
 
         productStructure.title = extractFromElement(
@@ -474,6 +476,14 @@ export class CronCrawlerService {
             productHtmlElementStructureJSON.url,
             'href',
           );
+
+        const categoryName = await this.serviceOpenaiService.getProductCategory(
+          productStructure.title,
+          website,
+        );
+        const category =
+          await this.semCategoryService.findOneByName(categoryName);
+        productStructure.category_id = category ? category.id : null;
 
         let productAlreadyExist: boolean = false;
 

@@ -256,7 +256,7 @@ export class ServiceOpenaiService {
       ) {
         completionsJSON.messages[completionsMessageIndex].content =
           completionsJSON.messages[completionsMessageIndex].content.replace(
-            parameters.placeholde,
+            parameters.placeholder,
             parameters.content,
           );
         console.log('Updated completionsJSON: ', completionsJSON);

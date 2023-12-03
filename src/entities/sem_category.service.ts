@@ -19,4 +19,12 @@ export class SemCategoryService {
       where: { id },
     });
   }
+
+  async findOneByName(name: string): Promise<SemCategory> {
+    return this.semCategoryRepository.findOne({
+      where: {
+        name: name,
+      },
+    });
+  }
 }

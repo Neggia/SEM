@@ -102,6 +102,7 @@ import * as fs from 'fs';
     SemProcessService,
     SemProductService,
     SemCurrencyService,
+    SemCategoryService,
   ],
 })
 export class DatabaseModule {}
