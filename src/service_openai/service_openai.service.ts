@@ -16,6 +16,7 @@ import {
   // HTML_ELEMENT_TYPE_CATEGORY,
   // HTML_ELEMENT_TYPE_PAGINATION,
 } from '../utils/globals';
+import { SemWebsite } from 'src/entities/sem_website.entity';
 
 export interface ProductHtmlElementStructure {
   url: string;
@@ -52,6 +53,24 @@ export class ServiceOpenaiService {
         this.semOpenaiCompletionsService.findDistinctFunctionNames();
 
       return fucntions;
+    } catch (error) {
+      this.logger.error(`Failed to get openai service functions`, error.stack);
+      throw new Error(`Failed to get openai service functions`);
+    }
+  }
+
+  async getProductCategory(
+    productDescription: string,
+    website: SemWebsite,
+  ): Promise<string> {
+    try {
+      const completions =
+        await this.semOpenaiCompletionsService.findOneBy('getProductCategory');
+
+      return await this.runCompletions(completions, website, {
+        placeholder: '<product_description>',
+        content: productDescription,
+      });
     } catch (error) {
       this.logger.error(`Failed to get openai service functions`, error.stack);
       throw new Error(`Failed to get openai service functions`);
@@ -195,6 +214,27 @@ export class ServiceOpenaiService {
     // completionsId: number,
   ): Promise<string> {
     try {
+      return await this.runCompletions(completions, htmlElement.website, {
+        placeholder: '<html_element>',
+        content: htmlElement.content,
+      });
+    } catch (error) {
+      this.logger.error(
+        `Failed to parse HTML element: ${htmlElement}`,
+        error.stack,
+      );
+      throw new Error(`Failed to parse HTML element: ${htmlElement}`);
+    }
+  }
+
+  async runCompletions(
+    // htmlElement: SemHtmlElement,
+    completions: SemOpenaiCompletions,
+    website: SemWebsite,
+    parameters?: any,
+    // completionsId: number,
+  ): Promise<string> {
+    try {
       // const completions =
       //   await this.semOpenaiCompletionsService.findOne(completionsId);
       // console.log(
@@ -209,11 +249,15 @@ export class ServiceOpenaiService {
       const completionsMessageIndex = completionsJSON.messages.findIndex(
         (item) => item.role === 'user',
       );
-      if (completionsMessageIndex !== -1) {
+      if (
+        completionsMessageIndex !== -1 &&
+        parameters?.placeholder &&
+        parameters?.content
+      ) {
         completionsJSON.messages[completionsMessageIndex].content =
           completionsJSON.messages[completionsMessageIndex].content.replace(
-            '<html_element>',
-            htmlElement.content,
+            parameters.placeholder,
+            parameters.content,
           );
         console.log('Updated completionsJSON: ', completionsJSON);
       }
@@ -230,13 +274,13 @@ export class ServiceOpenaiService {
       const bodyHash = hashString(bodyString);
       const semOpenaiCompletionsRequest =
         await this.semOpenaiCompletionsRequestService.findOneBy(
-          htmlElement.website,
+          website,
           bodyHash,
           completions,
         );
       if (semOpenaiCompletionsRequest !== null) {
         console.log(
-          `OpenaiCompletionsRequest fetched from cache with hash ${bodyHash} for website id ${htmlElement.website.id} and completions id ${completions.id}`,
+          `OpenaiCompletionsRequest fetched from cache with hash ${bodyHash} for website id ${website.id} and completions id ${completions.id}`,
         );
         return semOpenaiCompletionsRequest.response;
       }
@@ -247,7 +291,7 @@ export class ServiceOpenaiService {
       const response: string = completionsResponse.choices[0].message.content;
       console.log('parseHtmlElement() response: ', response);
       await this.semOpenaiCompletionsRequestService.createOpenaiCompletionsRequest(
-        htmlElement.website,
+        website,
         bodyHash,
         response,
         completions,
@@ -256,10 +300,10 @@ export class ServiceOpenaiService {
       return response;
     } catch (error) {
       this.logger.error(
-        `Failed to parse HTML element: ${htmlElement}`,
+        `Failed to run completions id: ${completions.id}`,
         error.stack,
       );
-      throw new Error(`Failed to parse HTML element: ${htmlElement}`);
+      throw new Error(`Failed to run completions id: ${completions.id}`);
     }
   }
 }

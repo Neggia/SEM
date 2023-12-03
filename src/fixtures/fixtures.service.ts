@@ -2,6 +2,8 @@ import { Injectable } from '@nestjs/common';
 // import { InjectRepository } from '@nestjs/typeorm';
 // import { Repository } from 'typeorm';
 // import { SemHtmlElementStructureFixtures } from '../fixtures/sem_html_element_structure.fixtures';
+// import { SemCategory } from '../entities/sem_category.entity';
+import { SemCategoryFixtures } from '../fixtures/sem_category.fixtures';
 import { SemProduct } from '../entities/sem_product.entity';
 import { SemHtmlElement } from '../entities/sem_html_element.entity';
 import { SemHtmlElementStructure } from '../entities/sem_html_element_structure.entity';
@@ -53,6 +55,7 @@ export class FixturesService {
 
     await this.loadEntities(SemProcessFixtures);
     await this.loadEntities(SemWebsiteFixtures);
+    await this.loadEntities(SemCategoryFixtures);
     // await this.loadEntities(SemHtmlElementFixtures);
 
     await this.loadEntities(SemOpenaiCompletionsFixtures);
