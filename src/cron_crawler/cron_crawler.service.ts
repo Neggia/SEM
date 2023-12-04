@@ -9,7 +9,10 @@ import * as appRoot from 'app-root-path';
 import { SemCurrency } from '../entities/sem_currency.entity';
 import { SemCurrencyService } from '../entities/sem_currency.service';
 import { SemCategoryService } from '../entities/sem_category.service';
-import { SemProcessService } from '../entities/sem_process.service';
+import {
+  SemProcessService,
+  SemProcessStatus,
+} from '../entities/sem_process.service';
 import { SemWebsite } from '../entities/sem_website.entity';
 import { SemHtmlElementService } from '../entities/sem_html_element.service';
 import { SemWebsiteService } from '../entities/sem_website.service';
@@ -60,24 +63,64 @@ export class CronCrawlerService {
     private readonly semCategoryService: SemCategoryService,
   ) {}
 
-  @Cron(CronExpression.EVERY_HOUR) // Runs every hour, adjust as needed
+  @Cron(CronExpression.EVERY_HOUR) // Runs every hour
   async handleCron() {
+    let timestampMs;
+    let intervalMs;
+
     this.logger.debug('Starting crawler job');
     try {
-      // Your crawler logic here
       const processArray = await this.semProcessService.findAll();
-      for (const process of processArray) {
-        // TODO add checking scheduling time from table
 
-        console.log('process:', process);
+      for (const process of processArray) {
+        intervalMs = process.interval * 60 * 60 * 1000;
+
+        timestampMs = Date.now();
+        if (process.last_start > 0) {
+          // Not first run
+          if (process.last_start > process.last_end) {
+            // Previous process still running
+            continue;
+          }
+          if (timestampMs - process.last_start < intervalMs) {
+            // Interval between processes has not yet passed
+            continue;
+          }
+        }
+
+        await this.semProcessService.updateProcessField(
+          process,
+          'status',
+          process.status | SemProcessStatus.RUNNING, // Setting RUNNING bit
+        );
+
+        await this.semProcessService.updateProcessField(
+          process,
+          'last_start',
+          timestampMs,
+        );
+
+        console.log('process id:', process.id);
         for (const website of process.websites) {
-          console.log('website.url:', website.url);
+          console.log('crawling website url:', website.url);
           // Test
           if (website.url === 'https://www.pagineazzurre.net') {
             await this.crawl(website);
-            // TODO handle pagination, add robots delay
           }
         }
+
+        timestampMs = Date.now();
+        await this.semProcessService.updateProcessField(
+          process,
+          'last_end',
+          timestampMs,
+        );
+
+        await this.semProcessService.updateProcessField(
+          process,
+          'status',
+          process.status & ~SemProcessStatus.RUNNING, // Clearing RUNNING bit
+        );
       }
 
       this.logger.debug('Crawler job completed successfully');
