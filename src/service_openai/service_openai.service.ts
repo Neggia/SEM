@@ -14,7 +14,7 @@ import {
   HTML_ELEMENT_TYPE_UNKNOWN,
   HTML_ELEMENT_TYPE_PRODUCT,
   // HTML_ELEMENT_TYPE_CATEGORY,
-  // HTML_ELEMENT_TYPE_PAGINATION,
+  HTML_ELEMENT_TYPE_PAGINATION,
 } from '../utils/globals';
 import { SemWebsite } from 'src/entities/sem_website.entity';
 
@@ -192,7 +192,7 @@ export class ServiceOpenaiService {
           completions,
         );
       console.log(
-        'ServiceOpenaiService.getProductJSON() productJSON: ',
+        'ServiceOpenaiService getProductStructure() productJSON: ',
         productJSON,
       );
 
@@ -204,6 +204,71 @@ export class ServiceOpenaiService {
       );
       // throw new Error(
       //   `Failed to get product JSON for HTML element id: ${htmlElement.id}`,
+      // );
+    }
+  }
+
+  async getPaginationStructure(
+    htmlElementId: number,
+    htmlElement?: SemHtmlElement,
+  ): Promise<SemHtmlElementStructure> {
+    try {
+      if (htmlElement === undefined || htmlElement.website === undefined) {
+        htmlElement = await this.semHtmlElementService.findOne(htmlElementId);
+      }
+
+      // const website = await this.semWebsiteService.findOne(
+      //   htmlElement.website_id,
+      // );
+      const completions =
+        await this.semOpenaiCompletionsService.findNarrowestOneBy(
+          'getPaginationStructure',
+          htmlElement.website,
+          htmlElement.group_id,
+        );
+      if (completions === undefined) {
+        throw new Error(
+          `Completions not found for getProductStructure website_id ${htmlElement.website.id} group_id ${htmlElement.group_id}`,
+        );
+      }
+      let paginationJSON: SemHtmlElementStructure;
+      paginationJSON = await this.semHtmlElementStructureService.findOneBy(
+        // completions.id,
+        htmlElement.website,
+        // htmlElement.group_id,
+        htmlElement.selector,
+      );
+      if (paginationJSON) {
+        return paginationJSON;
+      }
+
+      const parseHtmlElementResponse = await this.parseHtmlElement(
+        htmlElement,
+        completions,
+      );
+
+      paginationJSON =
+        await this.semHtmlElementStructureService.createHtmlElementStructure(
+          htmlElement.website.id,
+          // htmlElement.group_id,
+          htmlElement.selector,
+          HTML_ELEMENT_TYPE_PAGINATION,
+          parseHtmlElementResponse,
+          completions,
+        );
+      console.log(
+        'ServiceOpenaiService getPaginationStructure() paginationJSON: ',
+        paginationJSON,
+      );
+
+      return paginationJSON;
+    } catch (error) {
+      this.logger.error(
+        `Failed to get pagination JSON for HTML element id: ${htmlElement.id}`,
+        error.stack,
+      );
+      // throw new Error(
+      //   `Failed to get pagination JSON for HTML element id: ${htmlElement.id}`,
       // );
     }
   }

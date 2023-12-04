@@ -23,11 +23,13 @@ import {
   ProductStructure,
 } from '../entities/sem_product.service';
 import {
+  HTML_ELEMENT_TYPE_PAGINATION,
   HTML_ELEMENT_TYPE_PRODUCT,
   // HTML_ELEMENT_TYPE_CATEGORY,
   // HTML_ELEMENT_TYPE_PAGINATION,
   entitiesMatch,
   removeTrailingSlash,
+  delay,
 } from '../utils/globals';
 
 interface TagStructure {
@@ -73,6 +75,7 @@ export class CronCrawlerService {
           // Test
           if (website.url === 'https://www.pagineazzurre.net') {
             await this.crawl(website);
+            // TODO handle pagination, add robots delay
           }
         }
       }
@@ -87,6 +90,17 @@ export class CronCrawlerService {
     const robotsUrl = new URL('/robots.txt', url).href;
     await this.robotsAgent.useRobotsFor(robotsUrl);
     return this.robotsAgent.canCrawl(url);
+  }
+
+  async getCrawlDelay(url: string): Promise<number> {
+    // if (process.env.NODE_ENV === 'test') {
+    //   return 5;
+    // }
+
+    // TODO check if crawDelay already extracted and don't fetch again
+    const robotsUrl = new URL('/robots.txt', url).href;
+    await this.robotsAgent.useRobotsFor(robotsUrl);
+    return this.robotsAgent.getCrawlDelay();
   }
 
   async crawl(website: SemWebsite) {
@@ -106,404 +120,461 @@ export class CronCrawlerService {
       console.warn(`Crawling is disallowed by robots.txt: ${url}`);
       return;
     }
+    const crawlDelay = await this.getCrawlDelay(url);
 
+    let pageUrl = url;
+    let currentPage = 1;
+    let pages = [];
     const browser = await puppeteer.launch();
     try {
-      const page = await browser.newPage();
-      await page.goto(url, { waitUntil: 'networkidle0' });
-      // await page.goto(url, { waitUntil: 'domcontentloaded' });
-      // await page.waitForSelector('your-dynamic-content-selector');
-      await page.waitForTimeout(1000); // Additional time buffer, if necessary
+      while (pageUrl) {
+        // Deal with pagination
+        const page = await browser.newPage();
+        await page.goto(pageUrl, { waitUntil: 'networkidle0' });
+        // await page.goto(url, { waitUntil: 'domcontentloaded' });
+        // await page.waitForSelector('your-dynamic-content-selector');
+        await page.waitForTimeout(1000); // Additional time buffer, if necessary
 
-      const html = await page.content();
-      const $ = cheerio.load(html);
+        const html = await page.content();
+        const $ = cheerio.load(html);
 
-      // Function to recursively traverse the DOM and record the tag structure with classes, HTML, and selector
-      const getTagStructure = (
-        element: cheerio.Element,
-        parentSelector?: string,
-      ): TagStructure => {
-        const tag = element.tagName;
-        const classes = $(element).attr('class')
-          ? $(element).attr('class').split(/\s+/)
-          : [];
-        const classSelector = classes.length ? '.' + classes.join('.') : '';
-        const currentSelector = `${
-          parentSelector ? parentSelector + ' > ' : ''
-        }${tag}${classSelector}`;
+        // Function to recursively traverse the DOM and record the tag structure with classes, HTML, and selector
+        const getTagStructure = (
+          element: cheerio.Element,
+          parentSelector?: string,
+        ): TagStructure => {
+          const tag = element.tagName;
+          const classes = $(element).attr('class')
+            ? $(element).attr('class').split(/\s+/)
+            : [];
+          const classSelector = classes.length ? '.' + classes.join('.') : '';
+          const currentSelector = `${
+            parentSelector ? parentSelector + ' > ' : ''
+          }${tag}${classSelector}`;
 
-        const structure: TagStructure = {
-          tag,
-          html: $(element).html() || '',
-          selector: currentSelector,
+          const structure: TagStructure = {
+            tag,
+            html: $(element).html() || '',
+            selector: currentSelector,
+          };
+
+          if (classes.length) {
+            structure.classes = classes;
+          }
+
+          // If the element has children, recurse
+          const children = $(element).children().toArray();
+          if (children.length > 0) {
+            structure.children = children.map((child) =>
+              getTagStructure(child, currentSelector),
+            );
+          }
+
+          return structure;
         };
 
-        if (classes.length) {
-          structure.classes = classes;
-        }
-
-        // If the element has children, recurse
-        const children = $(element).children().toArray();
-        if (children.length > 0) {
-          structure.children = children.map((child) =>
-            getTagStructure(child, currentSelector),
-          );
-        }
-
-        return structure;
-      };
-
-      // Function to check if two TagStructure objects are equal
-      const areStructuresEqual = (
-        a: TagStructure,
-        b: TagStructure,
-      ): boolean => {
-        // Check if tags and classes are the same
-        if (
-          a.tag !== b.tag ||
-          (a.classes || []).join(' ') !== (b.classes || []).join(' ')
-        ) {
-          return false;
-        }
-
-        // Check if children arrays are the same length
-        if ((a.children || []).length !== (b.children || []).length) {
-          return false;
-        }
-
-        // Recursively check all children
-        for (let i = 0; i < (a.children || []).length; i++) {
-          if (!areStructuresEqual(a.children![i], b.children![i])) {
+        // Function to check if two TagStructure objects are equal
+        const areStructuresEqual = (
+          a: TagStructure,
+          b: TagStructure,
+        ): boolean => {
+          // Check if tags and classes are the same
+          if (
+            a.tag !== b.tag ||
+            (a.classes || []).join(' ') !== (b.classes || []).join(' ')
+          ) {
             return false;
           }
-        }
 
-        return true;
-      };
-
-      // Function to remove duplicate structures
-      const removeDuplicates = (structures: TagStructure[]): TagStructure[] => {
-        return structures.reduce<TagStructure[]>((unique, current) => {
-          if (!unique.some((item) => areStructuresEqual(item, current))) {
-            unique.push(current);
+          // Check if children arrays are the same length
+          if ((a.children || []).length !== (b.children || []).length) {
+            return false;
           }
-          return unique;
-        }, []);
-      };
 
-      let globalGroupId = 0; // Counter for unique groupId
+          // Recursively check all children
+          for (let i = 0; i < (a.children || []).length; i++) {
+            if (!areStructuresEqual(a.children![i], b.children![i])) {
+              return false;
+            }
+          }
 
-      await this.semHtmlElementService.deleteHtmlElementsByWebsite(website);
+          return true;
+        };
 
-      // Function to recursively deduplicate all structures and assign unique groupId
-      const deduplicateStructure = async (
-        structure: TagStructure,
-        website: SemWebsite,
-      ): Promise<TagStructure> => {
-        // Assign a unique groupId to the current structure if it doesn't have one
-        if (structure.groupId === undefined) {
-          structure.groupId = ++globalGroupId;
-        }
+        // Function to remove duplicate structures
+        const removeDuplicates = (
+          structures: TagStructure[],
+        ): TagStructure[] => {
+          return structures.reduce<TagStructure[]>((unique, current) => {
+            if (!unique.some((item) => areStructuresEqual(item, current))) {
+              unique.push(current);
+            }
+            return unique;
+          }, []);
+        };
 
-        // Create a record for the current structure
-        await this.semHtmlElementService.createHtmlElement(
-          structure.groupId,
-          structure.selector,
-          structure.html,
-          website,
-        );
+        let globalGroupId = 0; // Counter for unique groupId
 
-        // If the structure has children, process them recursively
-        if (structure.children) {
-          // First, remove duplicates from the children
-          const uniqueChildren = removeDuplicates(structure.children);
+        await this.semHtmlElementService.deleteHtmlElementsByWebsite(website);
 
-          // Then, process each unique child asynchronously and wait for all to complete
-          structure.children = await Promise.all(
-            uniqueChildren.map((child) => deduplicateStructure(child, website)),
+        // Function to recursively deduplicate all structures and assign unique groupId
+        const deduplicateStructure = async (
+          structure: TagStructure,
+          website: SemWebsite,
+        ): Promise<TagStructure> => {
+          // Assign a unique groupId to the current structure if it doesn't have one
+          if (structure.groupId === undefined) {
+            structure.groupId = ++globalGroupId;
+          }
+
+          // Create a record for the current structure
+          await this.semHtmlElementService.createHtmlElement(
+            structure.groupId,
+            structure.selector,
+            structure.html,
+            website,
           );
-        }
 
-        return structure;
-      };
+          // If the structure has children, process them recursively
+          if (structure.children) {
+            // First, remove duplicates from the children
+            const uniqueChildren = removeDuplicates(structure.children);
 
-      // Start from the body element
-      const bodyStructure = getTagStructure($('body')[0]);
-
-      // Deduplicate the body structure
-      const deduplicatedBodyStructure = await deduplicateStructure(
-        bodyStructure,
-        website,
-      );
-
-      if (process.env.NODE_ENV === 'test') {
-        // Convert your data to a string format, typically JSON for complex data
-        const groupsDataString = JSON.stringify(
-          deduplicatedBodyStructure,
-          null,
-          2,
-        );
-
-        const urlObj = new URL(url);
-        const baseUrl = `${urlObj.hostname}`;
-        const logsSubfolder = 'logs';
-        const logFilename = baseUrl + '.output.json';
-
-        // Check if the subfolder exists; if not, create it
-        const subfolderPath = path.join(appRoot.path, logsSubfolder);
-        if (!fs.existsSync(subfolderPath)) {
-          fs.mkdirSync(subfolderPath, { recursive: true });
-        }
-
-        // Define the full path for the file
-        const filePath = path.join(subfolderPath, logFilename);
-
-        // Write the string to a file
-        fs.writeFileSync(filePath, groupsDataString);
-      }
-
-      // if (!isDebug) {
-      //   return;
-      // }
-
-      // htmlElements sorted by group_id in descending order, from innermost to outermost
-      const updatedWebsite = await this.semWebsiteService.findOne(website.id);
-      const updatedHtmlElements = updatedWebsite.htmlElements.sort(
-        (a, b) => b.group_id - a.group_id,
-      );
-
-      let productHtmlElementStructure;
-
-      productHtmlElementStructure =
-        await this.semHtmlElementStructureService.findOneByWebsiteAndType(
-          website,
-          HTML_ELEMENT_TYPE_PRODUCT,
-        );
-      if (productHtmlElementStructure === null) {
-        for (const updatedHtmlElement of updatedHtmlElements) {
-          if (updatedHtmlElement.selector === 'body') {
-            continue; // No need to parse whole body, only subsections
+            // Then, process each unique child asynchronously and wait for all to complete
+            structure.children = await Promise.all(
+              uniqueChildren.map((child) =>
+                deduplicateStructure(child, website),
+              ),
+            );
           }
 
-          // if (
-          //   isDebug &&
-          //   updatedHtmlElement.selector ===
-          //     'body > div > div.grid-container > main > div > div > div.row.center.cards-container > div.card.card--tile'
-          // ) {
-          //   debugger;
-          // }
+          return structure;
+        };
 
-          // console.log('htmlElement.group_id: ', updatedHtmlElement.group_id);
+        // Start from the body element
+        const bodyStructure = getTagStructure($('body')[0]);
 
-          const htmlElementType =
-            await this.serviceOpenaiService.getHtmlElementType(
-              updatedHtmlElement.id,
-              updatedHtmlElement,
-            );
-          if (htmlElementType === HTML_ELEMENT_TYPE_PRODUCT) {
-            console.log(
-              'Product htmlElement.group_id: ',
-              updatedHtmlElement.group_id,
-            );
+        // Deduplicate the body structure
+        const deduplicatedBodyStructure = await deduplicateStructure(
+          bodyStructure,
+          website,
+        );
 
-            productHtmlElementStructure =
-              await this.serviceOpenaiService.getProductStructure(
+        if (process.env.NODE_ENV === 'test' && pageUrl === url) {
+          // Convert your data to a string format, typically JSON for complex data
+          const groupsDataString = JSON.stringify(
+            deduplicatedBodyStructure,
+            null,
+            2,
+          );
+
+          const urlObj = new URL(url);
+          const baseUrl = `${urlObj.hostname}`;
+          const logsSubfolder = 'logs';
+          const logFilename = baseUrl + '.output.json';
+
+          // Check if the subfolder exists; if not, create it
+          const subfolderPath = path.join(appRoot.path, logsSubfolder);
+          if (!fs.existsSync(subfolderPath)) {
+            fs.mkdirSync(subfolderPath, { recursive: true });
+          }
+
+          // Define the full path for the file
+          const filePath = path.join(subfolderPath, logFilename);
+
+          // Write the string to a file
+          fs.writeFileSync(filePath, groupsDataString);
+        }
+
+        // if (!isDebug) {
+        //   return;
+        // }
+
+        // htmlElements sorted by group_id in descending order, from innermost to outermost
+        const updatedWebsite = await this.semWebsiteService.findOne(website.id);
+        const updatedHtmlElements = updatedWebsite.htmlElements.sort(
+          (a, b) => b.group_id - a.group_id,
+        );
+
+        let productHtmlElementStructure = null;
+        let paginationHtmlElementStructure = null;
+
+        productHtmlElementStructure =
+          await this.semHtmlElementStructureService.findOneByWebsiteAndType(
+            website,
+            HTML_ELEMENT_TYPE_PRODUCT,
+          );
+        if (productHtmlElementStructure === null) {
+          for (const updatedHtmlElement of updatedHtmlElements) {
+            if (updatedHtmlElement.selector === 'body') {
+              continue; // No need to parse whole body, only subsections
+            }
+
+            // if (
+            //   isDebug &&
+            //   updatedHtmlElement.selector ===
+            //     'body > div > div.grid-container > main > div > div > div.row.center.cards-container > div.card.card--tile'
+            // ) {
+            //   debugger;
+            // }
+
+            // console.log('htmlElement.group_id: ', updatedHtmlElement.group_id);
+
+            const htmlElementType =
+              await this.serviceOpenaiService.getHtmlElementType(
                 updatedHtmlElement.id,
                 updatedHtmlElement,
               );
+            if (
+              htmlElementType === HTML_ELEMENT_TYPE_PRODUCT &&
+              productHtmlElementStructure === null
+            ) {
+              console.log(
+                'Product htmlElement.group_id: ',
+                updatedHtmlElement.group_id,
+              );
+
+              productHtmlElementStructure =
+                await this.serviceOpenaiService.getProductStructure(
+                  updatedHtmlElement.id,
+                  updatedHtmlElement,
+                );
+            } else if (
+              htmlElementType === HTML_ELEMENT_TYPE_PAGINATION &&
+              paginationHtmlElementStructure === null
+            ) {
+              console.log(
+                'Pagination htmlElement.group_id: ',
+                updatedHtmlElement.group_id,
+              );
+
+              paginationHtmlElementStructure =
+                await this.serviceOpenaiService.getPaginationStructure(
+                  updatedHtmlElement.id,
+                  updatedHtmlElement,
+                );
+            }
+
+            if (
+              productHtmlElementStructure !== null &&
+              productHtmlElementStructure !== undefined &&
+              paginationHtmlElementStructure !== null &&
+              paginationHtmlElementStructure !== undefined
+            ) {
+              break;
+            }
           }
+        }
 
-          if (
-            productHtmlElementStructure !== null &&
-            productHtmlElementStructure !== undefined
-          ) {
-            break;
+        const productHtmlElementStructureJSON: ProductHtmlElementStructure =
+          JSON.parse(productHtmlElementStructure.json);
+        let productStructure: ProductStructure;
+
+        const extractFromElement = (
+          $,
+          element,
+          selector: string,
+          attr?: string,
+        ): string => {
+          try {
+            if (selector) {
+              const selectedElement = $(element).find(selector);
+              return attr ? selectedElement.attr(attr) : selectedElement.text();
+            }
+          } catch (error) {
+            console.error(`Failed extractFromElement: ${selector}`, error);
           }
-        }
-      }
-
-      const productHtmlElementStructureJSON: ProductHtmlElementStructure =
-        JSON.parse(productHtmlElementStructure.json);
-      let productStructure: ProductStructure;
-
-      const extractFromElement = (
-        $,
-        element,
-        selector: string,
-        attr?: string,
-      ): string => {
-        try {
-          if (selector) {
-            const selectedElement = $(element).find(selector);
-            return attr ? selectedElement.attr(attr) : selectedElement.text();
-          }
-        } catch (error) {
-          console.error(`Failed extractFromElement: ${selector}`, error);
-        }
-      };
-
-      const extractNumbers = (str) => {
-        const sanitizedStr = str.replace(/null/g, '0');
-        const matches = sanitizedStr.match(/\d+/g) || [];
-        return matches.map(Number);
-      };
-
-      const isValidSelector = ($, selector) => {
-        try {
-          $(selector);
-          return true;
-        } catch (e) {
-          return false;
-        }
-      };
-
-      const getCurrency = async (
-        $,
-        productElement,
-        currencyString: string,
-      ): Promise<SemCurrency> => {
-        let currencyStringTemp: string;
-
-        if (isValidSelector($, currencyString)) {
-          currencyStringTemp = extractFromElement(
-            $,
-            productElement,
-            currencyString,
-          );
-        }
-        if (!currencyStringTemp) {
-          currencyStringTemp = currencyString;
-        }
-        const currency: SemCurrency =
-          await this.semCurrencyService.getCurrencyFromString(
-            currencyStringTemp,
-          );
-
-        return currency;
-      };
-
-      const productElements = $(productHtmlElementStructure.selector).get();
-      let numbers = [];
-
-      // Loop through product elements
-      // $(productHtmlElementStructure.selector).each((index, element) => {
-      for (const productElement of productElements) {
-        // 'element' refers to the current item in the loop
-        // You can use $(element) to wrap it with Cheerio and use jQuery-like methods
-
-        productStructure = {
-          url: null,
-          thumbnailUrl: null,
-          title: null,
-          description: null,
-          description_long: null,
-          price_01: null,
-          currency_01_id: null,
-          price_02: null,
-          currency_02_id: null,
-          category_id: null,
         };
 
-        productStructure.title = extractFromElement(
+        const extractNumbers = (str) => {
+          const sanitizedStr = str.replace(/null/g, '0');
+          const matches = sanitizedStr.match(/\d+/g) || [];
+          return matches.map(Number);
+        };
+
+        const isValidSelector = ($, selector) => {
+          try {
+            $(selector);
+            return true;
+          } catch (e) {
+            return false;
+          }
+        };
+
+        const getCurrency = async (
           $,
           productElement,
-          productHtmlElementStructureJSON.title,
-        );
+          currencyString: string,
+        ): Promise<SemCurrency> => {
+          let currencyStringTemp: string;
 
-        productStructure.description = extractFromElement(
-          $,
-          productElement,
-          productHtmlElementStructureJSON.description,
-        );
+          if (isValidSelector($, currencyString)) {
+            currencyStringTemp = extractFromElement(
+              $,
+              productElement,
+              currencyString,
+            );
+          }
+          if (!currencyStringTemp) {
+            currencyStringTemp = currencyString;
+          }
+          const currency: SemCurrency =
+            await this.semCurrencyService.getCurrencyFromString(
+              currencyStringTemp,
+            );
 
-        // TODO Check if url or data
-        productStructure.thumbnailUrl = extractFromElement(
-          $,
-          productElement,
-          productHtmlElementStructureJSON.thumbnail,
-          'src',
-        );
-        if (
-          productStructure.thumbnailUrl.startsWith('/') &&
-          !productStructure.thumbnailUrl.startsWith(
-            removeTrailingSlash(website.url),
-          )
-        ) {
-          // If it's an url and it's relative, not absolute
-          productStructure.thumbnailUrl =
-            removeTrailingSlash(website.url) + productStructure.thumbnailUrl;
-        }
+          return currency;
+        };
 
-        numbers = [];
-        numbers = extractNumbers(
-          extractFromElement(
+        const productElements = $(productHtmlElementStructure.selector).get();
+        let numbers = [];
+
+        // Loop through product elements
+        // $(productHtmlElementStructure.selector).each((index, element) => {
+        for (const productElement of productElements) {
+          // 'element' refers to the current item in the loop
+          // You can use $(element) to wrap it with Cheerio and use jQuery-like methods
+
+          productStructure = {
+            url: null,
+            thumbnailUrl: null,
+            title: null,
+            description: null,
+            description_long: null,
+            price_01: null,
+            currency_01_id: null,
+            price_02: null,
+            currency_02_id: null,
+            category_id: null,
+          };
+
+          productStructure.title = extractFromElement(
             $,
             productElement,
-            productHtmlElementStructureJSON.price_01,
-          ),
-        );
-        productStructure.price_01 = numbers.length > 0 ? numbers[0] : 0;
-
-        const currency_01 = await getCurrency(
-          $,
-          productElement,
-          productHtmlElementStructureJSON.currency_01,
-        );
-        productStructure.currency_01_id = currency_01.id;
-
-        numbers = [];
-        numbers = extractNumbers(
-          extractFromElement(
-            $,
-            productElement,
-            productHtmlElementStructureJSON.price_02,
-          ),
-        );
-        productStructure.price_02 = numbers.length > 1 ? numbers[1] : 0;
-
-        const currency_02 = await getCurrency(
-          $,
-          productElement,
-          productHtmlElementStructureJSON.currency_02,
-        );
-        productStructure.currency_02_id = currency_02.id;
-
-        productStructure.url =
-          removeTrailingSlash(website.url) +
-          extractFromElement(
-            $,
-            productElement,
-            productHtmlElementStructureJSON.url,
-            'href',
+            productHtmlElementStructureJSON.title,
           );
 
-        const categoryName = await this.serviceOpenaiService.getProductCategory(
-          productStructure.title,
-          website,
-        );
-        const category =
-          await this.semCategoryService.findOneByName(categoryName);
-        productStructure.category_id = category ? category.id : null;
+          productStructure.description = extractFromElement(
+            $,
+            productElement,
+            productHtmlElementStructureJSON.description,
+          );
 
-        let productAlreadyExist: boolean = false;
+          // TODO Check if url or data
+          productStructure.thumbnailUrl = extractFromElement(
+            $,
+            productElement,
+            productHtmlElementStructureJSON.thumbnail,
+            'src',
+          );
+          if (
+            productStructure.thumbnailUrl.startsWith('/') &&
+            !productStructure.thumbnailUrl.startsWith(
+              removeTrailingSlash(website.url),
+            )
+          ) {
+            // If it's an url and it's relative, not absolute
+            productStructure.thumbnailUrl =
+              removeTrailingSlash(website.url) + productStructure.thumbnailUrl;
+          }
 
-        // Url must be unique
-        const product = await this.semProductService.findOneByUrl(
-          productStructure.url,
-        );
-        if (product) {
-          if (entitiesMatch(product, productStructure, { exclude: ['id'] })) {
-            // Product already existing in database
-            productAlreadyExist = true;
-          } else {
-            // Delete previous product with same url
-            await this.semProductService.delete(product.id);
+          numbers = [];
+          numbers = extractNumbers(
+            extractFromElement(
+              $,
+              productElement,
+              productHtmlElementStructureJSON.price_01,
+            ),
+          );
+          productStructure.price_01 = numbers.length > 0 ? numbers[0] : 0;
+
+          const currency_01 = await getCurrency(
+            $,
+            productElement,
+            productHtmlElementStructureJSON.currency_01,
+          );
+          productStructure.currency_01_id = currency_01.id;
+
+          numbers = [];
+          numbers = extractNumbers(
+            extractFromElement(
+              $,
+              productElement,
+              productHtmlElementStructureJSON.price_02,
+            ),
+          );
+          productStructure.price_02 = numbers.length > 1 ? numbers[1] : 0;
+
+          const currency_02 = await getCurrency(
+            $,
+            productElement,
+            productHtmlElementStructureJSON.currency_02,
+          );
+          productStructure.currency_02_id = currency_02.id;
+
+          productStructure.url =
+            removeTrailingSlash(website.url) +
+            extractFromElement(
+              $,
+              productElement,
+              productHtmlElementStructureJSON.url,
+              'href',
+            );
+
+          const categoryName =
+            await this.serviceOpenaiService.getProductCategory(
+              productStructure.title,
+              website,
+            );
+          const category =
+            await this.semCategoryService.findOneByName(categoryName);
+          productStructure.category_id = category ? category.id : null;
+
+          let productAlreadyExist: boolean = false;
+
+          // Url must be unique
+          const product = await this.semProductService.findOneByUrl(
+            productStructure.url,
+          );
+          if (product) {
+            if (entitiesMatch(product, productStructure, { exclude: ['id'] })) {
+              // Product already existing in database
+              productAlreadyExist = true;
+            } else {
+              // Delete previous product with same url
+              await this.semProductService.delete(product.id);
+            }
+          }
+          if (!productAlreadyExist) {
+            await this.semProductService.createProduct(productStructure);
+          }
+          // TODO should delete products that no longer exist
+        }
+
+        pageUrl = null;
+        if (paginationHtmlElementStructure || pages.length > 0) {
+          if (pages.length === 0) {
+            pages = JSON.parse(paginationHtmlElementStructure.json);
+          }
+
+          if (pages.length > 1) {
+            if (currentPage < pages.length) {
+              pageUrl = pages[currentPage];
+              if (
+                pageUrl.startsWith('/') &&
+                !pageUrl.startsWith(removeTrailingSlash(website.url))
+              ) {
+                // If it's a relative url, not absolute
+                pageUrl = removeTrailingSlash(website.url) + pageUrl;
+              }
+            }
+
+            currentPage++;
           }
         }
-        if (!productAlreadyExist) {
-          await this.semProductService.createProduct(productStructure);
+        if (pageUrl) {
+          delay(crawlDelay);
         }
-        // TODO should delete products that no longer exist
       }
       // });
     } catch (error) {
