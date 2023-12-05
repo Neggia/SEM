@@ -68,11 +68,15 @@ function Login() {
     setAnchorEl(null);
   };
 
+  const appName = process.env.REACT_APP_NAME
+    ? process.env.REACT_APP_NAME
+    : 'SEM';
+
   return (
     <AppBar position="static">
       <Toolbar>
         <Typography variant="h6" style={{ flexGrow: 1 }}>
-          SEM
+          {appName}
         </Typography>
         {!user.isLoggedIn ? (
           <>

@@ -223,13 +223,13 @@ export class ServiceOpenaiService {
       // );
       const completions =
         await this.semOpenaiCompletionsService.findNarrowestOneBy(
-          'getPaginationStructure',
+          'getPaginationData',
           htmlElement.website,
           htmlElement.group_id,
         );
       if (completions === undefined) {
         throw new Error(
-          `Completions not found for getPaginationStructure website_id ${htmlElement.website.id} group_id ${htmlElement.group_id}`,
+          `Completions not found for getPaginationData website_id ${htmlElement.website.id} group_id ${htmlElement.group_id}`,
         );
       }
       let paginationHtmlElementStructure: SemHtmlElementStructure;
@@ -257,7 +257,7 @@ export class ServiceOpenaiService {
             completions,
           );
         console.log(
-          'ServiceOpenaiService getPaginationStructure() paginationHtmlElementStructure: ',
+          'ServiceOpenaiService getPaginationData() paginationHtmlElementStructure: ',
           paginationHtmlElementStructure,
         );
       }

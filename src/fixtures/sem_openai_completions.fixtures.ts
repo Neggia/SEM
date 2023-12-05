@@ -42,7 +42,7 @@ export const SemOpenaiCompletionsFixtures: Fixture = {
     },
     {
       id: 4,
-      function_name: 'getPaginationStructure',
+      function_name: 'getPaginationData',
       website_id: null,
       group_id: null,
       body: '{"model": "gpt-4","messages": [{"role": "system", "content": "You are an HTML parser."}, {"role": "user", "content": "Parse a pagination item of an ecommerce page and identify all the pages urls in sequence. Return an array object, without any other text, with a record for every page url. The HTML code is the following: <html_element>"}]}',

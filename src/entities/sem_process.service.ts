@@ -11,6 +11,11 @@ export class SemProcessStatus {
   // Add more as needed
 }
 
+export class SemProcessDto {
+  saveObjects: SemProcess[]; // Obejects to create or update with save
+  deleteIds: number[]; // Obejcts to delete from ids
+}
+
 @Injectable()
 export class SemProcessService {
   constructor(
@@ -38,5 +43,23 @@ export class SemProcessService {
     await this.semProcessRepository.save(process); // Save the updated process
 
     return process;
+  }
+
+  async sync(processDto: SemProcessDto) {
+    if (processDto.saveObjects.length > 0) {
+      const saveObjectsPromises = processDto.saveObjects.map((object) => {
+        return this.semProcessRepository.save(object);
+      });
+
+      await Promise.all(saveObjectsPromises);
+    }
+
+    if (processDto.deleteIds.length > 0) {
+      const deleteIdsPromises = processDto.deleteIds.map((deleteId) => {
+        return this.semProcessRepository.delete(deleteId);
+      });
+
+      await Promise.all(deleteIdsPromises);
+    }
   }
 }

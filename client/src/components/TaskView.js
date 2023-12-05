@@ -240,7 +240,9 @@ const TaskView = ({ processData, taskData }) => {
     }
   };
 
-  const handleSave = () => {};
+  const handleSave = () => {
+    console.log('data: ', data);
+  };
 
   if (pids === null) {
     return <div>Loading...</div>;

@@ -13,6 +13,13 @@ import {
   faStop,
   faFloppyDisk,
 } from '@fortawesome/free-solid-svg-icons';
+import axios from 'axios';
+import {
+  SERVER_BASE_URL,
+  CONTROLLER_PROCESS_ID,
+  CONTROLLER_PROCESS_SYNC,
+} from '../utils/globals';
+// import { DateTime } from 'luxon';
 
 // import { icon } from '@fortawesome/fontawesome-svg-core/import.macro';
 
@@ -28,6 +35,7 @@ const SaveIcon = () => <FontAwesomeIcon icon={faFloppyDisk} />;
 const ProcessView = ({ processData, onProcessDataUpdate }) => {
   const [data, setData] = useState(processData);
   const [lastId, setLastId] = useState(data[data.length - 1].id);
+  const [deletedIds, setDeletedIds] = useState([]);
 
   let tableRef = useRef(null);
 
@@ -113,8 +121,19 @@ const ProcessView = ({ processData, onProcessDataUpdate }) => {
       },
       // headerFilter: 'input',
     },
-    { title: 'Last run', field: 'last_run', width: 110 },
-    { title: 'Last duration', field: 'last_duration', width: 130 },
+    {
+      title: 'Last start',
+      field: 'last_start_datetime',
+      width: 140,
+      formatter: 'datetime',
+      formatterParams: {
+        // inputFormat: '',
+        outputFormat: 'yyyy/MM/dd HH:mm:ss',
+        invalidPlaceholder: '(invalid date)',
+        timezone: 'Europe/Rome',
+      },
+    },
+    { title: 'Duration', field: 'duration', width: 110 },
     {
       title: 'Progress',
       field: 'progress',
@@ -149,8 +168,8 @@ const ProcessView = ({ processData, onProcessDataUpdate }) => {
       name: '',
       server: '',
       interval: 60,
-      last_run: 0,
-      last_duration: 0,
+      last_start: 0,
+      last_end: 0,
       progress: 0,
     };
     setData([...data, newRow]);
@@ -166,13 +185,31 @@ const ProcessView = ({ processData, onProcessDataUpdate }) => {
         setData(newData);
         onProcessDataUpdate(newData);
         setLastId(lastId - 1);
+        setDeletedIds([...deletedIds, selectedData[0].id]);
       } else {
         alert('Please select a row to delete');
       }
     }
   };
 
-  const handleSave = () => {};
+  const handleSave = async () => {
+    console.log('data: ', data);
+    console.log('deletedIds: ', deletedIds);
+
+    try {
+      const processDto = {
+        saveObjects: data,
+        deleteIds: deletedIds,
+      };
+      const response = await axios.post(
+        SERVER_BASE_URL + CONTROLLER_PROCESS_ID + CONTROLLER_PROCESS_SYNC,
+        processDto,
+      );
+      console.log(response.data); // Handle the response
+    } catch (error) {
+      console.error('Error sync processes to database:', error.response.data);
+    }
+  };
 
   return (
     <div>

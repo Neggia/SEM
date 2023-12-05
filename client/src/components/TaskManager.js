@@ -12,6 +12,7 @@ import {
   CONTROLLER_PROCESS_ID,
   CONTROLLER_OPENAI_COMPLETIONS_ID,
 } from '../utils/globals';
+import { DateTime } from 'luxon';
 
 // import ReactTabulatorExample from './ReactTabulatorExample';
 
@@ -35,7 +36,28 @@ function TaskManager() {
             'Network response was not ok ' + processResponse.statusText,
           );
         }
-        const processResponseJson = await processResponse.json();
+        let processResponseJson = await processResponse.json();
+
+        processResponseJson = processResponseJson.map((obj) => {
+          // Convert timestamps to DateTime objects
+          const lastStartDateTime = DateTime.fromMillis(obj.last_start);
+          const lastEndDateTime = DateTime.fromMillis(obj.last_end);
+
+          // Calculate the difference
+          const duration = lastEndDateTime.diff(lastStartDateTime);
+
+          // Convert the difference to a Duration and format it
+          const formattedDuration = duration.toFormat('hh:mm:ss:SSS');
+
+          const formattedLastStart = DateTime.fromMillis(
+            obj.last_start,
+          ).toFormat('yyyy-MM-dd HH:mm:ss');
+          return {
+            ...obj,
+            last_start_datetime: formattedLastStart,
+            duration: formattedDuration,
+          };
+        });
         console.log(
           'TaskManager processDataResponseJson: ',
           processResponseJson,
