@@ -9,6 +9,7 @@ import {
 } from 'typeorm';
 import { SemProcess } from '../entities/sem_process.entity';
 import { SemHtmlElement } from '../entities/sem_html_element.entity';
+import { SemProduct } from '../entities/sem_product.entity';
 
 @Entity()
 export class SemWebsite {
@@ -47,4 +48,7 @@ export class SemWebsite {
 
   @OneToMany(() => SemHtmlElement, (htmlElement) => htmlElement.website)
   htmlElements: SemHtmlElement[];
+
+  @OneToMany(() => SemProduct, (product) => product.website)
+  products: SemProduct[];
 }
