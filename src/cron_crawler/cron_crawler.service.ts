@@ -65,6 +65,7 @@ export class CronCrawlerService {
 
   @Cron(CronExpression.EVERY_HOUR) // Runs every hour
   async handleCron() {
+    const isDebug = process.env.NODE_DEBUG === 'true';
     let timestampMs;
     let intervalMs;
 
@@ -103,9 +104,18 @@ export class CronCrawlerService {
         console.log('process id:', process.id);
         for (const website of process.websites) {
           console.log('crawling website url:', website.url);
-          // Test
+
           if (website.url === 'https://www.pagineazzurre.net') {
+            // Test
             await this.crawl(website);
+
+            if (isDebug) {
+              // Delete products that no longer exist
+              await this.semProductService.deleteOlderThan(
+                timestampMs,
+                website,
+              );
+            }
           }
         }
 
@@ -341,73 +351,101 @@ export class CronCrawlerService {
 
         let productHtmlElementStructure = null;
         let paginationHtmlElementStructure = null;
+        let paginationHtmlElementData: string = '';
 
         productHtmlElementStructure =
           await this.semHtmlElementStructureService.findOneByWebsiteAndType(
             website,
             HTML_ELEMENT_TYPE_PRODUCT,
           );
-        if (productHtmlElementStructure === null) {
-          for (const updatedHtmlElement of updatedHtmlElements) {
-            if (updatedHtmlElement.selector === 'body') {
-              continue; // No need to parse whole body, only subsections
+
+        paginationHtmlElementStructure =
+          await this.semHtmlElementStructureService.findOneByWebsiteAndType(
+            website,
+            HTML_ELEMENT_TYPE_PAGINATION,
+          );
+
+        // if (productHtmlElementStructure === null) {
+        for (const updatedHtmlElement of updatedHtmlElements) {
+          if (updatedHtmlElement.selector === 'body') {
+            continue; // No need to parse whole body, only subsections
+          }
+
+          if (
+            productHtmlElementStructure !== null &&
+            paginationHtmlElementStructure !== null
+          ) {
+            // Product and pagination structures have already been identified, no need to call serviceOpenaiService.getHtmlElementType
+            if (
+              updatedHtmlElement.selector ===
+              paginationHtmlElementStructure.selector
+            ) {
+              paginationHtmlElementData =
+                await this.serviceOpenaiService.getPaginationData(
+                  updatedHtmlElement.id,
+                  updatedHtmlElement,
+                );
+              break;
             }
 
-            // if (
-            //   isDebug &&
-            //   updatedHtmlElement.selector ===
-            //     'body > div > div.grid-container > main > div > div > div.row.center.cards-container > div.card.card--tile'
-            // ) {
-            //   debugger;
-            // }
+            continue;
+          }
 
-            // console.log('htmlElement.group_id: ', updatedHtmlElement.group_id);
+          // if (
+          //   isDebug &&
+          //   updatedHtmlElement.selector ===
+          //     'body > div > div.grid-container > main > div > div > div.row.center.cards-container > div.card.card--tile'
+          // ) {
+          //   debugger;
+          // }
 
-            const htmlElementType =
-              await this.serviceOpenaiService.getHtmlElementType(
+          // console.log('htmlElement.group_id: ', updatedHtmlElement.group_id);
+
+          const htmlElementType =
+            await this.serviceOpenaiService.getHtmlElementType(
+              updatedHtmlElement.id,
+              updatedHtmlElement,
+            );
+          if (
+            htmlElementType === HTML_ELEMENT_TYPE_PRODUCT &&
+            productHtmlElementStructure === null
+          ) {
+            console.log(
+              'Product htmlElement.group_id: ',
+              updatedHtmlElement.group_id,
+            );
+
+            productHtmlElementStructure =
+              await this.serviceOpenaiService.getProductStructure(
                 updatedHtmlElement.id,
                 updatedHtmlElement,
               );
-            if (
-              htmlElementType === HTML_ELEMENT_TYPE_PRODUCT &&
-              productHtmlElementStructure === null
-            ) {
-              console.log(
-                'Product htmlElement.group_id: ',
-                updatedHtmlElement.group_id,
+          } else if (htmlElementType === HTML_ELEMENT_TYPE_PAGINATION) {
+            console.log(
+              'Pagination htmlElement.group_id: ',
+              updatedHtmlElement.group_id,
+            );
+
+            // if (paginationHtmlElementStructure === null) {
+            paginationHtmlElementData =
+              await this.serviceOpenaiService.getPaginationData(
+                updatedHtmlElement.id,
+                updatedHtmlElement,
               );
+            // }
+          }
 
-              productHtmlElementStructure =
-                await this.serviceOpenaiService.getProductStructure(
-                  updatedHtmlElement.id,
-                  updatedHtmlElement,
-                );
-            } else if (
-              htmlElementType === HTML_ELEMENT_TYPE_PAGINATION &&
-              paginationHtmlElementStructure === null
-            ) {
-              console.log(
-                'Pagination htmlElement.group_id: ',
-                updatedHtmlElement.group_id,
-              );
-
-              paginationHtmlElementStructure =
-                await this.serviceOpenaiService.getPaginationStructure(
-                  updatedHtmlElement.id,
-                  updatedHtmlElement,
-                );
-            }
-
-            if (
-              productHtmlElementStructure !== null &&
-              productHtmlElementStructure !== undefined &&
-              paginationHtmlElementStructure !== null &&
-              paginationHtmlElementStructure !== undefined
-            ) {
-              break;
-            }
+          if (
+            productHtmlElementStructure !== null &&
+            productHtmlElementStructure !== undefined &&
+            // paginationHtmlElementStructure !== null &&
+            // paginationHtmlElementStructure !== undefined &&
+            paginationHtmlElementData !== ''
+          ) {
+            break;
           }
         }
+        // }
 
         const productHtmlElementStructureJSON: ProductHtmlElementStructure =
           JSON.parse(productHtmlElementStructure.json);
@@ -489,6 +527,7 @@ export class CronCrawlerService {
             price_02: null,
             currency_02_id: null,
             category_id: null,
+            timestamp: null,
           };
 
           productStructure.title = extractFromElement(
@@ -573,6 +612,8 @@ export class CronCrawlerService {
             await this.semCategoryService.findOneByName(categoryName);
           productStructure.category_id = category ? category.id : null;
 
+          productStructure.timestamp = Date.now();
+
           let productAlreadyExist: boolean = false;
 
           // Url must be unique
@@ -580,24 +621,35 @@ export class CronCrawlerService {
             productStructure.url,
           );
           if (product) {
-            if (entitiesMatch(product, productStructure, { exclude: ['id'] })) {
+            if (
+              entitiesMatch(product, productStructure, {
+                exclude: ['id', 'timestamp'],
+              })
+            ) {
               // Product already existing in database
               productAlreadyExist = true;
+              this.semProductService.updateProductTimestamp(
+                product,
+                productStructure.timestamp,
+              );
             } else {
               // Delete previous product with same url
               await this.semProductService.delete(product.id);
             }
           }
           if (!productAlreadyExist) {
-            await this.semProductService.createProduct(productStructure);
+            await this.semProductService.createProduct(
+              productStructure,
+              website,
+            );
           }
-          // TODO should delete products that no longer exist
         }
 
+        // TODO Handle case where all pages are not shown in pagination item from start
         pageUrl = null;
-        if (paginationHtmlElementStructure || pages.length > 0) {
+        if (paginationHtmlElementData || pages.length > 0) {
           if (pages.length === 0) {
-            pages = JSON.parse(paginationHtmlElementStructure.json);
+            pages = JSON.parse(paginationHtmlElementData);
           }
 
           if (pages.length > 1) {
