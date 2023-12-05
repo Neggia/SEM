@@ -12,18 +12,19 @@ export class SemProcess {
   @Column()
   server: string;
 
-  // Interval in seconds between two consequtive runs of the process, calculated between both starts
+  // Interval in hours between two consequtive runs of the process, calculated between both starts
   @Column()
   interval: number;
 
   // Timestamp of last start
-  @Column()
-  last_run: number;
+  @Column({ nullable: true })
+  last_start: number;
 
-  @Column()
-  last_duration: number;
+  // Timestamp of last end
+  @Column({ nullable: true })
+  last_end: number;
 
-  // Butmask
+  // Bitmask
   @Column()
   status: number;
 

@@ -8,7 +8,6 @@ import {
 } from 'typeorm';
 import { SemOpenaiCompletions } from './sem_openai_completions.entity';
 
-// TODO rename to SemHtmlElementStructure
 @Entity()
 export class SemHtmlElementStructure {
   @PrimaryGeneratedColumn()

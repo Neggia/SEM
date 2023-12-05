@@ -33,3 +33,7 @@ export function entitiesMatch(entity1, entity2, options = { exclude: [] }) {
 export function removeTrailingSlash(url) {
   return url.replace(/\/$/, '');
 }
+
+export function delay(ms) {
+  return new Promise((resolve) => setTimeout(resolve, ms));
+}

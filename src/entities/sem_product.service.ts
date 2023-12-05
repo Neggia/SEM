@@ -2,6 +2,7 @@ import { Injectable } from '@nestjs/common';
 import { InjectRepository } from '@nestjs/typeorm';
 import { Repository } from 'typeorm';
 import { SemProduct } from '../entities/sem_product.entity';
+import { SemWebsite } from '../entities/sem_website.entity';
 const {
   VIEW_PRODUCT_ITEMS_PER_PAGE,
   VIEW_PRODUCT_SEARCH_TITLES_LIMIT,
@@ -19,6 +20,7 @@ export interface ProductStructure {
   price_02: number;
   currency_02_id: number;
   category_id: number;
+  timestamp: number;
 }
 
 export interface PaginatedResult<T> {
@@ -133,7 +135,10 @@ export class SemProductService {
     }
   }
 
-  async createProduct(productStructure: ProductStructure): Promise<SemProduct> {
+  async createProduct(
+    productStructure: ProductStructure,
+    website: SemWebsite,
+  ): Promise<SemProduct> {
     const thumbnailImageBuffer = await this.downloadImage(
       productStructure.thumbnailUrl,
     );
@@ -148,9 +153,33 @@ export class SemProductService {
       price_02: productStructure.price_02,
       currency_02_id: productStructure.currency_02_id,
       category_id: productStructure.category_id,
+      timestamp: productStructure.timestamp,
+      website: website,
     });
     await this.semProductRepository.save(newProduct);
     return newProduct;
+  }
+
+  async updateProductTimestamp(
+    product: SemProduct,
+    timestamp: number,
+  ): Promise<SemProduct> {
+    product['timestamp'] = timestamp; // Update the field
+    await this.semProductRepository.save(product); // Save the updated process
+
+    return product;
+  }
+
+  async deleteOlderThan(timestamp: number, website: SemWebsite): Promise<void> {
+    const websiteId = website.id;
+
+    await this.semProductRepository
+      .createQueryBuilder()
+      .delete()
+      .from(SemProduct)
+      .where('timestamp < :timestamp', { timestamp })
+      .andWhere('websiteId = :websiteId', { websiteId })
+      .execute();
   }
 
   async softDelete(id: number) {

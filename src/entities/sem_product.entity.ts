@@ -5,7 +5,9 @@ import {
   Unique,
   DeleteDateColumn,
   Index,
+  ManyToOne,
 } from 'typeorm';
+import { SemWebsite } from '../entities/sem_website.entity';
 
 @Entity()
 @Unique(['url'])
@@ -49,8 +51,14 @@ export class SemProduct {
   @Column({ nullable: true })
   category_id: number;
 
+  @Column()
+  timestamp: number;
+
   // Soft delete, use the softRemove or softDelete method. To recover a soft-deleted entity, you can use the recover method.
   // Soft deleted entities are not included in query results. If you want to include them, you can use the withDeleted method.
   @DeleteDateColumn()
   deletedAt: Date;
+
+  @ManyToOne(() => SemWebsite, (website) => website.products)
+  website: SemWebsite;
 }
