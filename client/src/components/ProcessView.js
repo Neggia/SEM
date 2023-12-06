@@ -18,6 +18,7 @@ import {
   SERVER_BASE_URL,
   CONTROLLER_PROCESS_ID,
   CONTROLLER_PROCESS_SYNC,
+  displayFlashMessage,
 } from '../utils/globals';
 // import { DateTime } from 'luxon';
 
@@ -164,7 +165,7 @@ const ProcessView = ({ processData, onProcessDataUpdate }) => {
 
   const addRow = () => {
     const newRow = {
-      id: lastId + 1, // use the state variable here
+      id: lastId + 1,
       name: '',
       server: '',
       interval: 60,
@@ -192,27 +193,7 @@ const ProcessView = ({ processData, onProcessDataUpdate }) => {
     }
   };
 
-  const displayFlashMessage = (message, messageType) => {
-    const flashMessageDiv = document.getElementById('process-flash-message');
-    flashMessageDiv.textContent = message;
-
-    // Clear previous message types
-    flashMessageDiv.classList.remove('success', 'error');
-
-    // Add the appropriate class based on the message type
-    if (messageType === 'success') {
-      flashMessageDiv.classList.add('success');
-    } else if (messageType === 'error') {
-      flashMessageDiv.classList.add('error');
-    }
-
-    flashMessageDiv.style.display = 'block';
-
-    // Hide the message after a delay
-    setTimeout(() => {
-      flashMessageDiv.style.display = 'none';
-    }, 3000);
-  };
+  const flashMessageDivId = 'process-flash-message';
 
   const handleSave = async () => {
     console.log('data: ', data);
@@ -231,7 +212,7 @@ const ProcessView = ({ processData, onProcessDataUpdate }) => {
         // Handle success
         console.log('Success:', response.data);
         // Optionally, display a success message
-        displayFlashMessage('Process data saved', 'success');
+        displayFlashMessage('Process data saved', 'success', flashMessageDivId);
       })
       .catch((error) => {
         // Handle errors
@@ -243,7 +224,7 @@ const ProcessView = ({ processData, onProcessDataUpdate }) => {
         ) {
           errorMessage = error.response.data.message;
         }
-        displayFlashMessage(errorMessage, 'error');
+        displayFlashMessage(errorMessage, 'error', flashMessageDivId);
       });
   };
 
@@ -255,7 +236,7 @@ const ProcessView = ({ processData, onProcessDataUpdate }) => {
         <button onClick={handleSave}>
           <SaveIcon />
         </button>
-        <div id="process-flash-message"></div>
+        <div id={flashMessageDivId}></div>
       </div>
       <ReactTabulator
         // ref={tableRef}

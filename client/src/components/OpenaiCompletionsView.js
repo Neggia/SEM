@@ -281,38 +281,40 @@ const OpenaiCompletionsView = ({
 
   return (
     <div>
-      <button onClick={addRow}>Add new prompt </button>
-      <select
-        // value={currentPid}
-        onChange={(e) => setCurrentOpenaiServiceFunction(e.target.value)}
-      >
-        <option value="" disabled>
-          function
-        </option>
-        {openaiServiceFunctions.map((openaiServiceFunction) => (
-          <option key={openaiServiceFunction} value={openaiServiceFunction}>
-            {openaiServiceFunction}
+      <div class="buttons-and-message-container">
+        <button onClick={addRow}>Add new prompt </button>
+        <select
+          // value={currentPid}
+          onChange={(e) => setCurrentOpenaiServiceFunction(e.target.value)}
+        >
+          <option value="" disabled>
+            function
           </option>
-        ))}
-      </select>
-      for website id
-      <select
-        // value={currentPid}
-        onChange={(e) => setCurrentTask(e.target.value)}
-      >
-        <option value="" disabled>
-          website
-        </option>
-        {tasks.map((task) => (
-          <option key={task.id} value={task}>
-            {task}
+          {openaiServiceFunctions.map((openaiServiceFunction) => (
+            <option key={openaiServiceFunction} value={openaiServiceFunction}>
+              {openaiServiceFunction}
+            </option>
+          ))}
+        </select>
+        for website id
+        <select
+          // value={currentPid}
+          onChange={(e) => setCurrentTask(e.target.value)}
+        >
+          <option value="" disabled>
+            website
           </option>
-        ))}
-      </select>
-      <button onClick={deleteRow}>Delete prompt</button>
-      <button onClick={handleSave}>
-        <SaveIcon />
-      </button>
+          {tasks.map((task) => (
+            <option key={task.id} value={task}>
+              {task}
+            </option>
+          ))}
+        </select>
+        <button onClick={deleteRow}>Delete prompt</button>
+        <button onClick={handleSave}>
+          <SaveIcon />
+        </button>
+      </div>
       <ReactTabulator
         // ref={tableRef}
         onRef={(ref) => (tableRef = ref)}

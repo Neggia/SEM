@@ -37,6 +37,15 @@
   }
 }
 
+.task-manager-header-container {
+  display: flex; /* Use Flexbox */
+  align-items: center; /* Align items vertically */
+}
+
+.task-manager-header-container button {
+  margin-left: auto;
+}
+
 /* Container for the button and the flash message */
 .buttons-and-message-container {
   display: flex; /* Use Flexbox */
@@ -46,12 +55,21 @@
 .buttons-and-message-container button {
   margin-top: 5px;
   margin-bottom: 5px;
-  margin-right: 5px;
+  margin-left: 5px;
 }
 
 /* Flash message styling */
 #process-flash-message {
   display: none;
+  margin-left: 5px;
+  border-radius: 4px;
+  text-align: center;
+  font-size: 0.9em;
+}
+
+#task-flash-message {
+  display: none;
+  margin-left: 5px;
   border-radius: 4px;
   text-align: center;
   font-size: 0.9em;

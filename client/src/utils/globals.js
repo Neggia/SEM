@@ -9,6 +9,9 @@ const CONTROLLER_OPENAI_COMPLETIONS_ID = 'openai-completions';
 const CONTROLLER_PROCESS_ID = 'process';
 const CONTROLLER_PROCESS_SYNC = '/sync';
 
+const CONTROLLER_WEBSITE_ID = 'website';
+const CONTROLLER_WEBSITE_SYNC = '/sync';
+
 const CONTROLLER_PRODUCT_ID = 'product';
 const CONTROLLER_PRODUCT_TITLE = '/title';
 
@@ -47,6 +50,28 @@ function arrayToDataUrl(array, mimeType = 'image/jpeg') {
   // return URL.createObjectURL(blob);
 }
 
+function displayFlashMessage(message, messageType, flashMessageDivId) {
+  const flashMessageDiv = document.getElementById(flashMessageDivId);
+  flashMessageDiv.textContent = message;
+
+  // Clear previous message types
+  flashMessageDiv.classList.remove('success', 'error');
+
+  // Add the appropriate class based on the message type
+  if (messageType === 'success') {
+    flashMessageDiv.classList.add('success');
+  } else if (messageType === 'error') {
+    flashMessageDiv.classList.add('error');
+  }
+
+  flashMessageDiv.style.display = 'block';
+
+  // Hide the message after a delay
+  setTimeout(() => {
+    flashMessageDiv.style.display = 'none';
+  }, 3000);
+}
+
 module.exports = {
   SERVER_BASE_URL,
   CONTROLLER_SERVICE_OPENAI_ID,
@@ -55,6 +80,8 @@ module.exports = {
   CONTROLLER_OPENAI_COMPLETIONS_ID,
   CONTROLLER_PROCESS_ID,
   CONTROLLER_PROCESS_SYNC,
+  CONTROLLER_WEBSITE_ID,
+  CONTROLLER_WEBSITE_SYNC,
   CONTROLLER_PRODUCT_ID,
   CONTROLLER_PRODUCT_TITLE,
   CONTROLLER_CURRENCY_ID,
@@ -62,4 +89,5 @@ module.exports = {
   VIEW_PRODUCT_ITEMS_PER_PAGE,
   VIEW_PRODUCT_SEARCH_TITLES_LIMIT,
   arrayToDataUrl,
+  displayFlashMessage,
 };

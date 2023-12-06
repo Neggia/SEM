@@ -28,7 +28,7 @@ export class SemWebsite {
 
   // Timestamp of last start
   @Column()
-  last_run: number;
+  last_start: number;
 
   @Column()
   last_page: number;

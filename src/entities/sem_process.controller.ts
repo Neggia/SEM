@@ -1,7 +1,5 @@
 import { Controller, Get, Param, Post, Body } from '@nestjs/common';
 import { SemProcessService, SemProcessDto } from './sem_process.service';
-import { SemProcess } from '../entities/sem_process.entity';
-// import { CONTROLLER_PROCESS_ID } from '../../client/src/utils/globals';
 
 const {
   CONTROLLER_PROCESS_ID,

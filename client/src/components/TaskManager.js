@@ -52,6 +52,7 @@ function TaskManager() {
           const formattedLastStart = DateTime.fromMillis(
             obj.last_start,
           ).toFormat('yyyy-MM-dd HH:mm:ss');
+
           return {
             ...obj,
             last_start_datetime: formattedLastStart,
@@ -90,9 +91,14 @@ function TaskManager() {
 
           const updatedWebsites = tasksResponseJson.websites.map(
             (obj, index) => {
+              const formattedLastStart = DateTime.fromMillis(
+                obj.last_start,
+              ).toFormat('yyyy-MM-dd HH:mm:ss');
+
               return {
                 ...obj,
                 pid: process.id,
+                last_start_datetime: formattedLastStart,
                 progress: (obj.last_page / obj.num_pages) * 100,
                 product_structure: '',
               };
@@ -178,12 +184,12 @@ function TaskManager() {
 
   return (
     <div>
-      <h1>Task Manager</h1>
-      {/* Your task manager content goes here */}
-
-      <Button onClick={handleBack} variant="contained" color="primary">
-        Back to Home
-      </Button>
+      <div class="task-manager-header-container">
+        <h1>Task Manager</h1>
+        <Button onClick={handleBack} variant="contained" color="primary">
+          Back to Home
+        </Button>
+      </div>
       {processData && (
         <ProcessView
           processData={processData}
