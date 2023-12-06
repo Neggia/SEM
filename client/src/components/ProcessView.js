@@ -192,32 +192,71 @@ const ProcessView = ({ processData, onProcessDataUpdate }) => {
     }
   };
 
+  const displayFlashMessage = (message, messageType) => {
+    const flashMessageDiv = document.getElementById('process-flash-message');
+    flashMessageDiv.textContent = message;
+
+    // Clear previous message types
+    flashMessageDiv.classList.remove('success', 'error');
+
+    // Add the appropriate class based on the message type
+    if (messageType === 'success') {
+      flashMessageDiv.classList.add('success');
+    } else if (messageType === 'error') {
+      flashMessageDiv.classList.add('error');
+    }
+
+    flashMessageDiv.style.display = 'block';
+
+    // Hide the message after a delay
+    setTimeout(() => {
+      flashMessageDiv.style.display = 'none';
+    }, 3000);
+  };
+
   const handleSave = async () => {
     console.log('data: ', data);
     console.log('deletedIds: ', deletedIds);
 
-    try {
-      const processDto = {
-        saveObjects: data,
-        deleteIds: deletedIds,
-      };
-      const response = await axios.post(
+    const processDto = {
+      saveObjects: data,
+      deleteIds: deletedIds,
+    };
+    const response = await axios
+      .post(
         SERVER_BASE_URL + CONTROLLER_PROCESS_ID + CONTROLLER_PROCESS_SYNC,
         processDto,
-      );
-      console.log(response.data); // Handle the response
-    } catch (error) {
-      console.error('Error sync processes to database:', error.response.data);
-    }
+      )
+      .then((response) => {
+        // Handle success
+        console.log('Success:', response.data);
+        // Optionally, display a success message
+        displayFlashMessage('Process data saved', 'success');
+      })
+      .catch((error) => {
+        // Handle errors
+        let errorMessage = 'An error occurred';
+        if (
+          error.response &&
+          error.response.data &&
+          error.response.data.message
+        ) {
+          errorMessage = error.response.data.message;
+        }
+        displayFlashMessage(errorMessage, 'error');
+      });
   };
 
   return (
     <div>
-      <button onClick={addRow}>Add new process</button>
-      <button onClick={deleteRow}>Delete process</button>
-      <button onClick={handleSave}>
-        <SaveIcon />
-      </button>
+      <div class="buttons-and-message-container">
+        <button onClick={addRow}>Add new process</button>
+        <button onClick={deleteRow}>Delete process</button>
+        <button onClick={handleSave}>
+          <SaveIcon />
+        </button>
+        <div id="process-flash-message"></div>
+      </div>
       <ReactTabulator
         // ref={tableRef}
         onRef={(ref) => (tableRef = ref)}

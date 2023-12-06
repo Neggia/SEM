@@ -46,17 +46,31 @@ export class SemProcessService {
   }
 
   async sync(processDto: SemProcessDto) {
+    let deleteIds = processDto.deleteIds;
+
     if (processDto.saveObjects.length > 0) {
       const saveObjectsPromises = processDto.saveObjects.map((object) => {
+        // Records that are in saveObjects must not be deleted
+        deleteIds = deleteIds.filter((deleteId) => deleteId !== object.id);
+
         return this.semProcessRepository.save(object);
       });
 
       await Promise.all(saveObjectsPromises);
     }
 
-    if (processDto.deleteIds.length > 0) {
-      const deleteIdsPromises = processDto.deleteIds.map((deleteId) => {
-        return this.semProcessRepository.delete(deleteId);
+    if (deleteIds.length > 0) {
+      const deleteIdsPromises = deleteIds.map(async (deleteId) => {
+        // Check if the record exists
+        const process = await this.findOne(deleteId);
+
+        if (process) {
+          // If the record exists, delete it
+          return this.semProcessRepository.delete(deleteId);
+        } else {
+          // If the record does not exist, return null
+          return null;
+        }
       });
 
       await Promise.all(deleteIdsPromises);
