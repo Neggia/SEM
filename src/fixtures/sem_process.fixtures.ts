@@ -7,14 +7,14 @@ export const SemProcessFixtures: Fixture = {
     {
       id: 1,
       name: 'process0',
-      server: 'server0',
+      server: 'localhost',
       interval: 24,
       last_start: 0,
       last_end: 0,
       status: 0,
-      websites: [1, 2],
+      websites: null, //[1, 2],
     },
-    {
+    /*     {
       id: 2,
       name: 'process1',
       server: 'server1',
@@ -23,7 +23,7 @@ export const SemProcessFixtures: Fixture = {
       last_end: 1701726589954,
       status: 0,
       websites: [3],
-    },
+    }, */
   ],
   relations: ['websites'],
 };

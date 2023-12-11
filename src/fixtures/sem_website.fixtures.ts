@@ -38,5 +38,5 @@ export const SemWebsiteFixtures: Fixture = {
       htmlElements: null, //[3],
     }, */
   ],
-  relations: ['process', 'htmlElements'],
+  relations: ['process', 'htmlElements', 'products', 'htmlElementStructures'],
 };

@@ -14,6 +14,7 @@ import {
   faFloppyDisk,
 } from '@fortawesome/free-solid-svg-icons';
 import axios from 'axios';
+import Swal from 'sweetalert2';
 import {
   SERVER_BASE_URL,
   CONTROLLER_WEBSITE_ID,
@@ -34,7 +35,7 @@ const SaveIcon = () => <FontAwesomeIcon icon={faFloppyDisk} />;
 
 const TaskView = ({ processData, taskData }) => {
   const [data, setData] = useState(taskData);
-  const [lastId, setLastId] = useState(data[data.length - 1].id);
+  const [lastId, setLastId] = useState(null); //data[data.length - 1].id);
   const [pids, setPids] = useState(null);
   const [currentPid, setCurrentPid] = useState(null);
   const [deletedIds, setDeletedIds] = useState([]);
@@ -43,7 +44,9 @@ const TaskView = ({ processData, taskData }) => {
   useEffect(() => {
     if (taskData) {
       setData(taskData);
-      setLastId(data[data.length - 1].id);
+      if (data.length > 0) {
+        setLastId(data[data.length - 1].id);
+      }
 
       let pidsArray = [];
       for (const process of processData) {
@@ -138,7 +141,21 @@ const TaskView = ({ processData, taskData }) => {
       width: 90,
       hozAlign: 'center',
     },
-    { title: 'Product Structure', field: 'product_structure', width: 200 },
+    {
+      title: 'Product Structure',
+      field: 'product_structure',
+      editor: 'textarea',
+      width: 500,
+      editorParams: {
+        elementAttributes: {
+          maxlength: '10', //set the maximum character length of the textarea element to 10 characters
+        },
+        mask: 'AAA-999',
+        selectContents: true,
+        verticalNavigation: 'editor', //navigate cursor around text area without leaving the cell
+        shiftEnterSubmit: true, //submit cell value on shift enter
+      },
+    },
   ];
 
   const handleGroupHeaderPlay = () => {
@@ -236,12 +253,18 @@ const TaskView = ({ processData, taskData }) => {
   };
 
   const addRow = () => {
+    const newId = lastId + 1;
+
     const newRow = {
-      id: lastId + 1,
+      id: newId,
       pid: currentPid, // use the state variable here
-      website_name: '',
-      url: '',
-      last_run: null,
+      // processId: currentPid,
+      name: 'website' + newId,
+      url: 'https://www.website' + newId + '.com',
+      last_start: 0,
+      num_pages: 0,
+      last_page: 0,
+      status: 0,
       progress: null,
     };
     setData([...data, newRow]);
@@ -252,11 +275,23 @@ const TaskView = ({ processData, taskData }) => {
     if (tableRef.current) {
       const selectedData = tableRef.current.getSelectedData();
       if (selectedData.length > 0) {
-        const newData = data.filter((row) => row.id !== selectedData[0].id);
-        setData(newData);
-        setLastId(lastId - 1);
-        setDeletedIds([...deletedIds, selectedData[0].id]);
-        // TODO Add alert about deleting all related website elements
+        Swal.fire({
+          title:
+            'All website related records (html elements, structures, products) will be deleted also. Are you sure?',
+          text: "You won't be able to revert this after you save tasks, but you can refresh page instead of saving to undo this action",
+          icon: 'warning',
+          showCancelButton: true,
+          confirmButtonColor: '#3085d6',
+          cancelButtonColor: '#d33',
+          confirmButtonText: 'Yes, delete it!',
+        }).then((result) => {
+          if (result.isConfirmed) {
+            const newData = data.filter((row) => row.id !== selectedData[0].id);
+            setData(newData);
+            setLastId(lastId - 1);
+            setDeletedIds([...deletedIds, selectedData[0].id]);
+          }
+        });
       } else {
         alert('Please select a row to delete');
       }

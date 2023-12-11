@@ -37,3 +37,11 @@ export function removeTrailingSlash(url) {
 export function delay(ms) {
   return new Promise((resolve) => setTimeout(resolve, ms));
 }
+
+export function copyExistingFields(source, target) {
+  Object.keys(target).forEach((key) => {
+    if (source.hasOwnProperty(key)) {
+      target[key] = source[key];
+    }
+  });
+}

@@ -98,8 +98,8 @@ const ProcessView = ({ processData, onProcessDataUpdate }) => {
       editor: 'list',
       editorParams: {
         values: {
-          server1: 'Server 1',
-          server2: 'Server 2',
+          server1: 'localhost',
+          // server2: 'Server 2',
         },
       },
       // headerFilter: 'input',
@@ -164,11 +164,13 @@ const ProcessView = ({ processData, onProcessDataUpdate }) => {
   };
 
   const addRow = () => {
+    const newId = lastId + 1;
+
     const newRow = {
-      id: lastId + 1,
-      name: '',
-      server: '',
-      interval: 60,
+      id: newId,
+      name: 'process' + newId,
+      server: 'localhost',
+      interval: 24,
       last_start: 0,
       last_end: 0,
       progress: 0,

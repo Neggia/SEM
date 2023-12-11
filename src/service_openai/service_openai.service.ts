@@ -184,7 +184,7 @@ export class ServiceOpenaiService {
 
       productJSON =
         await this.semHtmlElementStructureService.createHtmlElementStructure(
-          htmlElement.website.id,
+          htmlElement.website,
           // htmlElement.group_id,
           htmlElement.selector,
           HTML_ELEMENT_TYPE_PRODUCT,
@@ -249,7 +249,7 @@ export class ServiceOpenaiService {
       if (!paginationHtmlElementStructure) {
         paginationHtmlElementStructure =
           await this.semHtmlElementStructureService.createHtmlElementStructure(
-            htmlElement.website.id,
+            htmlElement.website,
             // htmlElement.group_id,
             htmlElement.selector,
             HTML_ELEMENT_TYPE_PAGINATION,
@@ -340,10 +340,16 @@ export class ServiceOpenaiService {
       const bodyHash = hashString(bodyString);
       const semOpenaiCompletionsRequest =
         await this.semOpenaiCompletionsRequestService.findOneBy(
+          bodyHash,
+          completions,
           website,
+        );
+      if (semOpenaiCompletionsRequest === null) {
+        await this.semOpenaiCompletionsRequestService.findOneBy(
           bodyHash,
           completions,
         );
+      }
       if (semOpenaiCompletionsRequest !== null) {
         console.log(
           `OpenaiCompletionsRequest fetched from cache with hash ${bodyHash} for website id ${website.id} and completions id ${completions.id}`,

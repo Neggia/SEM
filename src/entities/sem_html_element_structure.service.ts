@@ -41,12 +41,14 @@ export class SemHtmlElementStructureService {
     // groupId: number,
     selector: string,
   ): Promise<SemHtmlElementStructure> {
-    const websiteId = website.id;
+    // const websiteId = website.id;
+
+    console.log('SemHtmlElementStructureService findOneBy');
 
     return this.semHtmlElementStructure.findOne({
       where: {
         // openai_completions_id: openaiCompletionsId,
-        website_id: websiteId,
+        website: website,
         // group_id: groupId,
         selector: selector,
       },
@@ -57,19 +59,19 @@ export class SemHtmlElementStructureService {
     website: SemWebsite,
     type: number,
   ): Promise<SemHtmlElementStructure> {
-    const websiteId = website.id;
+    // const websiteId = website.id;
 
     return this.semHtmlElementStructure.findOne({
       where: {
         // openai_completions_id: openaiCompletionsId,
-        website_id: websiteId,
+        website: website,
         type: type,
       },
     });
   }
 
   async createHtmlElementStructure(
-    websiteId: number,
+    website: SemWebsite,
     // groupId: number,
     selector: string,
     type: number,
@@ -77,7 +79,7 @@ export class SemHtmlElementStructureService {
     openaiCompletions: SemOpenaiCompletions,
   ): Promise<SemHtmlElementStructure> {
     const newHtmlElementStructure = this.semHtmlElementStructure.create({
-      website_id: websiteId,
+      website: website,
       // group_id: groupId,
       selector: selector,
       json: json,
