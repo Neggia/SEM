@@ -1,11 +1,17 @@
 import { Fixture } from './fixtures.service';
 import { SemOpenaiCompletions } from '../entities/sem_openai_completions.entity';
-import {
+// import {
+//   HTML_ELEMENT_TYPE_UNKNOWN,
+//   HTML_ELEMENT_TYPE_PRODUCT,
+//   HTML_ELEMENT_TYPE_CATEGORY,
+//   HTML_ELEMENT_TYPE_PAGINATION,
+// } from '../utils/globals';
+const {
   HTML_ELEMENT_TYPE_UNKNOWN,
   HTML_ELEMENT_TYPE_PRODUCT,
   HTML_ELEMENT_TYPE_CATEGORY,
   HTML_ELEMENT_TYPE_PAGINATION,
-} from '../utils/globals';
+} = require('../../client/src/utils/globals');
 
 export const SemOpenaiCompletionsFixtures: Fixture = {
   entityType: SemOpenaiCompletions,

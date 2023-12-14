@@ -11,6 +11,8 @@ import {
   CONTROLLER_SERVICE_OPENAI_GET_FUNCTIONS,
   CONTROLLER_PROCESS_ID,
   CONTROLLER_OPENAI_COMPLETIONS_ID,
+  CONTROLLER_HTML_ELEMENT_STRUCTURE_ID,
+  HTML_ELEMENT_TYPE_PRODUCT,
 } from '../utils/globals';
 import { DateTime } from 'luxon';
 
@@ -70,6 +72,25 @@ function TaskManager() {
         );
         setProcessData(processResponseJson);
 
+        const htmlElementStructureResponse = await fetch(
+          SERVER_BASE_URL +
+            CONTROLLER_HTML_ELEMENT_STRUCTURE_ID +
+            '?type=' +
+            HTML_ELEMENT_TYPE_PRODUCT,
+        );
+        if (!htmlElementStructureResponse.ok) {
+          throw new Error(
+            'Network response was not ok ' +
+              htmlElementStructureResponse.statusText,
+          );
+        }
+        let htmlElementStructureResponseJson =
+          await htmlElementStructureResponse.json();
+        console.log(
+          'TaskManager htmlElementStructureResponseJson: ',
+          htmlElementStructureResponseJson,
+        );
+
         // const lastId = data[data.length - 1].id;
         // console.log('ProcessView lastId: ', lastId);
         // setLastId(lastId);
@@ -103,12 +124,22 @@ function TaskManager() {
                 ).toFormat('yyyy-MM-dd HH:mm:ss');
               }
 
+              const htmlElementStructure =
+                htmlElementStructureResponseJson.find(
+                  (record) => record.website && record.website.id === obj.id,
+                );
+              const productStructureJSON = {
+                selector: htmlElementStructure.selector,
+                json: htmlElementStructure.json,
+              };
+              const productStructure = JSON.stringify(productStructureJSON);
+
               return {
                 ...obj,
                 pid: process.id,
                 last_start_datetime: formattedLastStart,
                 progress: (obj.last_page / obj.num_pages) * 100,
-                product_structure: '',
+                product_structure: productStructure,
               };
             },
           );

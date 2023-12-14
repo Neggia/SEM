@@ -209,17 +209,17 @@ const TaskView = ({ processData, taskData }) => {
     { title: 'Message', field: 'message', width: 350 },
   ];
 
-  const handleGroupHeaderPlay = () => {
-    console.log('Play clicked for GroupHeader:');
-  };
+  // const handleGroupHeaderPlay = () => {
+  //   console.log('Play clicked for GroupHeader:');
+  // };
 
-  const handleGroupHeaderPause = () => {
-    console.log('Pause clicked for GroupHeader:');
-  };
+  // const handleGroupHeaderPause = () => {
+  //   console.log('Pause clicked for GroupHeader:');
+  // };
 
-  const handleGroupHeaderStop = () => {
-    console.log('Stop clicked for GroupHeader:');
-  };
+  // const handleGroupHeaderStop = () => {
+  //   console.log('Stop clicked for GroupHeader:');
+  // };
 
   // const renderGroupHeaderButtons = (container) => {
   //   const buttons = (
@@ -359,6 +359,7 @@ const TaskView = ({ processData, taskData }) => {
 
     const websiteDto = {
       saveObjects: data,
+      // productStructures:
       deleteIds: deletedIds,
     };
     const response = await axios

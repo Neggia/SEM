@@ -11,11 +11,17 @@ import { SemHtmlElementStructureService } from '../entities/sem_html_element_str
 import { ClientOptions, OpenAI } from 'openai';
 import {
   hashString,
+  // HTML_ELEMENT_TYPE_UNKNOWN,
+  // HTML_ELEMENT_TYPE_PRODUCT,
+  // HTML_ELEMENT_TYPE_CATEGORY,
+  // HTML_ELEMENT_TYPE_PAGINATION,
+} from '../utils/globals';
+const {
   HTML_ELEMENT_TYPE_UNKNOWN,
   HTML_ELEMENT_TYPE_PRODUCT,
   // HTML_ELEMENT_TYPE_CATEGORY,
   HTML_ELEMENT_TYPE_PAGINATION,
-} from '../utils/globals';
+} = require('../../client/src/utils/globals');
 import { SemWebsite } from 'src/entities/sem_website.entity';
 
 export interface ProductHtmlElementStructure {

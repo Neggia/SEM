@@ -26,8 +26,8 @@ import {
   ProductStructure,
 } from '../entities/sem_product.service';
 import {
-  HTML_ELEMENT_TYPE_PAGINATION,
-  HTML_ELEMENT_TYPE_PRODUCT,
+  // HTML_ELEMENT_TYPE_PAGINATION,
+  // HTML_ELEMENT_TYPE_PRODUCT,
   // HTML_ELEMENT_TYPE_CATEGORY,
   // HTML_ELEMENT_TYPE_PAGINATION,
   entitiesMatch,
@@ -35,14 +35,18 @@ import {
   delay,
 } from '../utils/globals';
 const {
+  // HTML_ELEMENT_TYPE_UNKNOWN,
+  HTML_ELEMENT_TYPE_PRODUCT,
+  // HTML_ELEMENT_TYPE_CATEGORY,
+  HTML_ELEMENT_TYPE_PAGINATION,
   PROCESS_STATUS_RUNNING,
   PROCESS_STATUS_PAUSED,
   PROCESS_STATUS_STOPPED,
-  PROCESS_STATUS_ERROR,
+  // PROCESS_STATUS_ERROR,
   WEBSITE_STATUS_RUNNING,
   WEBSITE_STATUS_PAUSED,
   WEBSITE_STATUS_STOPPED,
-  WEBSITE_STATUS_ERROR,
+  // WEBSITE_STATUS_ERROR,
 } = require('../../client/src/utils/globals');
 
 interface TagStructure {
@@ -88,7 +92,7 @@ export class CronCrawlerService {
         processId = processLazy.id;
 
         // Reload process if it has changed from first findAll
-        const process = await this.semProcessService.findOne(processId);
+        let process = await this.semProcessService.findOne(processId);
         if (
           process.status & PROCESS_STATUS_STOPPED ||
           process.status & PROCESS_STATUS_RUNNING
@@ -112,14 +116,14 @@ export class CronCrawlerService {
           }
         }
 
-        await this.semProcessService.updateProcessField(
+        process = await this.semProcessService.updateProcessField(
           process,
           'status',
           PROCESS_STATUS_RUNNING, // Setting RUNNING bit only
           //process.status | PROCESS_STATUS_RUNNING, // Setting RUNNING bit
         );
 
-        await this.semProcessService.updateProcessField(
+        process = await this.semProcessService.updateProcessField(
           process,
           'last_start',
           timestampMs,
@@ -128,7 +132,7 @@ export class CronCrawlerService {
         console.log('process id:', process.id);
         for (const websiteLazy of process.websites) {
           // Reload website if it has changed from first findAll
-          const website = await this.semWebsiteService.findOne(websiteLazy.id);
+          let website = await this.semWebsiteService.findOne(websiteLazy.id);
 
           console.log('crawling website url:', website.url);
 
@@ -140,14 +144,14 @@ export class CronCrawlerService {
             continue;
           }
 
-          await this.semWebsiteService.updateWebsiteField(
+          website = await this.semWebsiteService.updateWebsiteField(
             website,
             'status',
             WEBSITE_STATUS_RUNNING, // Setting RUNNING bit only
             //website.status | WEBSITE_STATUS_RUNNING, // Setting RUNNING bit
           );
 
-          await this.semWebsiteService.updateWebsiteField(
+          website = await this.semWebsiteService.updateWebsiteField(
             website,
             'message',
             '',
@@ -158,7 +162,7 @@ export class CronCrawlerService {
           // const websiteUpdated = await this.semWebsiteService.findOne(
           //   website.id,
           // );
-          await this.semWebsiteService.updateWebsiteField(
+          website = await this.semWebsiteService.updateWebsiteField(
             website,
             'status',
             WEBSITE_STATUS_PAUSED, // Setting PAUSED bit only
@@ -172,13 +176,13 @@ export class CronCrawlerService {
         }
 
         timestampMs = Date.now();
-        await this.semProcessService.updateProcessField(
+        process = await this.semProcessService.updateProcessField(
           process,
           'last_end',
           timestampMs,
         );
 
-        await this.semProcessService.updateProcessField(
+        process = await this.semProcessService.updateProcessField(
           process,
           'status',
           PROCESS_STATUS_PAUSED, // Setting PAUSED bit only
@@ -693,7 +697,7 @@ export class CronCrawlerService {
           let productAlreadyExist: boolean = false;
 
           // Url must be unique
-          const product = await this.semProductService.findOneByUrl(
+          let product = await this.semProductService.findOneByUrl(
             productStructure.url,
           );
           if (product) {
@@ -704,7 +708,7 @@ export class CronCrawlerService {
             ) {
               // Product already existing in database
               productAlreadyExist = true;
-              this.semProductService.updateProductTimestamp(
+              product = await this.semProductService.updateProductTimestamp(
                 product,
                 productStructure.timestamp,
               );
