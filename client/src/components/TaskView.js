@@ -19,6 +19,12 @@ import {
   SERVER_BASE_URL,
   CONTROLLER_WEBSITE_ID,
   CONTROLLER_WEBSITE_SYNC,
+  WEBSITE_STATUS_RUNNING,
+  WEBSITE_STATUS_PAUSED,
+  WEBSITE_STATUS_STOPPED,
+  WEBSITE_STATUS_ERROR,
+  CLASS_ICON_BUTTON_PRESSED,
+  CLASS_ICON_BUTTON_NOT_PRESSED,
   displayFlashMessage,
 } from '../utils/globals';
 
@@ -61,30 +67,74 @@ const TaskView = ({ processData, taskData }) => {
 
   const buttonFormatter = (cell) => {
     const cellElement = document.createElement('div');
+    const rowData = cell.getRow().getData();
 
-    const handlePlay = () => {
-      console.log('Play clicked for row:', cell.getRow().getData());
-    };
+    // const handlePlay = () => {
+    //   console.log('Play clicked for row:', cell.getRow().getData());
+    // };
 
     const handlePause = () => {
-      console.log('Pause clicked for row:', cell.getRow().getData());
+      console.log('Pause clicked for row:', rowData);
+
+      rowData.status = WEBSITE_STATUS_PAUSED;
+      // Update the state with the modified data
+      setData((prevData) => {
+        return prevData.map((item) =>
+          item.id === rowData.id ? { ...item, ...rowData } : item,
+        );
+      });
     };
 
     const handleStop = () => {
-      console.log('Stop clicked for row:', cell.getRow().getData());
+      console.log('Stop clicked for row:', rowData);
+
+      rowData.last_start = 0;
+      rowData.last_start_datetime = ''; //'1970-01-01 01:00:00';
+      rowData.num_pages = 0;
+      rowData.last_page = 0;
+      rowData.status = WEBSITE_STATUS_STOPPED;
+      rowData.message = '';
+      // Update the state with the modified data
+      setData((prevData) => {
+        return prevData.map((item) =>
+          item.id === rowData.id ? { ...item, ...rowData } : item,
+        );
+      });
     };
 
     const root = createRoot(cellElement); // Create a root.
 
     root.render(
       <>
-        <button onClick={handlePlay}>
+        <button
+          disabled
+          // onClick={handlePlay}
+          className={
+            rowData.status & WEBSITE_STATUS_RUNNING
+              ? CLASS_ICON_BUTTON_PRESSED
+              : CLASS_ICON_BUTTON_NOT_PRESSED
+          }
+        >
           <PlayIcon />
         </button>
-        <button onClick={handlePause}>
+        <button
+          onClick={handlePause}
+          className={
+            rowData.status & WEBSITE_STATUS_PAUSED
+              ? CLASS_ICON_BUTTON_PRESSED
+              : CLASS_ICON_BUTTON_NOT_PRESSED
+          }
+        >
           <PauseIcon />
         </button>
-        <button onClick={handleStop}>
+        <button
+          onClick={handleStop}
+          className={
+            rowData.status & WEBSITE_STATUS_STOPPED
+              ? CLASS_ICON_BUTTON_PRESSED
+              : CLASS_ICON_BUTTON_NOT_PRESSED
+          }
+        >
           <StopIcon />
         </button>
       </>,
@@ -111,16 +161,10 @@ const TaskView = ({ processData, taskData }) => {
       formatter: 'link',
     },
     {
-      title: 'Last start',
-      field: 'last_start_datetime',
-      width: 140,
-      formatter: 'datetime',
-      formatterParams: {
-        // inputFormat: '',
-        outputFormat: 'yyyy/MM/dd HH:mm:ss',
-        invalidPlaceholder: '(invalid date)',
-        timezone: 'Europe/Rome',
-      },
+      title: 'Status',
+      formatter: buttonFormatter,
+      width: 90,
+      hozAlign: 'center',
     },
     {
       title: 'Progress',
@@ -136,16 +180,22 @@ const TaskView = ({ processData, taskData }) => {
       },
     },
     {
-      title: 'Actions',
-      formatter: buttonFormatter,
-      width: 90,
-      hozAlign: 'center',
+      title: 'Last start',
+      field: 'last_start_datetime',
+      width: 140,
+      formatter: 'datetime',
+      formatterParams: {
+        // inputFormat: '',
+        outputFormat: 'yyyy/MM/dd HH:mm:ss',
+        invalidPlaceholder: '(invalid date)',
+        timezone: 'Europe/Rome',
+      },
     },
     {
       title: 'Product Structure',
       field: 'product_structure',
       editor: 'textarea',
-      width: 500,
+      width: 350,
       editorParams: {
         elementAttributes: {
           maxlength: '10', //set the maximum character length of the textarea element to 10 characters
@@ -156,6 +206,7 @@ const TaskView = ({ processData, taskData }) => {
         shiftEnterSubmit: true, //submit cell value on shift enter
       },
     },
+    { title: 'Message', field: 'message', width: 350 },
   ];
 
   const handleGroupHeaderPlay = () => {
@@ -262,10 +313,12 @@ const TaskView = ({ processData, taskData }) => {
       name: 'website' + newId,
       url: 'https://www.website' + newId + '.com',
       last_start: 0,
+      last_start_datetime: '', //'1970-01-01 01:00:00';
       num_pages: 0,
       last_page: 0,
-      status: 0,
+      status: WEBSITE_STATUS_STOPPED,
       progress: null,
+      message: '',
     };
     setData([...data, newRow]);
     setLastId(lastId + 1);

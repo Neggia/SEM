@@ -2,14 +2,21 @@ import { Injectable } from '@nestjs/common';
 import { InjectRepository } from '@nestjs/typeorm';
 import { Repository } from 'typeorm';
 import { SemProcess } from '../entities/sem_process.entity';
+const {
+  PROCESS_STATUS_RUNNING,
+  PROCESS_STATUS_PAUSED,
+  PROCESS_STATUS_STOPPED,
+  PROCESS_STATUS_ERROR,
+} = require('../../client/src/utils/globals');
 
-export class SemProcessStatus {
-  static readonly RUNNING = 1; // 2^0, binary 0001
-  static readonly PAUSED = 2; // 2^1, binary 0010
-  static readonly ERROR = 4; // 2^2, binary 0100
+/* export class SemProcessStatus {
+  static readonly RUNNING = PROCESS_STATUS_RUNNING; // 2^0, binary 0001
+  static readonly PAUSED = PROCESS_STATUS_PAUSED; // 2^1, binary 0010
+  static readonly STOPPED = PROCESS_STATUS_STOPPED; // 2^2, binary 0100
+  static readonly ERROR = PROCESS_STATUS_ERROR; // 2^3, binary 1000
   // static readonly STATUS_BIT_4 = 8; // 2^3, binary 1000
   // Add more as needed
-}
+} */
 
 export class SemProcessDto {
   saveObjects: SemProcess[]; // Obejects to create or update with save

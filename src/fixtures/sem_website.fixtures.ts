@@ -13,6 +13,7 @@ export const SemWebsiteFixtures: Fixture = {
       last_page: 4,
       num_pages: 10,
       status: 0,
+      meessage: '',
       htmlElements: null, //[0, 1],
     },
     {
@@ -24,6 +25,7 @@ export const SemWebsiteFixtures: Fixture = {
       last_page: 8,
       num_pages: 10,
       status: 0,
+      meessage: '',
       htmlElements: null, //[2],
     },
     /*     {
@@ -35,6 +37,7 @@ export const SemWebsiteFixtures: Fixture = {
       last_page: 0,
       num_pages: 10,
       status: 0,
+      meessage: '',
       htmlElements: null, //[3],
     }, */
   ],

@@ -18,6 +18,12 @@ import {
   SERVER_BASE_URL,
   CONTROLLER_PROCESS_ID,
   CONTROLLER_PROCESS_SYNC,
+  PROCESS_STATUS_RUNNING,
+  PROCESS_STATUS_PAUSED,
+  PROCESS_STATUS_STOPPED,
+  PROCESS_STATUS_ERROR,
+  CLASS_ICON_BUTTON_PRESSED,
+  CLASS_ICON_BUTTON_NOT_PRESSED,
   displayFlashMessage,
 } from '../utils/globals';
 // import { DateTime } from 'luxon';
@@ -49,30 +55,91 @@ const ProcessView = ({ processData, onProcessDataUpdate }) => {
 
   const buttonFormatter = (cell) => {
     const cellElement = document.createElement('div');
+    const rowData = cell.getRow().getData();
 
-    const handlePlay = () => {
-      console.log('Play clicked for row:', cell.getRow().getData());
-    };
+    // const handlePlay = () => {
+    //   console.log('Play clicked for row:', cell.getRow().getData());
+    //   rowData.status = PROCESS_STATUS_RUNNING;
+    //   // Update the state with the modified data
+    //   setData((prevData) => {
+    //     return prevData.map((item) =>
+    //       item.id === rowData.id ? { ...item, ...rowData } : item,
+    //     );
+    //   });
+    // };
 
     const handlePause = () => {
-      console.log('Pause clicked for row:', cell.getRow().getData());
+      console.log('Pause clicked for row:', rowData);
+
+      rowData.status = PROCESS_STATUS_PAUSED;
+      // Update the state with the modified data
+      setData((prevData) => {
+        return prevData.map((item) =>
+          item.id === rowData.id ? { ...item, ...rowData } : item,
+        );
+      });
     };
 
     const handleStop = () => {
-      console.log('Stop clicked for row:', cell.getRow().getData());
+      // const rowData = cell.getRow().getData();
+      console.log('Stop clicked for row:', rowData);
+
+      // rowData.interval = 0;
+      rowData.duration = ''; //'00:00:00:000';
+      rowData.last_end = 0;
+      rowData.last_start = 0;
+      rowData.last_start_datetime = ''; //'1970-01-01 01:00:00';
+      rowData.status = PROCESS_STATUS_STOPPED;
+      rowData.message = '';
+      // Update the state with the modified data
+      setData((prevData) => {
+        return prevData.map((item) =>
+          item.id === rowData.id ? { ...item, ...rowData } : item,
+        );
+      });
+      // console.log('data: ', data);
+      // cell.getRow().update();
+      // setData(data);
+
+      // Refresh the table
+      // if (tableRef.current) {
+      //   tableRef.current.table.redraw(true);
+      // }
     };
 
     const root = createRoot(cellElement); // Create a root.
 
     root.render(
       <>
-        <button onClick={handlePlay}>
+        <button
+          disabled
+          // onClick={handlePlay}
+          className={
+            rowData.status & PROCESS_STATUS_RUNNING
+              ? CLASS_ICON_BUTTON_PRESSED
+              : CLASS_ICON_BUTTON_NOT_PRESSED
+          }
+        >
           <PlayIcon />
         </button>
-        <button onClick={handlePause}>
+        <button
+          onClick={handlePause}
+          className={
+            rowData.status & PROCESS_STATUS_PAUSED
+              ? CLASS_ICON_BUTTON_PRESSED
+              : CLASS_ICON_BUTTON_NOT_PRESSED
+          }
+        >
           <PauseIcon />
         </button>
-        <button onClick={handleStop}>
+        <button
+          onClick={handleStop}
+          className={
+            rowData.status & PROCESS_STATUS_STOPPED
+              ? CLASS_ICON_BUTTON_PRESSED
+              : CLASS_ICON_BUTTON_NOT_PRESSED
+          }
+        >
           <StopIcon />
         </button>
       </>,
@@ -98,7 +165,7 @@ const ProcessView = ({ processData, onProcessDataUpdate }) => {
       editor: 'list',
       editorParams: {
         values: {
-          server1: 'localhost',
+          localhost: 'server 1',
           // server2: 'Server 2',
         },
       },
@@ -123,18 +190,11 @@ const ProcessView = ({ processData, onProcessDataUpdate }) => {
       // headerFilter: 'input',
     },
     {
-      title: 'Last start',
-      field: 'last_start_datetime',
-      width: 140,
-      formatter: 'datetime',
-      formatterParams: {
-        // inputFormat: '',
-        outputFormat: 'yyyy/MM/dd HH:mm:ss',
-        invalidPlaceholder: '(invalid date)',
-        timezone: 'Europe/Rome',
-      },
+      title: 'Status',
+      formatter: buttonFormatter,
+      width: 90,
+      hozAlign: 'center',
     },
-    { title: 'Duration', field: 'duration', width: 110 },
     {
       title: 'Progress',
       field: 'progress',
@@ -149,11 +209,19 @@ const ProcessView = ({ processData, onProcessDataUpdate }) => {
       },
     },
     {
-      title: 'Actions',
-      formatter: buttonFormatter,
-      width: 90,
-      hozAlign: 'center',
+      title: 'Last start',
+      field: 'last_start_datetime',
+      width: 140,
+      formatter: 'datetime',
+      formatterParams: {
+        // inputFormat: '',
+        outputFormat: 'yyyy/MM/dd HH:mm:ss',
+        invalidPlaceholder: '(invalid date)',
+        timezone: 'Europe/Rome',
+      },
     },
+    { title: 'Duration', field: 'duration', width: 110 },
+    { title: 'Message', field: 'message', width: 350 },
   ];
 
   const options = {
@@ -174,6 +242,8 @@ const ProcessView = ({ processData, onProcessDataUpdate }) => {
       last_start: 0,
       last_end: 0,
       progress: 0,
+      status: PROCESS_STATUS_STOPPED,
+      message: '',
     };
     setData([...data, newRow]);
     onProcessDataUpdate([...data, newRow]);

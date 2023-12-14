@@ -86,3 +86,9 @@
   color: #721c24;
   border: 1px solid #f5c6cb;
 }
+
+/* Style for the pressed state */
+.icon-button-pressed {
+  border-style: inset;
+  background-color: lightgrey; /* Slight background color */
+}

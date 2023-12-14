@@ -41,6 +41,9 @@ export class SemWebsite {
   @Column()
   status: number;
 
+  @Column({ nullable: true })
+  message: string;
+
   // @Column()
   // openai_completions_id: number;
 

@@ -46,12 +46,16 @@ function TaskManager() {
           // Calculate the difference
           const duration = lastEndDateTime.diff(lastStartDateTime);
 
-          // Convert the difference to a Duration and format it
-          const formattedDuration = duration.toFormat('hh:mm:ss:SSS');
+          let formattedDuration = '';
+          let formattedLastStart = '';
+          if (obj.last_start > 0) {
+            // Convert the difference to a Duration and format it
+            formattedDuration = duration.toFormat('hh:mm:ss:SSS');
 
-          const formattedLastStart = DateTime.fromMillis(
-            obj.last_start,
-          ).toFormat('yyyy-MM-dd HH:mm:ss');
+            formattedLastStart = DateTime.fromMillis(obj.last_start).toFormat(
+              'yyyy-MM-dd HH:mm:ss',
+            );
+          }
 
           return {
             ...obj,
@@ -59,6 +63,7 @@ function TaskManager() {
             duration: formattedDuration,
           };
         });
+
         console.log(
           'TaskManager processDataResponseJson: ',
           processResponseJson,
@@ -91,9 +96,12 @@ function TaskManager() {
 
           const updatedWebsites = tasksResponseJson.websites.map(
             (obj, index) => {
-              const formattedLastStart = DateTime.fromMillis(
-                obj.last_start,
-              ).toFormat('yyyy-MM-dd HH:mm:ss');
+              let formattedLastStart = '';
+              if (obj.last_start > 0) {
+                formattedLastStart = DateTime.fromMillis(
+                  obj.last_start,
+                ).toFormat('yyyy-MM-dd HH:mm:ss');
+              }
 
               return {
                 ...obj,

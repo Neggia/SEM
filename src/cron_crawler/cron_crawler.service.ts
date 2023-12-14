@@ -11,7 +11,7 @@ import { SemCurrencyService } from '../entities/sem_currency.service';
 import { SemCategoryService } from '../entities/sem_category.service';
 import {
   SemProcessService,
-  SemProcessStatus,
+  // SemProcessStatus,
 } from '../entities/sem_process.service';
 import { SemWebsite } from '../entities/sem_website.entity';
 import { SemHtmlElementService } from '../entities/sem_html_element.service';
@@ -34,6 +34,16 @@ import {
   removeTrailingSlash,
   delay,
 } from '../utils/globals';
+const {
+  PROCESS_STATUS_RUNNING,
+  PROCESS_STATUS_PAUSED,
+  PROCESS_STATUS_STOPPED,
+  PROCESS_STATUS_ERROR,
+  WEBSITE_STATUS_RUNNING,
+  WEBSITE_STATUS_PAUSED,
+  WEBSITE_STATUS_STOPPED,
+  WEBSITE_STATUS_ERROR,
+} = require('../../client/src/utils/globals');
 
 interface TagStructure {
   tag: string;
@@ -65,15 +75,28 @@ export class CronCrawlerService {
 
   @Cron(CronExpression.EVERY_HOUR) // Runs every hour
   async handleCron() {
-    const isDebug = process.env.NODE_DEBUG === 'true';
+    // const isDebug = process.env.NODE_DEBUG === 'true';
     let timestampMs;
     let intervalMs;
+    let processId;
 
     this.logger.debug('Starting crawler job');
     try {
       const processArray = await this.semProcessService.findAll();
 
-      for (const process of processArray) {
+      for (const processLazy of processArray) {
+        processId = processLazy.id;
+
+        // Reload process if it has changed from first findAll
+        const process = await this.semProcessService.findOne(processId);
+        if (
+          process.status & PROCESS_STATUS_STOPPED ||
+          process.status & PROCESS_STATUS_RUNNING
+        ) {
+          // Skip if it has been stopped or is already running
+          continue;
+        }
+
         intervalMs = process.interval * 60 * 60 * 1000;
 
         timestampMs = Date.now();
@@ -92,7 +115,8 @@ export class CronCrawlerService {
         await this.semProcessService.updateProcessField(
           process,
           'status',
-          process.status | SemProcessStatus.RUNNING, // Setting RUNNING bit
+          PROCESS_STATUS_RUNNING, // Setting RUNNING bit only
+          //process.status | PROCESS_STATUS_RUNNING, // Setting RUNNING bit
         );
 
         await this.semProcessService.updateProcessField(
@@ -102,21 +126,49 @@ export class CronCrawlerService {
         );
 
         console.log('process id:', process.id);
-        for (const website of process.websites) {
+        for (const websiteLazy of process.websites) {
+          // Reload website if it has changed from first findAll
+          const website = await this.semWebsiteService.findOne(websiteLazy.id);
+
           console.log('crawling website url:', website.url);
 
-          if (website.url === 'https://www.pagineazzurre.net') {
-            // Test
-            await this.crawl(website);
-
-            if (isDebug) {
-              // Delete products that no longer exist
-              await this.semProductService.deleteOlderThan(
-                timestampMs,
-                website,
-              );
-            }
+          if (
+            website.status & WEBSITE_STATUS_STOPPED ||
+            website.status & WEBSITE_STATUS_RUNNING
+          ) {
+            // Skip if it has been stopped or is already running
+            continue;
           }
+
+          await this.semWebsiteService.updateWebsiteField(
+            website,
+            'status',
+            WEBSITE_STATUS_RUNNING, // Setting RUNNING bit only
+            //website.status | WEBSITE_STATUS_RUNNING, // Setting RUNNING bit
+          );
+
+          await this.semWebsiteService.updateWebsiteField(
+            website,
+            'message',
+            '',
+          );
+
+          await this.crawl(website);
+
+          // const websiteUpdated = await this.semWebsiteService.findOne(
+          //   website.id,
+          // );
+          await this.semWebsiteService.updateWebsiteField(
+            website,
+            'status',
+            WEBSITE_STATUS_PAUSED, // Setting PAUSED bit only
+            //website.status | WEBSITE_STATUS_PAUSED, // Setting PAUSED bit
+          );
+
+          // if (isDebug) {
+          // Delete products that no longer exist
+          await this.semProductService.deleteOlderThan(timestampMs, website);
+          // }
         }
 
         timestampMs = Date.now();
@@ -129,13 +181,21 @@ export class CronCrawlerService {
         await this.semProcessService.updateProcessField(
           process,
           'status',
-          process.status & ~SemProcessStatus.RUNNING, // Clearing RUNNING bit
+          PROCESS_STATUS_PAUSED, // Setting PAUSED bit only
+          //process.status & ~PROCESS_STATUS_RUNNING, // Clearing RUNNING bit
         );
       }
 
       this.logger.debug('Crawler job completed successfully');
     } catch (error) {
       this.logger.error('Error running crawler job', error.stack);
+
+      const process = await this.semProcessService.findOne(processId);
+      await this.semProcessService.updateProcessField(
+        process,
+        'message',
+        error.stack,
+      );
     }
   }
 
@@ -156,17 +216,17 @@ export class CronCrawlerService {
     return this.robotsAgent.getCrawlDelay();
   }
 
-  async crawl(website: SemWebsite) {
-    const isDebug = process.env.NODE_DEBUG === 'true';
+  async crawl(websiteLazy: SemWebsite) {
+    // const isDebug = process.env.NODE_DEBUG === 'true';
     // const isDebug = process.execArgv.some(
     //   (arg) => arg.includes('--inspect') || arg.includes('--debug'),
     // );
-    console.log('isDebug: ', isDebug);
-    if (!isDebug) {
-      return;
-    }
+    // console.log('isDebug: ', isDebug);
+    // if (!isDebug) {
+    //   return;
+    // }
 
-    const url = removeTrailingSlash(website.url);
+    const url = removeTrailingSlash(websiteLazy.url);
 
     const canCrawl = await this.shouldCrawl(url);
     if (!canCrawl) {
@@ -178,9 +238,22 @@ export class CronCrawlerService {
     let pageUrl = url;
     let currentPage = 1;
     let pages = [];
+    let websiteId;
+
     const browser = await puppeteer.launch();
     try {
       while (pageUrl) {
+        websiteId = websiteLazy.id;
+
+        const website = await this.semWebsiteService.findOne(websiteId);
+        if (
+          website.status & WEBSITE_STATUS_STOPPED ||
+          website.status & WEBSITE_STATUS_PAUSED
+        ) {
+          // Stop crawling if website processing has been stopped or paused
+          break;
+        }
+
         // Deal with pagination
         const page = await browser.newPage();
         await page.goto(pageUrl, { waitUntil: 'networkidle0' });
@@ -344,7 +417,10 @@ export class CronCrawlerService {
         // }
 
         // htmlElements sorted by group_id in descending order, from innermost to outermost
-        const updatedWebsite = await this.semWebsiteService.findOne(website.id);
+        const updatedWebsite = await this.semWebsiteService.findOne(
+          website.id,
+          ['process', 'htmlElements'],
+        );
         const updatedHtmlElements = updatedWebsite.htmlElements.sort(
           (a, b) => b.group_id - a.group_id,
         );
@@ -674,6 +750,19 @@ export class CronCrawlerService {
       // });
     } catch (error) {
       console.error(`Failed to crawl: ${url}`, error);
+
+      // Update the existing websiteLazy object instead of reassigning it
+      const website = await this.semWebsiteService.findOne(websiteId);
+      if (website) {
+        Object.assign(websiteLazy, website);
+      }
+
+      const message: string = error.message;
+      await this.semWebsiteService.updateWebsiteField(
+        websiteLazy,
+        'message',
+        message,
+      );
     } finally {
       await browser.close();
     }

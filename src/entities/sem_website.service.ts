@@ -44,16 +44,31 @@ export class SemWebsiteService {
     });
   }
 
-  async findOne(id: number): Promise<SemWebsite> {
-    return this.semWebsiteRepository.findOne({
-      where: { id },
-      relations: [
+  async findOne(id: number, relations: string[] = []): Promise<SemWebsite> {
+    if (relations.length === 0) {
+      relations = [
         'process',
         // 'htmlElements',
         // 'products',
         // 'htmlElementStructures',
-      ],
+      ];
+    }
+
+    return this.semWebsiteRepository.findOne({
+      where: { id },
+      relations: relations,
     });
+  }
+
+  async updateWebsiteField(
+    website: SemWebsite,
+    fieldName: string,
+    newValue: any,
+  ): Promise<SemWebsite> {
+    website[fieldName] = newValue; // Update the field
+    await this.semWebsiteRepository.save(website); // Save the updated process
+
+    return website;
   }
 
   async sync(websiteDto: SemWebsiteDto) {
