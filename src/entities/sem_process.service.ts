@@ -42,10 +42,13 @@ export class SemProcessService {
   }
 
   async updateProcessField(
-    process: SemProcess,
+    // process: SemProcess,
+    processId: number,
     fieldName: string,
     newValue: any,
   ): Promise<SemProcess> {
+    const process = await this.findOne(processId);
+
     process[fieldName] = newValue; // Update the field
     await this.semProcessRepository.save(process); // Save the updated process
 

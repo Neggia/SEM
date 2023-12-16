@@ -1,12 +1,12 @@
 import { Controller, Get, Param, Post, Body, Query } from '@nestjs/common';
 import {
   SemHtmlElementStructureService,
-  SemHtmlElementStructureDto,
+  // SemHtmlElementStructureDto,
 } from './sem_html_element_structure.service';
 
 const {
   CONTROLLER_HTML_ELEMENT_STRUCTURE_ID,
-  CONTROLLER_HTML_ELEMENT_STRUCTURE_SYNC,
+  // CONTROLLER_HTML_ELEMENT_STRUCTURE_SYNC,
 } = require('../../client/src/utils/globals');
 
 @Controller(CONTROLLER_HTML_ELEMENT_STRUCTURE_ID)
@@ -25,10 +25,10 @@ export class SemHtmlElementStructureController {
     return this.semHtmlElementStructureService.findOne(+id);
   }
 
-  @Post(CONTROLLER_HTML_ELEMENT_STRUCTURE_SYNC)
-  async sync(@Body() htmlElementStructureDto: SemHtmlElementStructureDto) {
-    return this.semHtmlElementStructureService.sync(htmlElementStructureDto);
-  }
+  // @Post(CONTROLLER_HTML_ELEMENT_STRUCTURE_SYNC)
+  // async sync(@Body() htmlElementStructureDto: SemHtmlElementStructureDto) {
+  //   return this.semHtmlElementStructureService.sync(htmlElementStructureDto);
+  // }
 
   // Add other endpoints as needed
 }

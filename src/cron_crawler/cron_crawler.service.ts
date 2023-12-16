@@ -117,14 +117,14 @@ export class CronCrawlerService {
         }
 
         process = await this.semProcessService.updateProcessField(
-          process,
+          process.id,
           'status',
           PROCESS_STATUS_RUNNING, // Setting RUNNING bit only
           //process.status | PROCESS_STATUS_RUNNING, // Setting RUNNING bit
         );
 
         process = await this.semProcessService.updateProcessField(
-          process,
+          process.id,
           'last_start',
           timestampMs,
         );
@@ -145,14 +145,14 @@ export class CronCrawlerService {
           }
 
           website = await this.semWebsiteService.updateWebsiteField(
-            website,
+            website.id,
             'status',
             WEBSITE_STATUS_RUNNING, // Setting RUNNING bit only
             //website.status | WEBSITE_STATUS_RUNNING, // Setting RUNNING bit
           );
 
           website = await this.semWebsiteService.updateWebsiteField(
-            website,
+            website.id,
             'message',
             '',
           );
@@ -163,7 +163,7 @@ export class CronCrawlerService {
           //   website.id,
           // );
           website = await this.semWebsiteService.updateWebsiteField(
-            website,
+            website.id,
             'status',
             WEBSITE_STATUS_PAUSED, // Setting PAUSED bit only
             //website.status | WEBSITE_STATUS_PAUSED, // Setting PAUSED bit
@@ -177,13 +177,13 @@ export class CronCrawlerService {
 
         timestampMs = Date.now();
         process = await this.semProcessService.updateProcessField(
-          process,
+          process.id,
           'last_end',
           timestampMs,
         );
 
         process = await this.semProcessService.updateProcessField(
-          process,
+          process.id,
           'status',
           PROCESS_STATUS_PAUSED, // Setting PAUSED bit only
           //process.status & ~PROCESS_STATUS_RUNNING, // Clearing RUNNING bit
@@ -196,7 +196,7 @@ export class CronCrawlerService {
 
       const process = await this.semProcessService.findOne(processId);
       await this.semProcessService.updateProcessField(
-        process,
+        process.id,
         'message',
         error.stack,
       );
@@ -762,8 +762,8 @@ export class CronCrawlerService {
       }
 
       const message: string = error.message;
-      await this.semWebsiteService.updateWebsiteField(
-        websiteLazy,
+      websiteLazy = await this.semWebsiteService.updateWebsiteField(
+        websiteLazy.id,
         'message',
         message,
       );

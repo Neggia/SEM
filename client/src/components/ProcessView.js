@@ -271,6 +271,13 @@ const ProcessView = ({ processData, onProcessDataUpdate }) => {
     console.log('data: ', data);
     console.log('deletedIds: ', deletedIds);
 
+    const dataUpdated = data.map((object) => {
+      object.message = '';
+      return object;
+    });
+    console.log('dataUpdated: ', dataUpdated);
+    setData(dataUpdated);
+
     const processDto = {
       saveObjects: data,
       deleteIds: deletedIds,

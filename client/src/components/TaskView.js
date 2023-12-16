@@ -39,8 +39,14 @@ const PauseIcon = () => <FontAwesomeIcon icon={faPause} />;
 const StopIcon = () => <FontAwesomeIcon icon={faStop} />;
 const SaveIcon = () => <FontAwesomeIcon icon={faFloppyDisk} />;
 
-const TaskView = ({ processData, taskData }) => {
+const TaskView = ({
+  processData,
+  taskData,
+  //productStructureData
+}) => {
   const [data, setData] = useState(taskData);
+  // const [productStructures, setProductStructures] =
+  //   useState(productStructureData);
   const [lastId, setLastId] = useState(null); //data[data.length - 1].id);
   const [pids, setPids] = useState(null);
   const [currentPid, setCurrentPid] = useState(null);
@@ -53,6 +59,7 @@ const TaskView = ({ processData, taskData }) => {
       if (data.length > 0) {
         setLastId(data[data.length - 1].id);
       }
+      // setProductStructures(productStructureData);
 
       let pidsArray = [];
       for (const process of processData) {
@@ -198,9 +205,9 @@ const TaskView = ({ processData, taskData }) => {
       width: 350,
       editorParams: {
         elementAttributes: {
-          maxlength: '10', //set the maximum character length of the textarea element to 10 characters
+          maxlength: '10000', //set the maximum character length of the textarea element
         },
-        mask: 'AAA-999',
+        // mask: 'AAA-999',
         selectContents: true,
         verticalNavigation: 'editor', //navigate cursor around text area without leaving the cell
         shiftEnterSubmit: true, //submit cell value on shift enter
@@ -357,9 +364,16 @@ const TaskView = ({ processData, taskData }) => {
     console.log('data: ', data);
     console.log('deletedIds: ', deletedIds);
 
+    const dataUpdated = data.map((object) => {
+      object.message = '';
+      return object;
+    });
+    console.log('dataUpdated: ', dataUpdated);
+    setData(dataUpdated);
+
     const websiteDto = {
       saveObjects: data,
-      // productStructures:
+      // productStructures: productStructures,
       deleteIds: deletedIds,
     };
     const response = await axios

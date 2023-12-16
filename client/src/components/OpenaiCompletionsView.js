@@ -122,9 +122,9 @@ const OpenaiCompletionsView = ({
       width: 500,
       editorParams: {
         elementAttributes: {
-          maxlength: '10', //set the maximum character length of the textarea element to 10 characters
+          maxlength: '10000', //set the maximum character length of the textarea element
         },
-        mask: 'AAA-999',
+        // mask: 'AAA-999',
         selectContents: true,
         verticalNavigation: 'editor', //navigate cursor around text area without leaving the cell
         shiftEnterSubmit: true, //submit cell value on shift enter

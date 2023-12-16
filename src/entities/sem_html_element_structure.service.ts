@@ -1,33 +1,35 @@
-import { Injectable } from '@nestjs/common';
+import { Injectable, Inject, forwardRef } from '@nestjs/common';
 import { InjectRepository } from '@nestjs/typeorm';
 import { Repository } from 'typeorm';
 import { SemHtmlElementStructure } from './sem_html_element_structure.entity';
 import { SemOpenaiCompletions } from './sem_openai_completions.entity';
+import { SemOpenaiCompletionsService } from './sem_openai_completions.service';
 import { SemWebsite } from './sem_website.entity';
+import { SemWebsiteService } from './sem_website.service';
 
 // Should match client\src\components\TaskView.js const addRow = () => {...
-class HtmlElementStructureSaveObjectDto {
-  id: number;
-  // pid: number;
-  // name: string;
-  // url: string;
-  // last_start: number;
-  // num_pages: number;
-  // last_page: number;
-  // status: number;
-  // progress: null;
-}
+// class HtmlElementStructureSaveObjectDto {
+//   id: number;
+//   selector: string;
+//   type: number;
+//   json: string;
+//   openai_completions_id: number;
+//   website_id: number;
+// }
 
-export class SemHtmlElementStructureDto {
-  saveObjects: HtmlElementStructureSaveObjectDto[];
-  // deleteIds: number[]; // Obejcts to delete from ids
-}
+// export class SemHtmlElementStructureDto {
+//   saveObjects: HtmlElementStructureSaveObjectDto[];
+//   // deleteIds: number[]; // Obejcts to delete from ids
+// }
 
 @Injectable()
 export class SemHtmlElementStructureService {
   constructor(
     @InjectRepository(SemHtmlElementStructure)
     private readonly semHtmlElementStructureRepository: Repository<SemHtmlElementStructure>,
+    @Inject(forwardRef(() => SemWebsiteService))
+    private readonly semWebsiteService: SemWebsiteService,
+    private readonly semOpenaiCompletionsService: SemOpenaiCompletionsService,
   ) {}
 
   findAll(type: number): Promise<SemHtmlElementStructure[]> {
@@ -112,7 +114,35 @@ export class SemHtmlElementStructureService {
     return newHtmlElementStructure;
   }
 
-  async sync(htmlElementStructureDto: SemHtmlElementStructureDto) {
+  async saveFromJSON(json: string) {
+    try {
+      const data = JSON.parse(json);
+      console.log('saveFromJSON data: ', data);
+      // console.log('saveFromJSON data.id: ', data.id);
+
+      const htmlElementStructure =
+        await this.semHtmlElementStructureRepository.findOne({
+          where: { id: data.id },
+        });
+      if (
+        htmlElementStructure.selector !== data.selector ||
+        htmlElementStructure.json !== data.json
+      ) {
+        htmlElementStructure.selector = data.selector;
+        htmlElementStructure.json = data.json;
+        console.log(
+          'saveFromJSON htmlElementStructure: ',
+          htmlElementStructure,
+        );
+        await this.semHtmlElementStructureRepository.save(htmlElementStructure);
+      }
+    } catch (error) {
+      console.error(`Failed to saveFromJSON: ${json}`, error);
+      throw new Error(error);
+    }
+  }
+
+  /*   async sync(htmlElementStructureDto: SemHtmlElementStructureDto) {
     // let deleteIds = websiteDto.deleteIds;
 
     // Handling saveObjects
@@ -126,12 +156,25 @@ export class SemHtmlElementStructureService {
         let htmlElementStructure = new SemHtmlElementStructure();
         htmlElementStructure = { ...htmlElementStructure, ...object };
 
-        // Set the process relation using the process ID (pid)
-        // if (object.pid) {
-        //   website.process = await this.semProcessService.findOne(object.pid);
-        // }
-        // console.log('SemWebsiteService sync website: ', website);
+        // Set the website relation using the website ID
+        if (object.website_id) {
+          htmlElementStructure.website = await this.semWebsiteService.findOne(
+            object.website_id,
+          );
+        }
+        // console.log('SemWebsiteService sync website: ', htmlElementStructure.website);
 
+        if (object.openai_completions_id) {
+          htmlElementStructure.openaiCompletions =
+            await this.semOpenaiCompletionsService.findOne(
+              object.openai_completions_id,
+            );
+        }
+
+        console.log(
+          'SemHtmlElementStructureService sync htmlElementStructure: ',
+          htmlElementStructure,
+        );
         await this.semHtmlElementStructureRepository.save(htmlElementStructure);
       }
     }
@@ -148,7 +191,7 @@ export class SemHtmlElementStructureService {
     //     }
     //   }
     // }
-  }
+  } */
 
   // async clearTableData(): Promise<void> {
   //   await this.semHtmlElementStructure.clear();

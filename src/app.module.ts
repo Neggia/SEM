@@ -17,6 +17,7 @@ import { FixturesService } from './fixtures/fixtures.service';
 import { AuthModule } from './auth/auth.module';
 import { SemOpenaiCompletionsController } from './entities/sem_openai_completions.controller';
 import { CronCrawlerService } from './cron_crawler/cron_crawler.service';
+// import { SemWebsiteService } from './entities/sem_website.service';
 
 @Module({
   imports: [
@@ -44,6 +45,7 @@ import { CronCrawlerService } from './cron_crawler/cron_crawler.service';
     ServiceOpenaiService,
     FixturesService,
     CronCrawlerService,
+    // SemWebsiteService,
   ],
 })
 export class AppModule {}

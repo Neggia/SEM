@@ -22,6 +22,7 @@ function TaskManager() {
   const navigate = useNavigate();
   const [processData, setProcessData] = useState(null);
   const [taskData, setTaskData] = useState(null);
+  // const [productStructureData, setProductStructureData] = useState(null);
   const [openaiCompletionsData, setOpenaiCompletionsData] = useState(null);
   const [openaiServiceFunctionsData, setOpenaiServiceFunctions] =
     useState(null);
@@ -90,6 +91,7 @@ function TaskManager() {
           'TaskManager htmlElementStructureResponseJson: ',
           htmlElementStructureResponseJson,
         );
+        // setProductStructureData(htmlElementStructureResponseJson);
 
         // const lastId = data[data.length - 1].id;
         // console.log('ProcessView lastId: ', lastId);
@@ -129,6 +131,7 @@ function TaskManager() {
                   (record) => record.website && record.website.id === obj.id,
                 );
               const productStructureJSON = {
+                id: htmlElementStructure.id,
                 selector: htmlElementStructure.selector,
                 json: htmlElementStructure.json,
               };
@@ -239,6 +242,7 @@ function TaskManager() {
         <TaskView
           processData={processData} //pids={pids}
           taskData={taskData}
+          // productStructureData={productStructureData}
         />
       )}
       {openaiCompletionsData && taskData && openaiServiceFunctionsData && (
