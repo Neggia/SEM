@@ -4,6 +4,7 @@ import { Button } from '@mui/material';
 import ProcessView from './ProcessView';
 import TaskView from './TaskView';
 import OpenaiCompletionsView from './OpenaiCompletionsView';
+import ClearTableDataDialog from './ClearTableDataDialog';
 import {
   SERVER_BASE_URL,
   CONTROLLER_SERVICE_OPENAI_ID,
@@ -27,6 +28,9 @@ function TaskManager() {
   const [openaiServiceFunctionsData, setOpenaiServiceFunctions] =
     useState(null);
   // const [pids, setPids] = useState(null);
+  const [clearTableDataDialogOpen, setClearTableDataDialogOpen] =
+    useState(false);
+  // const clearTableDataDialogItems = ['Item 1', 'Item 2', 'Item 3'];
 
   useEffect(() => {
     async function fetchData() {
@@ -220,9 +224,19 @@ function TaskManager() {
     setProcessData([...updatedProcessData]);
   };
 
+  const handleClearTableDataDialogOpen = () => {
+    setClearTableDataDialogOpen(true);
+  };
+
+  const handleClearTableDataDialogClose = () => {
+    setClearTableDataDialogOpen(false);
+  };
+
   if (processData === null) {
     return <div>Loading...</div>;
   }
+
+  const clearTableDataFlashMessageDivId = 'fixtures-flash-message';
 
   return (
     <div>
@@ -252,6 +266,22 @@ function TaskManager() {
           openaiServiceFunctionsData={openaiServiceFunctionsData}
         />
       )}
+      <div>
+        <div id={clearTableDataFlashMessageDivId}></div>
+        <Button
+          variant="contained"
+          color="error"
+          onClick={handleClearTableDataDialogOpen}
+        >
+          Clear Table Data
+        </Button>
+        <ClearTableDataDialog
+          open={clearTableDataDialogOpen}
+          handleClose={handleClearTableDataDialogClose}
+          flashMessageDivId={clearTableDataFlashMessageDivId}
+          // items={clearTableDataDialogItems}
+        />
+      </div>
     </div>
   );
 }

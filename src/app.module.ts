@@ -13,6 +13,7 @@ import { SemProductController } from './entities/sem_product.controller';
 import { SemProcessController } from './entities/sem_process.controller';
 import { ServiceOpenaiService } from './service_openai/service_openai.service';
 import { ServiceOpenaiController } from './service_openai/service_openai.controller';
+import { FixturesController } from './fixtures/fixtures.controller';
 import { FixturesService } from './fixtures/fixtures.service';
 import { AuthModule } from './auth/auth.module';
 import { SemOpenaiCompletionsController } from './entities/sem_openai_completions.controller';
@@ -39,6 +40,7 @@ import { CronCrawlerService } from './cron_crawler/cron_crawler.service';
     SemCategoryController,
     SemWebsiteController,
     SemHtmlElementStructureController,
+    FixturesController,
   ],
   providers: [
     AppService,

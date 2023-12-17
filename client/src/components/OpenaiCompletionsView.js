@@ -14,6 +14,13 @@ import {
   faFloppyDisk,
   faSync,
 } from '@fortawesome/free-solid-svg-icons';
+import axios from 'axios';
+import {
+  SERVER_BASE_URL,
+  CONTROLLER_OPENAI_COMPLETIONS_ID,
+  CONTROLLER_OPENAI_COMPLETIONS_SYNC,
+  displayFlashMessage,
+} from '../utils/globals';
 
 // import { icon } from '@fortawesome/fontawesome-svg-core/import.macro';
 
@@ -83,7 +90,7 @@ const OpenaiCompletionsView = ({
         {/* <button onClick={handlePlay}>
           <PlayIcon />
         </button> */}
-        <button onClick={handleUpdate}>
+        <button disabled onClick={handleUpdate}>
           <UpdateIcon />
         </button>
         {/* <button onClick={handlePause}>
@@ -273,7 +280,48 @@ const OpenaiCompletionsView = ({
     }
   };
 
-  const handleSave = () => {};
+  const flashMessageDivId = 'openai-completions-flash-message';
+
+  const handleSave = async () => {
+    console.log('data: ', data);
+    // console.log('deletedIds: ', deletedIds);
+    // const dataUpdated = data.map((object) => {
+    //   object.message = '';
+    //   return object;
+    // });
+    // console.log('dataUpdated: ', dataUpdated);
+    // setData(dataUpdated);
+    const openaiCompletionsDto = {
+      saveObjects: data,
+      // productStructures: productStructures,
+      // deleteIds: deletedIds,
+    };
+    const response = await axios
+      .post(
+        SERVER_BASE_URL +
+          CONTROLLER_OPENAI_COMPLETIONS_ID +
+          CONTROLLER_OPENAI_COMPLETIONS_SYNC,
+        openaiCompletionsDto,
+      )
+      .then((response) => {
+        // Handle success
+        console.log('Success:', response.data);
+        // Optionally, display a success message
+        displayFlashMessage('Task data saved', 'success', flashMessageDivId);
+      })
+      .catch((error) => {
+        // Handle errors
+        let errorMessage = 'An error occurred';
+        if (
+          error.response &&
+          error.response.data &&
+          error.response.data.message
+        ) {
+          errorMessage = error.response.data.message;
+        }
+        displayFlashMessage(errorMessage, 'error', flashMessageDivId);
+      });
+  };
 
   if (tasks === null || openaiServiceFunctions === null) {
     return <div>Loading...</div>;
@@ -282,8 +330,11 @@ const OpenaiCompletionsView = ({
   return (
     <div>
       <div class="buttons-and-message-container">
-        <button onClick={addRow}>Add new prompt </button>
+        <button disabled onClick={addRow}>
+          Add new prompt{' '}
+        </button>
         <select
+          disabled
           // value={currentPid}
           onChange={(e) => setCurrentOpenaiServiceFunction(e.target.value)}
         >
@@ -298,6 +349,7 @@ const OpenaiCompletionsView = ({
         </select>
         for website id
         <select
+          disabled
           // value={currentPid}
           onChange={(e) => setCurrentTask(e.target.value)}
         >
@@ -310,10 +362,13 @@ const OpenaiCompletionsView = ({
             </option>
           ))}
         </select>
-        <button onClick={deleteRow}>Delete prompt</button>
+        <button disabled onClick={deleteRow}>
+          Delete prompt
+        </button>
         <button onClick={handleSave}>
           <SaveIcon />
         </button>
+        <div id={flashMessageDivId}></div>
       </div>
       <ReactTabulator
         // ref={tableRef}
