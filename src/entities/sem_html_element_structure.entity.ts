@@ -7,6 +7,7 @@ import {
   ManyToOne,
 } from 'typeorm';
 import { SemOpenaiCompletions } from './sem_openai_completions.entity';
+import { SemWebsite } from '../entities/sem_website.entity';
 
 @Entity()
 export class SemHtmlElementStructure {
@@ -17,8 +18,8 @@ export class SemHtmlElementStructure {
   // @JoinColumn()
   // openai_completions_id: number;
 
-  @Column()
-  website_id: number;
+  // @Column()
+  // website_id: number;
 
   // @Column()
   // group_id: number; // This could become wrong if html_entity get crawled again and group_id change
@@ -38,4 +39,7 @@ export class SemHtmlElementStructure {
     (openaiCompletions) => openaiCompletions.htmlElementStructures,
   )
   openaiCompletions: SemOpenaiCompletions;
+
+  @ManyToOne(() => SemWebsite, (website) => website.htmlElementStructures)
+  website: SemWebsite;
 }

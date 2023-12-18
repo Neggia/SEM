@@ -10,6 +10,7 @@ import {
 import { SemProcess } from '../entities/sem_process.entity';
 import { SemHtmlElement } from '../entities/sem_html_element.entity';
 import { SemProduct } from '../entities/sem_product.entity';
+import { SemHtmlElementStructure } from './sem_html_element_structure.entity';
 
 @Entity()
 export class SemWebsite {
@@ -28,7 +29,7 @@ export class SemWebsite {
 
   // Timestamp of last start
   @Column()
-  last_run: number;
+  last_start: number;
 
   @Column()
   last_page: number;
@@ -40,15 +41,27 @@ export class SemWebsite {
   @Column()
   status: number;
 
+  @Column({ nullable: true })
+  message: string;
+
   // @Column()
   // openai_completions_id: number;
 
   @ManyToOne(() => SemProcess, (process) => process.websites)
   process: SemProcess;
 
-  @OneToMany(() => SemHtmlElement, (htmlElement) => htmlElement.website)
+  @OneToMany(() => SemHtmlElement, (htmlElement) => htmlElement.website, {
+    cascade: true,
+  })
   htmlElements: SemHtmlElement[];
 
-  @OneToMany(() => SemProduct, (product) => product.website)
+  @OneToMany(() => SemProduct, (product) => product.website, { cascade: true })
   products: SemProduct[];
+
+  @OneToMany(
+    () => SemHtmlElementStructure,
+    (htmlElementStructure) => htmlElementStructure.website,
+    { cascade: true },
+  )
+  htmlElementStructures: SemHtmlElementStructure[];
 }

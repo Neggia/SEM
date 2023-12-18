@@ -4,6 +4,7 @@ import { Injectable } from '@nestjs/common';
 // import { SemHtmlElementStructureFixtures } from '../fixtures/sem_html_element_structure.fixtures';
 // import { SemCategory } from '../entities/sem_category.entity';
 import { SemCategoryFixtures } from '../fixtures/sem_category.fixtures';
+import { SemCategoryService } from '../entities/sem_category.service';
 import { SemProduct } from '../entities/sem_product.entity';
 import { SemHtmlElement } from '../entities/sem_html_element.entity';
 import { SemHtmlElementStructure } from '../entities/sem_html_element_structure.entity';
@@ -11,10 +12,14 @@ import { SemHtmlElementStructure } from '../entities/sem_html_element_structure.
 import { SemOpenaiCompletions } from '../entities/sem_openai_completions.entity';
 import { SemOpenaiCompletionsRequest } from '../entities/sem_openai_completions_request.entity';
 import { SemOpenaiCompletionsFixtures } from '../fixtures/sem_openai_completions.fixtures';
+import { SemOpenaiCompletionsService } from '../entities/sem_openai_completions.service';
 import { SemProcess } from '../entities/sem_process.entity';
 import { SemProcessFixtures } from '../fixtures/sem_process.fixtures';
+import { SemProcessService } from '../entities/sem_process.service';
 import { SemWebsite } from '../entities/sem_website.entity';
 import { SemWebsiteFixtures } from '../fixtures/sem_website.fixtures';
+import { SemCategory } from '../entities/sem_category.entity';
+import { SemCurrency } from '../entities/sem_currency.entity';
 import { EntityManager, EntityTarget } from 'typeorm';
 import { InjectEntityManager } from '@nestjs/typeorm';
 
@@ -24,13 +29,35 @@ export interface Fixture {
   relations?: string[];
 }
 
+export class FixturesDto {
+  // saveObjects: TaskSaveObjectDto[];
+  //SemWebsite[]; // Obejects to create or update with save
+  // productStructures: SemHtmlElementStructureDto;
+  deleteEntities: string[]; // Obejcts to delete from ids
+}
+
 @Injectable()
 export class FixturesService {
   private entityMap = new Map<number, any>();
+  private entityMappings = {
+    // Ensure you clear data in the right order to respect foreign key constraints
+    SemProduct: SemProduct,
+    SemHtmlElementStructure: SemHtmlElementStructure,
+    SemHtmlElement: SemHtmlElement,
+    SemWebsite: SemWebsite,
+    SemProcess: SemProcess,
+    SemOpenaiCompletionsRequest: SemOpenaiCompletionsRequest,
+    SemOpenaiCompletions: SemOpenaiCompletions,
+    SemCategory: SemCategory,
+    SemCurrency: SemCurrency,
+  };
 
   constructor(
     @InjectEntityManager()
     private readonly entityManager: EntityManager, // inject other dependencies if needed
+    private readonly semProcessService: SemProcessService,
+    private readonly semCategoryService: SemCategoryService,
+    private readonly semOpenaiCompletionsService: SemOpenaiCompletionsService,
   ) {}
 
   private async clearEntityData(entityType: EntityTarget<any>) {
@@ -53,12 +80,22 @@ export class FixturesService {
   async loadFixtures(): Promise<void> {
     await this.clearData();
 
-    await this.loadEntities(SemProcessFixtures);
-    await this.loadEntities(SemWebsiteFixtures);
-    await this.loadEntities(SemCategoryFixtures);
+    const processes = await this.semProcessService.findAll();
+    if (processes.length === 0) {
+      await this.loadEntities(SemProcessFixtures);
+    }
+
+    // await this.loadEntities(SemWebsiteFixtures);
+    const categories = await this.semCategoryService.findAll();
+    if (categories.length === 0) {
+      await this.loadEntities(SemCategoryFixtures);
+    }
     // await this.loadEntities(SemHtmlElementFixtures);
 
-    await this.loadEntities(SemOpenaiCompletionsFixtures);
+    const openaiCompletions = await this.semOpenaiCompletionsService.findAll();
+    if (openaiCompletions.length === 0) {
+      await this.loadEntities(SemOpenaiCompletionsFixtures);
+    }
     // await this.loadEntities(SemHtmlElementStructureFixtures);
     // add other entities as needed, making sure to load dependencies first
   }
@@ -87,6 +124,33 @@ export class FixturesService {
 
       const savedEntity = await repository.save(entity);
       this.entityMap.set(savedEntity.id, savedEntity);
+    }
+  }
+
+  async sync(fixturesDto: FixturesDto) {
+    console.log('FixturesService fixturesDto: ', fixturesDto);
+
+    // Handling deleteEntities
+    if (fixturesDto.deleteEntities.length > 0) {
+      for (const entityName of fixturesDto.deleteEntities) {
+        const entityType = this.entityMappings[entityName];
+        if (!entityType) {
+          throw new Error(`Entity type for '${entityName}' not found.`);
+        }
+        console.log('entityType: ', entityType);
+
+        await this.clearEntityData(entityType);
+
+        if (entityName === 'SemProcessFixtures') {
+          await this.loadEntities(SemProcessFixtures);
+        }
+        // if (entityName === 'SemCategoryFixtures') {
+        //   await this.loadEntities(SemCategoryFixtures);
+        // }
+        if (entityName === 'SemOpenaiCompletionsFixtures') {
+          await this.loadEntities(SemOpenaiCompletionsFixtures);
+        }
+      }
     }
   }
 }

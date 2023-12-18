@@ -27,18 +27,28 @@ export class SemOpenaiCompletionsRequestService {
   }
 
   async findOneBy(
-    website: SemWebsite,
     bodyHash: string,
     openaiCompletions: SemOpenaiCompletions,
+    website?: SemWebsite,
   ): Promise<SemOpenaiCompletionsRequest> {
-    return this.semOpenaiCompletionsRequest.findOne({
-      where: {
-        website_id: website.id,
-        bodyHash: bodyHash,
-        openaiCompletions: openaiCompletions,
-      },
-      relations: ['openaiCompletions'],
-    });
+    if (website) {
+      return this.semOpenaiCompletionsRequest.findOne({
+        where: {
+          website_id: website.id,
+          bodyHash: bodyHash,
+          openaiCompletions: openaiCompletions,
+        },
+        relations: ['openaiCompletions'],
+      });
+    } else {
+      return this.semOpenaiCompletionsRequest.findOne({
+        where: {
+          bodyHash: bodyHash,
+          openaiCompletions: openaiCompletions,
+        },
+        relations: ['openaiCompletions'],
+      });
+    }
   }
 
   async createOpenaiCompletionsRequest(

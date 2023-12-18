@@ -9,10 +9,11 @@ export const SemWebsiteFixtures: Fixture = {
       name: 'pagineazzurre',
       url: 'https://www.pagineazzurre.net',
       process: 1,
-      last_run: 1698624314,
+      last_start: 1698624314,
       last_page: 4,
       num_pages: 10,
       status: 0,
+      meessage: '',
       htmlElements: null, //[0, 1],
     },
     {
@@ -20,10 +21,11 @@ export const SemWebsiteFixtures: Fixture = {
       name: 'giuna',
       url: 'https://online.sinerville.com/mod/data/view.php?id=49',
       process: 1,
-      last_run: 1698624314,
+      last_start: 1698624314,
       last_page: 8,
       num_pages: 10,
       status: 0,
+      meessage: '',
       htmlElements: null, //[2],
     },
     /*     {
@@ -35,8 +37,9 @@ export const SemWebsiteFixtures: Fixture = {
       last_page: 0,
       num_pages: 10,
       status: 0,
+      meessage: '',
       htmlElements: null, //[3],
     }, */
   ],
-  relations: ['process', 'htmlElements'],
+  relations: ['process', 'htmlElements', 'products', 'htmlElementStructures'],
 };

@@ -25,8 +25,11 @@ export class SemProcess {
   last_end: number;
 
   // Bitmask
-  @Column()
+  @Column({ nullable: true })
   status: number;
+
+  @Column({ nullable: true })
+  message: string;
 
   @OneToMany(() => SemWebsite, (website) => website.process)
   websites: SemWebsite[];

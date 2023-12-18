@@ -4,6 +4,7 @@ import { Button } from '@mui/material';
 import ProcessView from './ProcessView';
 import TaskView from './TaskView';
 import OpenaiCompletionsView from './OpenaiCompletionsView';
+import ClearTableDataDialog from './ClearTableDataDialog';
 import {
   SERVER_BASE_URL,
   CONTROLLER_SERVICE_OPENAI_ID,
@@ -11,7 +12,10 @@ import {
   CONTROLLER_SERVICE_OPENAI_GET_FUNCTIONS,
   CONTROLLER_PROCESS_ID,
   CONTROLLER_OPENAI_COMPLETIONS_ID,
+  CONTROLLER_HTML_ELEMENT_STRUCTURE_ID,
+  HTML_ELEMENT_TYPE_PRODUCT,
 } from '../utils/globals';
+import { DateTime } from 'luxon';
 
 // import ReactTabulatorExample from './ReactTabulatorExample';
 
@@ -19,10 +23,14 @@ function TaskManager() {
   const navigate = useNavigate();
   const [processData, setProcessData] = useState(null);
   const [taskData, setTaskData] = useState(null);
+  // const [productStructureData, setProductStructureData] = useState(null);
   const [openaiCompletionsData, setOpenaiCompletionsData] = useState(null);
   const [openaiServiceFunctionsData, setOpenaiServiceFunctions] =
     useState(null);
   // const [pids, setPids] = useState(null);
+  const [clearTableDataDialogOpen, setClearTableDataDialogOpen] =
+    useState(false);
+  // const clearTableDataDialogItems = ['Item 1', 'Item 2', 'Item 3'];
 
   useEffect(() => {
     async function fetchData() {
@@ -35,12 +43,59 @@ function TaskManager() {
             'Network response was not ok ' + processResponse.statusText,
           );
         }
-        const processResponseJson = await processResponse.json();
+        let processResponseJson = await processResponse.json();
+
+        processResponseJson = processResponseJson.map((obj) => {
+          // Convert timestamps to DateTime objects
+          const lastStartDateTime = DateTime.fromMillis(obj.last_start);
+          const lastEndDateTime = DateTime.fromMillis(obj.last_end);
+
+          // Calculate the difference
+          const duration = lastEndDateTime.diff(lastStartDateTime);
+
+          let formattedDuration = '';
+          let formattedLastStart = '';
+          if (obj.last_start > 0) {
+            // Convert the difference to a Duration and format it
+            formattedDuration = duration.toFormat('hh:mm:ss:SSS');
+
+            formattedLastStart = DateTime.fromMillis(obj.last_start).toFormat(
+              'yyyy-MM-dd HH:mm:ss',
+            );
+          }
+
+          return {
+            ...obj,
+            last_start_datetime: formattedLastStart,
+            duration: formattedDuration,
+          };
+        });
+
         console.log(
           'TaskManager processDataResponseJson: ',
           processResponseJson,
         );
         setProcessData(processResponseJson);
+
+        const htmlElementStructureResponse = await fetch(
+          SERVER_BASE_URL +
+            CONTROLLER_HTML_ELEMENT_STRUCTURE_ID +
+            '?type=' +
+            HTML_ELEMENT_TYPE_PRODUCT,
+        );
+        if (!htmlElementStructureResponse.ok) {
+          throw new Error(
+            'Network response was not ok ' +
+              htmlElementStructureResponse.statusText,
+          );
+        }
+        let htmlElementStructureResponseJson =
+          await htmlElementStructureResponse.json();
+        console.log(
+          'TaskManager htmlElementStructureResponseJson: ',
+          htmlElementStructureResponseJson,
+        );
+        // setProductStructureData(htmlElementStructureResponseJson);
 
         // const lastId = data[data.length - 1].id;
         // console.log('ProcessView lastId: ', lastId);
@@ -68,11 +123,30 @@ function TaskManager() {
 
           const updatedWebsites = tasksResponseJson.websites.map(
             (obj, index) => {
+              let formattedLastStart = '';
+              if (obj.last_start > 0) {
+                formattedLastStart = DateTime.fromMillis(
+                  obj.last_start,
+                ).toFormat('yyyy-MM-dd HH:mm:ss');
+              }
+
+              const htmlElementStructure =
+                htmlElementStructureResponseJson.find(
+                  (record) => record.website && record.website.id === obj.id,
+                );
+              const productStructureJSON = {
+                id: htmlElementStructure.id,
+                selector: htmlElementStructure.selector,
+                json: htmlElementStructure.json,
+              };
+              const productStructure = JSON.stringify(productStructureJSON);
+
               return {
                 ...obj,
                 pid: process.id,
+                last_start_datetime: formattedLastStart,
                 progress: (obj.last_page / obj.num_pages) * 100,
-                product_structure: '',
+                product_structure: productStructure,
               };
             },
           );
@@ -150,18 +224,28 @@ function TaskManager() {
     setProcessData([...updatedProcessData]);
   };
 
+  const handleClearTableDataDialogOpen = () => {
+    setClearTableDataDialogOpen(true);
+  };
+
+  const handleClearTableDataDialogClose = () => {
+    setClearTableDataDialogOpen(false);
+  };
+
   if (processData === null) {
     return <div>Loading...</div>;
   }
 
+  const clearTableDataFlashMessageDivId = 'fixtures-flash-message';
+
   return (
     <div>
-      <h1>Task Manager</h1>
-      {/* Your task manager content goes here */}
-
-      <Button onClick={handleBack} variant="contained" color="primary">
-        Back to Home
-      </Button>
+      <div class="task-manager-header-container">
+        <h1>Task Manager</h1>
+        <Button onClick={handleBack} variant="contained" color="primary">
+          Back to Home
+        </Button>
+      </div>
       {processData && (
         <ProcessView
           processData={processData}
@@ -172,6 +256,7 @@ function TaskManager() {
         <TaskView
           processData={processData} //pids={pids}
           taskData={taskData}
+          // productStructureData={productStructureData}
         />
       )}
       {openaiCompletionsData && taskData && openaiServiceFunctionsData && (
@@ -181,6 +266,22 @@ function TaskManager() {
           openaiServiceFunctionsData={openaiServiceFunctionsData}
         />
       )}
+      <div>
+        <div id={clearTableDataFlashMessageDivId}></div>
+        <Button
+          variant="contained"
+          color="error"
+          onClick={handleClearTableDataDialogOpen}
+        >
+          Clear Table Data
+        </Button>
+        <ClearTableDataDialog
+          open={clearTableDataDialogOpen}
+          handleClose={handleClearTableDataDialogClose}
+          flashMessageDivId={clearTableDataFlashMessageDivId}
+          // items={clearTableDataDialogItems}
+        />
+      </div>
     </div>
   );
 }

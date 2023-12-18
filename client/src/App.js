@@ -7,6 +7,8 @@ import { UserProvider } from './context/UserContext';
 import PrivateRoute from './components/PrivateRoute';
 import ProductsView from './components/ProductsView';
 
+// TODO Add translation
+
 function App() {
   return (
     <UserProvider>
