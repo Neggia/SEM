@@ -151,6 +151,13 @@ export class CronCrawlerService {
             //website.status | WEBSITE_STATUS_RUNNING, // Setting RUNNING bit
           );
 
+          timestampMs = Date.now();
+          website = await this.semWebsiteService.updateWebsiteField(
+            website.id,
+            'last_start',
+            timestampMs,
+          );
+
           website = await this.semWebsiteService.updateWebsiteField(
             website.id,
             'message',
@@ -240,8 +247,9 @@ export class CronCrawlerService {
     const crawlDelay = await this.getCrawlDelay(url);
 
     let pageUrl = url;
-    let currentPage = 1;
-    let pages = [];
+    // let currentPage = 1;
+    // let pages = [];
+    let total_pages = 0;
     let websiteId;
 
     const browser = await puppeteer.launch();
@@ -725,28 +733,43 @@ export class CronCrawlerService {
           }
         }
 
-        // TODO Handle case where all pages are not shown in pagination item from start
         pageUrl = null;
-        if (paginationHtmlElementData || pages.length > 0) {
-          if (pages.length === 0) {
-            pages = JSON.parse(paginationHtmlElementData);
-          }
+        const paginationJSON = JSON.parse(paginationHtmlElementData);
+        if (paginationJSON.current_page < paginationJSON.total_pages) {
+          // if (paginationHtmlElementData || pages.length > 0) {
+          //   if (pages.length === 0) {
+          //     pages = JSON.parse(paginationHtmlElementData);
+          //   }
 
-          if (pages.length > 1) {
-            if (currentPage < pages.length) {
-              pageUrl = pages[currentPage];
-              if (
-                pageUrl.startsWith('/') &&
-                !pageUrl.startsWith(removeTrailingSlash(website.url))
-              ) {
-                // If it's a relative url, not absolute
-                pageUrl = removeTrailingSlash(website.url) + pageUrl;
-              }
-            }
-
-            currentPage++;
+          // if (pages.length > 1) {
+          //   if (currentPage < pages.length) {
+          pageUrl = paginationJSON.next_page_url; //pages[currentPage];
+          if (
+            pageUrl.startsWith('/') &&
+            !pageUrl.startsWith(removeTrailingSlash(website.url))
+          ) {
+            // If it's a relative url, not absolute
+            pageUrl = removeTrailingSlash(website.url) + pageUrl;
           }
+          // }
+          // currentPage++;
+          // }
         }
+
+        if (total_pages === 0) {
+          websiteLazy = await this.semWebsiteService.updateWebsiteField(
+            websiteLazy.id,
+            'num_pages',
+            paginationJSON.total_pages,
+          );
+          total_pages = paginationJSON.total_pages;
+        }
+        websiteLazy = await this.semWebsiteService.updateWebsiteField(
+          websiteLazy.id,
+          'last_page',
+          paginationJSON.current_page,
+        );
+
         if (pageUrl) {
           delay(crawlDelay);
         }
