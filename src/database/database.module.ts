@@ -1,5 +1,6 @@
-import { Module } from '@nestjs/common';
-import { TypeOrmModule } from '@nestjs/typeorm';
+import { Module, forwardRef } from '@nestjs/common';
+import { TypeOrmModule, getRepositoryToken } from '@nestjs/typeorm';
+import { Repository } from 'typeorm';
 import { ConfigModule, ConfigService } from '@nestjs/config';
 import { SemCategory } from '../entities/sem_category.entity';
 import { SemCategoryService } from '../entities/sem_category.service';
@@ -86,7 +87,43 @@ import * as fs from 'fs';
     SemOpenaiCompletionsService,
     SemOpenaiCompletionsRequestService,
     SemWebsiteService,
+    // {
+    //   provide: SemWebsiteService,
+    //   useFactory: (
+    //     semWebsiteRepository: Repository<SemWebsite>,
+    //     semProcessService: SemProcessService,
+    //     semHtmlElementStructureService: SemHtmlElementStructureService,
+    //   ) =>
+    //     new SemWebsiteService(
+    //       semWebsiteRepository,
+    //       semProcessService,
+    //       semHtmlElementStructureService,
+    //     ),
+    //   inject: [
+    //     getRepositoryToken(SemWebsite),
+    //     SemProcessService,
+    //     forwardRef(() => SemHtmlElementStructureService),
+    //   ],
+    // },
     SemHtmlElementStructureService,
+    // {
+    //   provide: SemHtmlElementStructureService,
+    //   useFactory: (
+    //     semHtmlElementStructureRepository: Repository<SemHtmlElementStructure>,
+    //     semWebsiteService: SemWebsiteService,
+    //     semOpenaiCompletionsService: SemOpenaiCompletionsService,
+    //   ) =>
+    //     new SemHtmlElementStructureService(
+    //       semHtmlElementStructureRepository,
+    //       semWebsiteService,
+    //       semOpenaiCompletionsService,
+    //     ),
+    //   inject: [
+    //     getRepositoryToken(SemHtmlElementStructure),
+    //     forwardRef(() => SemWebsiteService),
+    //     SemOpenaiCompletionsService,
+    //   ],
+    // },
     SemProcessService,
     SemProductService,
     SemCurrencyService,
@@ -99,6 +136,8 @@ import * as fs from 'fs';
     SemOpenaiCompletionsRequestService,
     SemWebsiteService,
     SemHtmlElementStructureService,
+    // forwardRef(() => SemWebsiteService),
+    // forwardRef(() => SemHtmlElementStructureService),
     SemProcessService,
     SemProductService,
     SemCurrencyService,

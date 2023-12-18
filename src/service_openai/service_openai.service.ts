@@ -11,11 +11,17 @@ import { SemHtmlElementStructureService } from '../entities/sem_html_element_str
 import { ClientOptions, OpenAI } from 'openai';
 import {
   hashString,
+  // HTML_ELEMENT_TYPE_UNKNOWN,
+  // HTML_ELEMENT_TYPE_PRODUCT,
+  // HTML_ELEMENT_TYPE_CATEGORY,
+  // HTML_ELEMENT_TYPE_PAGINATION,
+} from '../utils/globals';
+const {
   HTML_ELEMENT_TYPE_UNKNOWN,
   HTML_ELEMENT_TYPE_PRODUCT,
   // HTML_ELEMENT_TYPE_CATEGORY,
   HTML_ELEMENT_TYPE_PAGINATION,
-} from '../utils/globals';
+} = require('../../client/src/utils/globals');
 import { SemWebsite } from 'src/entities/sem_website.entity';
 
 export interface ProductHtmlElementStructure {
@@ -184,7 +190,7 @@ export class ServiceOpenaiService {
 
       productJSON =
         await this.semHtmlElementStructureService.createHtmlElementStructure(
-          htmlElement.website.id,
+          htmlElement.website,
           // htmlElement.group_id,
           htmlElement.selector,
           HTML_ELEMENT_TYPE_PRODUCT,
@@ -223,13 +229,13 @@ export class ServiceOpenaiService {
       // );
       const completions =
         await this.semOpenaiCompletionsService.findNarrowestOneBy(
-          'getPaginationStructure',
+          'getPaginationData',
           htmlElement.website,
           htmlElement.group_id,
         );
       if (completions === undefined) {
         throw new Error(
-          `Completions not found for getPaginationStructure website_id ${htmlElement.website.id} group_id ${htmlElement.group_id}`,
+          `Completions not found for getPaginationData website_id ${htmlElement.website.id} group_id ${htmlElement.group_id}`,
         );
       }
       let paginationHtmlElementStructure: SemHtmlElementStructure;
@@ -249,7 +255,7 @@ export class ServiceOpenaiService {
       if (!paginationHtmlElementStructure) {
         paginationHtmlElementStructure =
           await this.semHtmlElementStructureService.createHtmlElementStructure(
-            htmlElement.website.id,
+            htmlElement.website,
             // htmlElement.group_id,
             htmlElement.selector,
             HTML_ELEMENT_TYPE_PAGINATION,
@@ -257,7 +263,7 @@ export class ServiceOpenaiService {
             completions,
           );
         console.log(
-          'ServiceOpenaiService getPaginationStructure() paginationHtmlElementStructure: ',
+          'ServiceOpenaiService getPaginationData() paginationHtmlElementStructure: ',
           paginationHtmlElementStructure,
         );
       }
@@ -340,10 +346,16 @@ export class ServiceOpenaiService {
       const bodyHash = hashString(bodyString);
       const semOpenaiCompletionsRequest =
         await this.semOpenaiCompletionsRequestService.findOneBy(
+          bodyHash,
+          completions,
           website,
+        );
+      if (semOpenaiCompletionsRequest === null) {
+        await this.semOpenaiCompletionsRequestService.findOneBy(
           bodyHash,
           completions,
         );
+      }
       if (semOpenaiCompletionsRequest !== null) {
         console.log(
           `OpenaiCompletionsRequest fetched from cache with hash ${bodyHash} for website id ${website.id} and completions id ${completions.id}`,
