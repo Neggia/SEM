@@ -26,6 +26,7 @@ import { arrayToDataUrl } from '../utils/globals';
 import { FontAwesomeIcon } from '@fortawesome/react-fontawesome';
 import { faMagnifyingGlass } from '@fortawesome/free-solid-svg-icons';
 // import { fetchProducts } from '../api'; // Assume you have an API function to fetch products
+import { useTranslation } from 'react-i18next';
 
 const SearchIcon = () => <FontAwesomeIcon icon={faMagnifyingGlass} />;
 
@@ -42,12 +43,17 @@ const ProductsView = () => {
   const [searchResults, setSearchResults] = useState([]);
   const [anchorEl, setAnchorEl] = useState(null);
   const searchFieldRef = useRef(null);
+  const [loading, setLoading] = useState(false);
+
+  const { t } = useTranslation();
 
   const debounceDelay = 300; // 300 milliseconds
 
   let searchDebounceTimeout = null;
 
   const fetchProductData = async () => {
+    setLoading(true);
+
     try {
       console.log('ProductsView selectedCurrencies: ', selectedCurrencies);
       const currenciesQueryString = `&currencies=${selectedCurrencies.join(
@@ -75,6 +81,8 @@ const ProductsView = () => {
         error,
       );
     }
+
+    setLoading(false);
   };
 
   const fetchCategoryData = async () => {
@@ -188,17 +196,17 @@ const ProductsView = () => {
               displayEmpty
             >
               <MenuItem value="">
-                <em>None</em>
+                <em>{t('None')}</em>
               </MenuItem>
               {categories.map((category) => (
                 <MenuItem key={category.id} value={category.id}>
-                  {category.name}
+                  {t(category.name)}
                 </MenuItem>
               ))}
             </Select>
 
             <TextField
-              label="Search"
+              label={t('Search')}
               onChange={handleSearchChange}
               variant="outlined"
               inputRef={searchFieldRef} // Assign the ref to the TextField
@@ -211,6 +219,7 @@ const ProductsView = () => {
             />
 
             <Button
+              disabled={loading}
               variant="contained" // Use 'contained' for a filled button
               color="primary" // Use the theme's primary color
               onClick={() => fetchProductData()}
@@ -220,51 +229,54 @@ const ProductsView = () => {
                 marginLeft: 8, // Add some margin if needed
               }}
             >
-              Search
+              {t('Search')}
             </Button>
+            {loading && <div className="loader"></div>}
           </Box>
         </Grid>
-        {products.map((product) => (
-          <Grid item xs={12} sm={6} md={4} key={product.id}>
-            <Card>
-              <a href={product.url} target="_blank" rel="noopener noreferrer">
-                <CardMedia
-                  component="img"
-                  height="140"
-                  image={arrayToDataUrl(
-                    product.thumbnail ? product.thumbnail.data : null,
-                  )} // Convert buffer to data URL
-                  alt={product.title}
-                />
-              </a>
 
-              <CardContent>
-                <Typography gutterBottom variant="h5" component="h2">
-                  {product.title}
-                </Typography>
-                {/* Displaying price information only if it's greater than 0 */}
-                {(product.price_01 || product.price_01 === 0) &&
-                  product.price_01 > 0 && (
-                    <Typography variant="body1" color="textSecondary">
-                      Price: {product.price_01}{' '}
-                      {getCurrencyStringById(product.currency_01_id)}
-                    </Typography>
-                  )}
-                {(product.price_02 || product.price_02 === 0) &&
-                  product.price_02 > 0 && (
-                    <Typography variant="body1" color="textSecondary">
-                      {product.price_01 > 0
-                        ? 'Alternate/additional Price:'
-                        : 'Price:'}{' '}
-                      {product.price_02}{' '}
-                      {getCurrencyStringById(product.currency_02_id)}
-                    </Typography>
-                  )}
-                {/* Additional Product Info */}
-              </CardContent>
-            </Card>
-          </Grid>
-        ))}
+        {!loading &&
+          products.map((product) => (
+            <Grid item xs={12} sm={6} md={4} key={product.id}>
+              <Card>
+                <a href={product.url} target="_blank" rel="noopener noreferrer">
+                  <CardMedia
+                    component="img"
+                    height="140"
+                    image={arrayToDataUrl(
+                      product.thumbnail ? product.thumbnail.data : null,
+                    )} // Convert buffer to data URL
+                    alt={product.title}
+                  />
+                </a>
+
+                <CardContent>
+                  <Typography gutterBottom variant="h5" component="h2">
+                    {product.title}
+                  </Typography>
+                  {/* Displaying price information only if it's greater than 0 */}
+                  {(product.price_01 || product.price_01 === 0) &&
+                    product.price_01 > 0 && (
+                      <Typography variant="body1" color="textSecondary">
+                        Price: {product.price_01}{' '}
+                        {getCurrencyStringById(product.currency_01_id)}
+                      </Typography>
+                    )}
+                  {(product.price_02 || product.price_02 === 0) &&
+                    product.price_02 > 0 && (
+                      <Typography variant="body1" color="textSecondary">
+                        {product.price_01 > 0
+                          ? 'Alternate/additional Price:'
+                          : 'Price:'}{' '}
+                        {product.price_02}{' '}
+                        {getCurrencyStringById(product.currency_02_id)}
+                      </Typography>
+                    )}
+                  {/* Additional Product Info */}
+                </CardContent>
+              </Card>
+            </Grid>
+          ))}
 
         {/* Dropdown for Search Results */}
         <Menu
@@ -302,11 +314,14 @@ const ProductsView = () => {
           ))}
         </Menu>
       </Grid>
-      <Pagination
-        count={totalPages}
-        page={currentPage}
-        onChange={(event, page) => setCurrentPage(page)}
-      />
+
+      {!loading && (
+        <Pagination
+          count={totalPages}
+          page={currentPage}
+          onChange={(event, page) => setCurrentPage(page)}
+        />
+      )}
     </>
   );
 };

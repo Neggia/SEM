@@ -14,6 +14,9 @@ import AccountCircle from '@mui/icons-material/AccountCircle';
 // import MenuRoundedIcon from '@mui/icons-material/MenuRounded';
 import { useNavigate } from 'react-router-dom';
 import { UserContext } from '../context/UserContext';
+import i18n from 'i18next';
+import LanguageSelect from './LanguageSelect';
+import { useTranslation } from 'react-i18next';
 
 function Login() {
   const navigate = useNavigate();
@@ -21,6 +24,8 @@ function Login() {
   const [username, setUsername] = useState('');
   const [password, setPassword] = useState('');
   const [anchorEl, setAnchorEl] = useState(null);
+
+  const { t } = useTranslation();
 
   useEffect(() => {
     // Update local login state based on global user context
@@ -72,6 +77,10 @@ function Login() {
     ? process.env.REACT_APP_NAME
     : 'SEM';
 
+  const changeLanguage = (language) => {
+    i18n.changeLanguage(language);
+  };
+
   return (
     <AppBar position="static">
       <Toolbar>
@@ -81,7 +90,7 @@ function Login() {
         {!user.isLoggedIn ? (
           <>
             <TextField
-              label="Username"
+              label={t('Username')}
               value={username}
               onChange={(e) => setUsername(e.target.value)}
             />
@@ -98,7 +107,7 @@ function Login() {
         ) : (
           <div>
             <Typography variant="subtitle1" style={{ display: 'inline' }}>
-              Logged in as {user.username}
+              {t('Logged in as ')} {user.username}
             </Typography>
             <IconButton
               edge="end"
@@ -125,11 +134,16 @@ function Login() {
               open={Boolean(anchorEl)}
               onClose={handleClose}
             >
-              <MenuItem onClick={handleGoToTasks}>Task manager</MenuItem>
-              <MenuItem onClick={handleLogoutClick}>Logout</MenuItem>
+              <MenuItem onClick={handleGoToTasks}>{t('Task manager')}</MenuItem>
+              <MenuItem onClick={handleLogoutClick}>{t('Logout')}</MenuItem>
             </Menu>
           </div>
         )}
+        {/* <select onChange={(e) => changeLanguage(e.target.value)}>
+          <option value="it">Italiano</option>
+          <option value="en">English</option>
+        </select> */}
+        <LanguageSelect onChange={changeLanguage} />
       </Toolbar>
     </AppBar>
   );

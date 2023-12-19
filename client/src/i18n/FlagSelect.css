@@ -1,0 +1,34 @@
+.flag-select {
+  position: relative;
+  display: inline-block;
+  font-size: 16px; /* Adjust font size as needed */
+  margin-left: 10px;
+}
+
+.flag-select-button {
+  cursor: pointer;
+  padding: 5px 10px;
+  border: 1px solid #ccc;
+  border-radius: 5px;
+  background-color: #fff; /* Ensure background is not transparent */
+  color: #333; /* Text color */
+}
+
+.flag-select-options {
+  position: absolute;
+  background-color: #f9f9f9;
+  min-width: 50px;
+  box-shadow: 0px 8px 16px 0px rgba(0, 0, 0, 0.2);
+  z-index: 1;
+  border-radius: 5px;
+}
+
+.flag-option {
+  padding: 5px 10px;
+  cursor: pointer;
+  color: #333; /* Text color */
+}
+
+.flag-option:hover {
+  background-color: #ddd;
+}
