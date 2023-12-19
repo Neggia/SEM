@@ -1,11 +1,14 @@
 import React, { useState, useEffect } from 'react';
 import { Button, Menu, MenuItem, Checkbox } from '@mui/material';
 import { SERVER_BASE_URL, CONTROLLER_CURRENCY_ID } from '../utils/globals';
+import { useTranslation } from 'react-i18next';
 
 const CurrencySelect = ({ setCurrencies, selectedItems, setSelectedItems }) => {
   const [anchorEl, setAnchorEl] = useState(null);
   //   const [selectedItems, setSelectedItems] = useState([]);
   const [items, setItems] = useState([]);
+
+  const { t } = useTranslation();
 
   const fetchData = async () => {
     try {
@@ -66,7 +69,7 @@ const CurrencySelect = ({ setCurrencies, selectedItems, setSelectedItems }) => {
         aria-haspopup="true"
         onClick={handleClick}
       >
-        Currency
+        {t('Currency')}
       </Button>
       <Menu
         id="simple-menu"
