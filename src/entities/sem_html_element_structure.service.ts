@@ -114,28 +114,54 @@ export class SemHtmlElementStructureService {
     return newHtmlElementStructure;
   }
 
-  async saveFromJSON(json: string) {
+  async saveFromJSON(
+    json: string,
+    type: number,
+    website: SemWebsite,
+    openaiCompletions: SemOpenaiCompletions,
+  ): Promise<SemHtmlElementStructure> {
     try {
       const data = JSON.parse(json);
       console.log('saveFromJSON data: ', data);
       // console.log('saveFromJSON data.id: ', data.id);
 
-      const htmlElementStructure =
+      let htmlElementStructure =
         await this.semHtmlElementStructureRepository.findOne({
           where: { id: data.id },
         });
-      if (
+      if (!htmlElementStructure) {
+        htmlElementStructure = new SemHtmlElementStructure();
+        // if (data.id !== null) {
+        htmlElementStructure.id = data.id;
+        // }
+        htmlElementStructure.selector = data.selector;
+        htmlElementStructure.type = type;
+        htmlElementStructure.json = data.json;
+        htmlElementStructure.website = website;
+        htmlElementStructure.openaiCompletions = openaiCompletions;
+
+        console.log(
+          'saveFromJSON htmlElementStructure: ',
+          htmlElementStructure,
+        );
+
+        await this.semHtmlElementStructureRepository.save(htmlElementStructure);
+      } else if (
         htmlElementStructure.selector !== data.selector ||
         htmlElementStructure.json !== data.json
       ) {
         htmlElementStructure.selector = data.selector;
         htmlElementStructure.json = data.json;
+
         console.log(
           'saveFromJSON htmlElementStructure: ',
           htmlElementStructure,
         );
+
         await this.semHtmlElementStructureRepository.save(htmlElementStructure);
       }
+
+      return htmlElementStructure;
     } catch (error) {
       console.error(`Failed to saveFromJSON: ${json}`, error);
       throw new Error(error);

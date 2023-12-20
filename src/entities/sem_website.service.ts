@@ -10,6 +10,13 @@ import {
   SemHtmlElementStructureService,
   // SemHtmlElementStructureDto,
 } from './sem_html_element_structure.service';
+import { SemOpenaiCompletionsService } from './sem_openai_completions.service';
+const {
+  // HTML_ELEMENT_TYPE_UNKNOWN,
+  HTML_ELEMENT_TYPE_PRODUCT,
+  // HTML_ELEMENT_TYPE_CATEGORY,
+  // HTML_ELEMENT_TYPE_PAGINATION,
+} = require('../../client/src/utils/globals');
 
 // Should match client\src\components\TaskView.js const addRow = () => {...
 class TaskSaveObjectDto {
@@ -49,6 +56,7 @@ export class SemWebsiteService {
     private readonly semProcessService: SemProcessService,
     @Inject(forwardRef(() => SemHtmlElementStructureService))
     private readonly semHtmlElementStructureService: SemHtmlElementStructureService,
+    private readonly semOpenaiCompletionsService: SemOpenaiCompletionsService,
   ) {}
 
   findAll(): Promise<SemWebsite[]> {
@@ -101,27 +109,42 @@ export class SemWebsiteService {
         let website = await this.findOne(object.id);
 
         try {
-          await this.updateWebsiteField(website.id, 'message', '');
+          if (website) {
+            await this.updateWebsiteField(website.id, 'message', '');
+          }
 
           // Records that are in saveObjects must not be deleted
           deleteIds = deleteIds.filter((deleteId) => deleteId !== object.id);
 
           console.log('SemWebsiteService sync object: ', object);
 
-          // let website = new SemWebsite();
+          if (!website) {
+            website = new SemWebsite();
+            // Set the process relation using the process ID (pid)
+            if (object.pid) {
+              website.process = await this.semProcessService.findOne(
+                object.pid,
+              );
+            }
+          }
           website = { ...website, ...object };
 
-          // Set the process relation using the process ID (pid)
-          // if (object.pid) {
-          //   website.process = await this.semProcessService.findOne(object.pid);
-          // }
           console.log('SemWebsiteService sync website: ', website);
 
           await this.semWebsiteRepository.save(website);
 
-          await this.semHtmlElementStructureService.saveFromJSON(
-            object.product_structure,
-          );
+          if (object.product_structure) {
+            // TODO Update if openaiCompletions can be added for specific websites
+            const getProductStructureOpenaiCompletions =
+              await this.semOpenaiCompletionsService.findOne(1); // getProductStructure
+
+            await await this.semHtmlElementStructureService.saveFromJSON(
+              object.product_structure,
+              HTML_ELEMENT_TYPE_PRODUCT,
+              website,
+              getProductStructureOpenaiCompletions,
+            );
+          }
         } catch (error) {
           // console.error(`Failed to crawl: ${url}`, error);
 
@@ -132,7 +155,9 @@ export class SemWebsiteService {
           // }
 
           const message: string = error.message;
-          await this.updateWebsiteField(website.id, 'message', message);
+          if (website) {
+            await this.updateWebsiteField(website.id, 'message', message);
+          }
         }
       }
     }

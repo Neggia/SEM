@@ -130,16 +130,20 @@ function TaskManager() {
                 ).toFormat('yyyy-MM-dd HH:mm:ss');
               }
 
+              let productStructure = '';
+
               const htmlElementStructure =
                 htmlElementStructureResponseJson.find(
                   (record) => record.website && record.website.id === obj.id,
                 );
-              const productStructureJSON = {
-                id: htmlElementStructure.id,
-                selector: htmlElementStructure.selector,
-                json: htmlElementStructure.json,
-              };
-              const productStructure = JSON.stringify(productStructureJSON);
+              if (htmlElementStructure) {
+                const productStructureJSON = {
+                  id: htmlElementStructure.id,
+                  selector: htmlElementStructure.selector,
+                  json: htmlElementStructure.json,
+                };
+                productStructure = JSON.stringify(productStructureJSON);
+              }
 
               return {
                 ...obj,

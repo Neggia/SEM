@@ -14,13 +14,6 @@ export class SemHtmlElementStructure {
   @PrimaryGeneratedColumn()
   id: number;
 
-  // @OneToOne(() => SemOpenaiCompletions)
-  // @JoinColumn()
-  // openai_completions_id: number;
-
-  // @Column()
-  // website_id: number;
-
   // @Column()
   // group_id: number; // This could become wrong if html_entity get crawled again and group_id change
 
