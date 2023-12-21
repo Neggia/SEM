@@ -15,7 +15,7 @@ const {
   // HTML_ELEMENT_TYPE_UNKNOWN,
   HTML_ELEMENT_TYPE_PRODUCT,
   // HTML_ELEMENT_TYPE_CATEGORY,
-  // HTML_ELEMENT_TYPE_PAGINATION,
+  HTML_ELEMENT_TYPE_PAGINATION,
 } = require('../../client/src/utils/globals');
 
 // Should match client\src\components\TaskView.js const addRow = () => {...
@@ -30,6 +30,7 @@ class TaskSaveObjectDto {
   status: number;
   progress: null;
   product_structure: string;
+  pagination_structure: string;
 }
 
 // class ProductStructureDto {
@@ -143,6 +144,19 @@ export class SemWebsiteService {
               HTML_ELEMENT_TYPE_PRODUCT,
               website,
               getProductStructureOpenaiCompletions,
+            );
+          }
+
+          if (object.pagination_structure) {
+            // TODO Update if openaiCompletions can be added for specific websites
+            const getPaginationStructureOpenaiCompletions =
+              await this.semOpenaiCompletionsService.findOne(4); // getProductStructure
+
+            await await this.semHtmlElementStructureService.saveFromJSON(
+              object.pagination_structure,
+              HTML_ELEMENT_TYPE_PAGINATION,
+              website,
+              getPaginationStructureOpenaiCompletions,
             );
           }
         } catch (error) {

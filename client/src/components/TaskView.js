@@ -213,6 +213,21 @@ const TaskView = ({
         shiftEnterSubmit: true, //submit cell value on shift enter
       },
     },
+    {
+      title: 'Pagination Structure',
+      field: 'pagination_structure',
+      editor: 'textarea',
+      width: 350,
+      editorParams: {
+        elementAttributes: {
+          maxlength: '10000', //set the maximum character length of the textarea element
+        },
+        // mask: 'AAA-999',
+        selectContents: true,
+        verticalNavigation: 'editor', //navigate cursor around text area without leaving the cell
+        shiftEnterSubmit: true, //submit cell value on shift enter
+      },
+    },
     { title: 'Message', field: 'message', width: 350, formatter: 'textarea' },
   ];
 

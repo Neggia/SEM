@@ -15,5 +15,7 @@
   "Arts": "Arte",
   "Security": "Sicurezza",
   "Currency": "Valute",
-  "Username": "Utente"
+  "Username": "Utente",
+  "Price: ": "Prezzo: ",
+  "Alternate/additional Price: ": "Prezzo alternativo/addizionale: "
 }

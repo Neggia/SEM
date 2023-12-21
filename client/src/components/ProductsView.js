@@ -258,7 +258,7 @@ const ProductsView = () => {
                   {(product.price_01 || product.price_01 === 0) &&
                     product.price_01 > 0 && (
                       <Typography variant="body1" color="textSecondary">
-                        Price: {product.price_01}{' '}
+                        {t('Price: ')} {product.price_01}{' '}
                         {getCurrencyStringById(product.currency_01_id)}
                       </Typography>
                     )}
@@ -266,8 +266,8 @@ const ProductsView = () => {
                     product.price_02 > 0 && (
                       <Typography variant="body1" color="textSecondary">
                         {product.price_01 > 0
-                          ? 'Alternate/additional Price:'
-                          : 'Price:'}{' '}
+                          ? t('Alternate/additional Price: ')
+                          : t('Price: ')}{' '}
                         {product.price_02}{' '}
                         {getCurrencyStringById(product.currency_02_id)}
                       </Typography>

@@ -32,11 +32,17 @@ export class SemHtmlElementStructureService {
     private readonly semOpenaiCompletionsService: SemOpenaiCompletionsService,
   ) {}
 
-  findAll(type: number): Promise<SemHtmlElementStructure[]> {
+  findAll(type?: number): Promise<SemHtmlElementStructure[]> {
+    if (type) {
+      return this.semHtmlElementStructureRepository.find({
+        where: {
+          type: type,
+        },
+        relations: ['website', 'openaiCompletions'],
+      });
+    }
+
     return this.semHtmlElementStructureRepository.find({
-      where: {
-        type: type,
-      },
       relations: ['website', 'openaiCompletions'],
     });
   }
