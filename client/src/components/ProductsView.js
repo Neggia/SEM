@@ -177,7 +177,7 @@ const ProductsView = () => {
       ? [currency.name, currency.symbol, currency.ticker]
           .filter(Boolean)
           .join(' ')
-      : 'Unknown currency';
+      : t('(unknown currency)');
   };
 
   const handleCategoryChange = (event) => {

@@ -17,5 +17,6 @@
   "Currency": "Currency",
   "Username": "Username",
   "Price: ": "Price: ",
-  "Alternate/additional Price: ": "Alternate/additional Price: "
+  "Alternate/additional Price: ": "Alternate/additional Price: ",
+  "(unknown currency)": "(unknown currency)"
 }

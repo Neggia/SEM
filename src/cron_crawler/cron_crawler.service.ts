@@ -590,6 +590,9 @@ export class CronCrawlerService {
           if (!currencyStringTemp) {
             currencyStringTemp = currencyString;
           }
+          // This will remove trailing spaces and colons
+          currencyStringTemp = currencyStringTemp.replace(/[:\s]+$/, '');
+
           const currency: SemCurrency =
             await this.semCurrencyService.getCurrencyFromString(
               currencyStringTemp,
@@ -695,7 +698,12 @@ export class CronCrawlerService {
               productHtmlElementStructureJSON.price_02,
             ),
           );
-          productStructure.price_02 = numbers.length > 1 ? numbers[1] : 0;
+          productStructure.price_02 =
+            numbers.length > 1
+              ? numbers[1]
+              : productStructure.price_01 === 0
+              ? numbers[0]
+              : 0;
 
           const currency_02 = await getCurrency(
             $,
