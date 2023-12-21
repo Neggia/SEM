@@ -1,0 +1,113 @@
+.App {
+  text-align: center;
+}
+
+.App-logo {
+  height: 40vmin;
+  pointer-events: none;
+}
+
+@media (prefers-reduced-motion: no-preference) {
+  .App-logo {
+    animation: App-logo-spin infinite 20s linear;
+  }
+}
+
+.App-header {
+  background-color: #282c34;
+  min-height: 100vh;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  font-size: calc(10px + 2vmin);
+  color: white;
+}
+
+.App-link {
+  color: #61dafb;
+}
+
+@keyframes App-logo-spin {
+  from {
+    transform: rotate(0deg);
+  }
+  to {
+    transform: rotate(360deg);
+  }
+}
+
+.task-manager-header-container {
+  display: flex; /* Use Flexbox */
+  align-items: center; /* Align items vertically */
+}
+
+.task-manager-header-container button {
+  margin-left: auto;
+}
+
+/* Container for the button and the flash message */
+.buttons-and-message-container {
+  display: flex; /* Use Flexbox */
+  align-items: center; /* Align items vertically */
+}
+
+.buttons-and-message-container button {
+  margin-top: 5px;
+  margin-bottom: 5px;
+  margin-left: 5px;
+}
+
+/* Flash message styling */
+#process-flash-message {
+  display: none;
+  margin-left: 5px;
+  border-radius: 4px;
+  text-align: center;
+  font-size: 0.9em;
+}
+
+#task-flash-message {
+  display: none;
+  margin-left: 5px;
+  border-radius: 4px;
+  text-align: center;
+  font-size: 0.9em;
+}
+
+.success {
+  background-color: #d4edda;
+  color: #155724;
+  border: 1px solid #c3e6cb;
+}
+
+.error {
+  background-color: #f8d7da;
+  color: #721c24;
+  border: 1px solid #f5c6cb;
+}
+
+/* Style for the pressed state */
+.icon-button-pressed {
+  border-style: inset;
+  background-color: lightgrey; /* Slight background color */
+}
+
+.loader {
+  border: 5px solid #f3f3f3;
+  border-top: 5px solid #3498db;
+  border-radius: 50%;
+  width: 30px;
+  height: 30px;
+  animation: spin 2s linear infinite;
+  margin-left: 5px;
+}
+
+@keyframes spin {
+  0% {
+    transform: rotate(0deg);
+  }
+  100% {
+    transform: rotate(360deg);
+  }
+}
