@@ -15,5 +15,8 @@
   "Arts": "Arts",
   "Security": "Security",
   "Currency": "Currency",
-  "Username": "Username"
+  "Username": "Username",
+  "Price: ": "Price: ",
+  "Alternate/additional Price: ": "Alternate/additional Price: ",
+  "(unknown currency)": "(unknown currency)"
 }

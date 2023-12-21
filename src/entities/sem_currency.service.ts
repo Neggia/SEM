@@ -61,7 +61,7 @@ export class SemCurrencyService {
         break;
       default:
         name = currencyString;
-        currency = await this.findOneByTicker(name);
+        currency = await this.findOneByName(name);
         break;
     }
     if (!currency) {

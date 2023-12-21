@@ -20,8 +20,15 @@ export class SemOpenaiCompletionsRequest {
   @Column()
   bodyHash: string;
 
+  @Column({ nullable: true })
+  body: string;
+
   @Column()
   response: string;
+
+  // Bitmask
+  @Column({ nullable: true })
+  status: number;
 
   @ManyToOne(
     () => SemOpenaiCompletions,

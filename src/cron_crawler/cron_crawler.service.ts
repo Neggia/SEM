@@ -19,6 +19,7 @@ import { SemWebsiteService } from '../entities/sem_website.service';
 import {
   ServiceOpenaiService,
   ProductHtmlElementStructure,
+  PaginationHtmlElementData,
 } from '../service_openai/service_openai.service';
 import { SemHtmlElementStructureService } from '../entities/sem_html_element_structure.service';
 import {
@@ -33,6 +34,7 @@ import {
   entitiesMatch,
   removeTrailingSlash,
   delay,
+  getFormattedUrl,
 } from '../utils/globals';
 const {
   // HTML_ELEMENT_TYPE_UNKNOWN,
@@ -247,7 +249,7 @@ export class CronCrawlerService {
     const crawlDelay = await this.getCrawlDelay(url);
 
     let pageUrl = url;
-    // let currentPage = 1;
+    let currentPage = 1;
     // let pages = [];
     let total_pages = 0;
     let websiteId;
@@ -528,7 +530,8 @@ export class CronCrawlerService {
             productHtmlElementStructure !== undefined &&
             // paginationHtmlElementStructure !== null &&
             // paginationHtmlElementStructure !== undefined &&
-            paginationHtmlElementData !== ''
+            paginationHtmlElementData !== '' &&
+            paginationHtmlElementData !== null
           ) {
             break;
           }
@@ -587,6 +590,9 @@ export class CronCrawlerService {
           if (!currencyStringTemp) {
             currencyStringTemp = currencyString;
           }
+          // This will remove trailing spaces and colons
+          currencyStringTemp = currencyStringTemp.replace(/[:\s]+$/, '');
+
           const currency: SemCurrency =
             await this.semCurrencyService.getCurrencyFromString(
               currencyStringTemp,
@@ -618,6 +624,31 @@ export class CronCrawlerService {
             timestamp: null,
           };
 
+          productStructure.url =
+            // removeTrailingSlash(website.url) +
+            extractFromElement(
+              $,
+              productElement,
+              productHtmlElementStructureJSON.url,
+              'href',
+            );
+          productStructure.url = getFormattedUrl(
+            website.url,
+            productStructure.url,
+          );
+
+          // TODO Check if url or data
+          productStructure.thumbnailUrl = extractFromElement(
+            $,
+            productElement,
+            productHtmlElementStructureJSON.thumbnail,
+            'src',
+          );
+          productStructure.thumbnailUrl = getFormattedUrl(
+            website.url,
+            productStructure.thumbnailUrl,
+          );
+
           productStructure.title = extractFromElement(
             $,
             productElement,
@@ -630,23 +661,17 @@ export class CronCrawlerService {
             productHtmlElementStructureJSON.description,
           );
 
-          // TODO Check if url or data
-          productStructure.thumbnailUrl = extractFromElement(
-            $,
-            productElement,
-            productHtmlElementStructureJSON.thumbnail,
-            'src',
-          );
-          if (
-            productStructure.thumbnailUrl.startsWith('/') &&
-            !productStructure.thumbnailUrl.startsWith(
-              removeTrailingSlash(website.url),
-            )
-          ) {
-            // If it's an url and it's relative, not absolute
-            productStructure.thumbnailUrl =
-              removeTrailingSlash(website.url) + productStructure.thumbnailUrl;
-          }
+          // if (
+          //   productStructure.thumbnailUrl &&
+          //   productStructure.thumbnailUrl.startsWith('/') &&
+          //   !productStructure.thumbnailUrl.startsWith(
+          //     removeTrailingSlash(website.url),
+          //   )
+          // ) {
+          //   // If it's an url and it's relative, not absolute
+          //   productStructure.thumbnailUrl =
+          //     removeTrailingSlash(website.url) + productStructure.thumbnailUrl;
+          // }
 
           numbers = [];
           numbers = extractNumbers(
@@ -673,7 +698,12 @@ export class CronCrawlerService {
               productHtmlElementStructureJSON.price_02,
             ),
           );
-          productStructure.price_02 = numbers.length > 1 ? numbers[1] : 0;
+          productStructure.price_02 =
+            numbers.length > 1
+              ? numbers[1]
+              : productStructure.price_01 === 0
+              ? numbers[0]
+              : 0;
 
           const currency_02 = await getCurrency(
             $,
@@ -681,15 +711,6 @@ export class CronCrawlerService {
             productHtmlElementStructureJSON.currency_02,
           );
           productStructure.currency_02_id = currency_02.id;
-
-          productStructure.url =
-            removeTrailingSlash(website.url) +
-            extractFromElement(
-              $,
-              productElement,
-              productHtmlElementStructureJSON.url,
-              'href',
-            );
 
           const categoryName =
             await this.serviceOpenaiService.getProductCategory(
@@ -734,7 +755,9 @@ export class CronCrawlerService {
         }
 
         pageUrl = null;
-        const paginationJSON = JSON.parse(paginationHtmlElementData);
+        const paginationJSON: PaginationHtmlElementData = JSON.parse(
+          paginationHtmlElementData,
+        );
         if (paginationJSON.current_page < paginationJSON.total_pages) {
           // if (paginationHtmlElementData || pages.length > 0) {
           //   if (pages.length === 0) {
@@ -743,16 +766,17 @@ export class CronCrawlerService {
 
           // if (pages.length > 1) {
           //   if (currentPage < pages.length) {
-          pageUrl = paginationJSON.next_page_url; //pages[currentPage];
-          if (
-            pageUrl.startsWith('/') &&
-            !pageUrl.startsWith(removeTrailingSlash(website.url))
-          ) {
-            // If it's a relative url, not absolute
-            pageUrl = removeTrailingSlash(website.url) + pageUrl;
-          }
+          pageUrl = getFormattedUrl(website.url, paginationJSON.next_page_url); //pages[currentPage];
+          // if (!pageUrl.startsWith(removeTrailingSlash(website.url))) {
+          //   // If it's a relative url, not absolute
+          //   if (!pageUrl.startsWith('/')) {
+          //     pageUrl = '/' + pageUrl;
+          //   }
+
+          //   pageUrl = removeTrailingSlash(website.url) + pageUrl;
           // }
-          // currentPage++;
+          // }
+          currentPage++; // Failsafe in case of infinite loops
           // }
         }
 
@@ -769,7 +793,9 @@ export class CronCrawlerService {
           'last_page',
           paginationJSON.current_page,
         );
-
+        if (currentPage > total_pages) {
+          break;
+        }
         if (pageUrl) {
           delay(crawlDelay);
         }

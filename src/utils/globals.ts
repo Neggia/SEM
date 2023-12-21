@@ -45,3 +45,33 @@ export function copyExistingFields(source, target) {
     }
   });
 }
+
+export function getFormattedUrl(websiteUrl: string, pathUrl: string) {
+  const url = new URL(websiteUrl);
+  const protocol = url.protocol; // "https:"
+  const domain = url.hostname; // "www.example.com"
+  const domainUrl = protocol + '//' + domain;
+  let path = pathUrl;
+
+  const websiteUrlLastSlashIndex = websiteUrl.lastIndexOf('/');
+  const websiteUrlPartBeforeLastSlash =
+    websiteUrl === domainUrl
+      ? domainUrl
+      : websiteUrl.substring(0, websiteUrlLastSlashIndex);
+
+  if (!path) {
+    return null;
+  }
+
+  if (!path.startsWith(protocol)) {
+    // it's a relative url, not absolute
+    if (!path.startsWith('/')) {
+      path = '/' + path;
+    }
+
+    path = websiteUrlPartBeforeLastSlash + path;
+  }
+
+  path = path.replace(/&amp;/g, '&');
+  return path;
+}

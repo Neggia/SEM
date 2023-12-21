@@ -75,6 +75,12 @@ export class FixturesService {
     // await this.clearEntityData(SemProcess);
     // await this.clearEntityData(SemOpenaiCompletionsRequest);
     // await this.clearEntityData(SemOpenaiCompletions);
+    /*     const semHtmlElementStructureRepository = this.entityManager.getRepository(
+      SemHtmlElementStructure,
+    );
+    await semHtmlElementStructureRepository.delete({
+      website: { id: 2 },
+    }); */
   }
 
   async loadFixtures(): Promise<void> {

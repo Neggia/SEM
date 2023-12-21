@@ -14,6 +14,7 @@ import {
   CONTROLLER_OPENAI_COMPLETIONS_ID,
   CONTROLLER_HTML_ELEMENT_STRUCTURE_ID,
   HTML_ELEMENT_TYPE_PRODUCT,
+  HTML_ELEMENT_TYPE_PAGINATION,
 } from '../utils/globals';
 import { DateTime } from 'luxon';
 
@@ -78,10 +79,9 @@ function TaskManager() {
         setProcessData(processResponseJson);
 
         const htmlElementStructureResponse = await fetch(
-          SERVER_BASE_URL +
-            CONTROLLER_HTML_ELEMENT_STRUCTURE_ID +
-            '?type=' +
-            HTML_ELEMENT_TYPE_PRODUCT,
+          SERVER_BASE_URL + CONTROLLER_HTML_ELEMENT_STRUCTURE_ID,
+          // + '?type=' +
+          // HTML_ELEMENT_TYPE_PRODUCT,
         );
         if (!htmlElementStructureResponse.ok) {
           throw new Error(
@@ -130,16 +130,41 @@ function TaskManager() {
                 ).toFormat('yyyy-MM-dd HH:mm:ss');
               }
 
-              const htmlElementStructure =
+              let productStructure = '';
+
+              const htmlElementStructureProduct =
                 htmlElementStructureResponseJson.find(
-                  (record) => record.website && record.website.id === obj.id,
+                  (record) =>
+                    record.website &&
+                    record.website.id === obj.id &&
+                    record.type === HTML_ELEMENT_TYPE_PRODUCT,
                 );
-              const productStructureJSON = {
-                id: htmlElementStructure.id,
-                selector: htmlElementStructure.selector,
-                json: htmlElementStructure.json,
-              };
-              const productStructure = JSON.stringify(productStructureJSON);
+              if (htmlElementStructureProduct) {
+                const productStructureJSON = {
+                  id: htmlElementStructureProduct.id,
+                  selector: htmlElementStructureProduct.selector,
+                  json: htmlElementStructureProduct.json,
+                };
+                productStructure = JSON.stringify(productStructureJSON);
+              }
+
+              let paginationStructure = '';
+
+              const htmlElementStructurePagination =
+                htmlElementStructureResponseJson.find(
+                  (record) =>
+                    record.website &&
+                    record.website.id === obj.id &&
+                    record.type === HTML_ELEMENT_TYPE_PAGINATION,
+                );
+              if (htmlElementStructurePagination) {
+                const productStructureJSON = {
+                  id: htmlElementStructurePagination.id,
+                  selector: htmlElementStructurePagination.selector,
+                  json: htmlElementStructurePagination.json,
+                };
+                paginationStructure = JSON.stringify(productStructureJSON);
+              }
 
               return {
                 ...obj,
@@ -147,6 +172,7 @@ function TaskManager() {
                 last_start_datetime: formattedLastStart,
                 progress: (obj.last_page / obj.num_pages) * 100,
                 product_structure: productStructure,
+                pagination_structure: paginationStructure,
               };
             },
           );

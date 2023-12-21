@@ -221,7 +221,7 @@ const ProcessView = ({ processData, onProcessDataUpdate }) => {
       },
     },
     { title: 'Duration', field: 'duration', width: 110 },
-    { title: 'Message', field: 'message', width: 350 },
+    { title: 'Message', field: 'message', width: 350, formatter: 'textarea' },
   ];
 
   const options = {

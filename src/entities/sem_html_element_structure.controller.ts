@@ -16,7 +16,7 @@ export class SemHtmlElementStructureController {
   ) {}
 
   @Get()
-  findAll(@Query('type') type: number) {
+  findAll(@Query('type') type?: number) {
     return this.semHtmlElementStructureService.findAll(type);
   }
 

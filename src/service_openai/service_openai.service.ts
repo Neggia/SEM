@@ -3,7 +3,11 @@ import { SemHtmlElement } from '../entities/sem_html_element.entity';
 import { SemHtmlElementService } from '../entities/sem_html_element.service';
 import { SemOpenaiCompletions } from '../entities/sem_openai_completions.entity';
 import { SemOpenaiCompletionsService } from '../entities/sem_openai_completions.service';
-import { SemOpenaiCompletionsRequestService } from '../entities/sem_openai_completions_request.service';
+import {
+  SemOpenaiCompletionsRequestService,
+  OPENAICOMPLETIONS_REQUEST_STATUS_SUCCESS,
+  OPENAICOMPLETIONS_REQUEST_STATUS_ERROR,
+} from '../entities/sem_openai_completions_request.service';
 // import { SemWebsiteService } from '../entities/sem_website.service';
 import { SemHtmlElementStructure } from '../entities/sem_html_element_structure.entity';
 import { SemHtmlElementStructureService } from '../entities/sem_html_element_structure.service';
@@ -33,6 +37,12 @@ export interface ProductHtmlElementStructure {
   currency_01: string;
   price_02: string;
   currency_02: string;
+}
+
+export interface PaginationHtmlElementData {
+  current_page: number;
+  total_pages: number;
+  next_page_url: string;
 }
 
 const clientOptions: ClientOptions = {
@@ -107,19 +117,22 @@ export class ServiceOpenaiService {
         htmlElement,
         completions,
       );
-      if (isNaN(Number(parseHtmlElementResponse))) {
+      if (
+        isNaN(Number(parseHtmlElementResponse)) ||
+        parseHtmlElementResponse === null
+      ) {
         return HTML_ELEMENT_TYPE_UNKNOWN;
       }
 
       return Number(parseHtmlElementResponse);
     } catch (error) {
       this.logger.error(
-        `Failed to identify type for HTML element id: ${htmlElement.id}`,
+        `Failed to identify type for HTML element id: ${htmlElement.id}, selector "${htmlElement.selector}"`,
         error.stack,
       );
       // debugger;
       throw new Error(
-        `Failed to identify type for HTML element id: ${htmlElement.id}`,
+        `Failed to identify type for HTML element id: ${htmlElement.id}, selector "${htmlElement.selector}"`,
       );
     }
   }
@@ -214,6 +227,25 @@ export class ServiceOpenaiService {
     }
   }
 
+  isValidPaginationData(parseHtmlElementResponse: string): boolean {
+    try {
+      const parseHtmlElementResponseJSON: PaginationHtmlElementData =
+        JSON.parse(parseHtmlElementResponse);
+
+      if (
+        parseHtmlElementResponseJSON.current_page !== null &&
+        parseHtmlElementResponseJSON.total_pages !== null &&
+        parseHtmlElementResponseJSON.next_page_url !== undefined
+      ) {
+        return true;
+      }
+
+      return false;
+    } catch (error) {
+      return false;
+    }
+  }
+
   async getPaginationData(
     htmlElementId: number,
     htmlElement?: SemHtmlElement,
@@ -251,6 +283,9 @@ export class ServiceOpenaiService {
         htmlElement,
         completions,
       );
+      if (!this.isValidPaginationData(paginationHtmlElementData)) {
+        return null;
+      }
 
       if (!paginationHtmlElementStructure) {
         paginationHtmlElementStructure =
@@ -295,7 +330,9 @@ export class ServiceOpenaiService {
         `Failed to parse HTML element: ${htmlElement}`,
         error.stack,
       );
-      throw new Error(`Failed to parse HTML element: ${htmlElement}`);
+      // throw new Error(
+      //   `Failed to parse HTML element: ${htmlElement}, ${error.stack}`,
+      // );
     }
   }
 
@@ -306,6 +343,9 @@ export class ServiceOpenaiService {
     parameters?: any,
     // completionsId: number,
   ): Promise<string> {
+    let bodyString: string;
+    let bodyHash: string;
+
     try {
       // const completions =
       //   await this.semOpenaiCompletionsService.findOne(completionsId);
@@ -342,8 +382,8 @@ export class ServiceOpenaiService {
         // ],
         model: completionsJSON.model, //"gpt-3.5-turbo",
       };
-      const bodyString = JSON.stringify(body);
-      const bodyHash = hashString(bodyString);
+      bodyString = JSON.stringify(body);
+      bodyHash = hashString(bodyString);
       const semOpenaiCompletionsRequest =
         await this.semOpenaiCompletionsRequestService.findOneBy(
           bodyHash,
@@ -357,10 +397,25 @@ export class ServiceOpenaiService {
         );
       }
       if (semOpenaiCompletionsRequest !== null) {
-        console.log(
-          `OpenaiCompletionsRequest fetched from cache with hash ${bodyHash} for website id ${website.id} and completions id ${completions.id}`,
-        );
-        return semOpenaiCompletionsRequest.response;
+        if (
+          semOpenaiCompletionsRequest.status !== null &&
+          semOpenaiCompletionsRequest.status &
+            OPENAICOMPLETIONS_REQUEST_STATUS_ERROR
+        ) {
+          // Retry again for Error: 429 Rate limit reached
+          if (
+            !semOpenaiCompletionsRequest.response.startsWith(
+              'Error: 429 Rate limit reached',
+            )
+          ) {
+            return null;
+          }
+        } else {
+          console.log(
+            `OpenaiCompletionsRequest fetched from cache with hash ${bodyHash} for website id ${website.id} and completions id ${completions.id}`,
+          );
+          return semOpenaiCompletionsRequest.response;
+        }
       }
 
       // The system message helps set the behavior of the assistant
@@ -373,6 +428,8 @@ export class ServiceOpenaiService {
         bodyHash,
         response,
         completions,
+        OPENAICOMPLETIONS_REQUEST_STATUS_SUCCESS,
+        process.env.NODE_ENV === 'test' ? bodyString : null,
       );
 
       return response;
@@ -381,7 +438,19 @@ export class ServiceOpenaiService {
         `Failed to run completions id: ${completions.id}`,
         error.stack,
       );
-      throw new Error(`Failed to run completions id: ${completions.id}`);
+      // throw new Error(
+      //   `Failed to run completions id: ${completions.id}, ${error.stack}`,
+      // );
+
+      await this.semOpenaiCompletionsRequestService.createOpenaiCompletionsRequest(
+        website,
+        bodyHash,
+        error.stack,
+        completions,
+        OPENAICOMPLETIONS_REQUEST_STATUS_ERROR,
+        process.env.NODE_ENV === 'test' ? bodyString : null,
+      );
+      return null;
     }
   }
 }
