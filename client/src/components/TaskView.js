@@ -213,7 +213,7 @@ const TaskView = ({
         shiftEnterSubmit: true, //submit cell value on shift enter
       },
     },
-    { title: 'Message', field: 'message', width: 350 },
+    { title: 'Message', field: 'message', width: 350, formatter: 'textarea' },
   ];
 
   // const handleGroupHeaderPlay = () => {

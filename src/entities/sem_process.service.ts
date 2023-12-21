@@ -2,12 +2,12 @@ import { Injectable } from '@nestjs/common';
 import { InjectRepository } from '@nestjs/typeorm';
 import { Repository } from 'typeorm';
 import { SemProcess } from '../entities/sem_process.entity';
-const {
-  PROCESS_STATUS_RUNNING,
-  PROCESS_STATUS_PAUSED,
-  PROCESS_STATUS_STOPPED,
-  PROCESS_STATUS_ERROR,
-} = require('../../client/src/utils/globals');
+// const {
+//   PROCESS_STATUS_RUNNING,
+//   PROCESS_STATUS_PAUSED,
+//   PROCESS_STATUS_STOPPED,
+//   PROCESS_STATUS_ERROR,
+// } = require('../../client/src/utils/globals');
 
 /* export class SemProcessStatus {
   static readonly RUNNING = PROCESS_STATUS_RUNNING; // 2^0, binary 0001

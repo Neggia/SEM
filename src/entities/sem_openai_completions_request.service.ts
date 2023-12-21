@@ -6,6 +6,9 @@ import { SemOpenaiCompletionsRequest } from '../entities/sem_openai_completions_
 import { SemWebsite } from './sem_website.entity';
 // import { hashString } from '../utils/globals';
 
+export const OPENAICOMPLETIONS_REQUEST_STATUS_SUCCESS = 0;
+export const OPENAICOMPLETIONS_REQUEST_STATUS_ERROR = 1; // 2^0, binary 0001
+
 @Injectable()
 export class SemOpenaiCompletionsRequestService {
   constructor(
@@ -56,6 +59,8 @@ export class SemOpenaiCompletionsRequestService {
     bodyHash: string,
     response: string,
     openaiCompletions: SemOpenaiCompletions,
+    status: number,
+    body?: string,
   ): Promise<SemOpenaiCompletionsRequest> {
     const websiteId = website.id;
 
@@ -65,6 +70,8 @@ export class SemOpenaiCompletionsRequestService {
     openaiCompletionsRequest.bodyHash = bodyHash;
     openaiCompletionsRequest.response = response;
     openaiCompletionsRequest.openaiCompletions = openaiCompletions;
+    openaiCompletionsRequest.status = status;
+    openaiCompletionsRequest.body = body ? body : null;
 
     // Save the new SemOpenaiCompletionsRequest in the database
     return await this.semOpenaiCompletionsRequest.save(

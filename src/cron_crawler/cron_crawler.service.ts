@@ -19,6 +19,7 @@ import { SemWebsiteService } from '../entities/sem_website.service';
 import {
   ServiceOpenaiService,
   ProductHtmlElementStructure,
+  PaginationHtmlElementData,
 } from '../service_openai/service_openai.service';
 import { SemHtmlElementStructureService } from '../entities/sem_html_element_structure.service';
 import {
@@ -528,7 +529,8 @@ export class CronCrawlerService {
             productHtmlElementStructure !== undefined &&
             // paginationHtmlElementStructure !== null &&
             // paginationHtmlElementStructure !== undefined &&
-            paginationHtmlElementData !== ''
+            paginationHtmlElementData !== '' &&
+            paginationHtmlElementData !== null
           ) {
             break;
           }
@@ -734,7 +736,9 @@ export class CronCrawlerService {
         }
 
         pageUrl = null;
-        const paginationJSON = JSON.parse(paginationHtmlElementData);
+        const paginationJSON: PaginationHtmlElementData = JSON.parse(
+          paginationHtmlElementData,
+        );
         if (paginationJSON.current_page < paginationJSON.total_pages) {
           // if (paginationHtmlElementData || pages.length > 0) {
           //   if (pages.length === 0) {

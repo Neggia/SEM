@@ -37,7 +37,7 @@ export class SemWebsite {
   @Column()
   num_pages: number;
 
-  // Butmask
+  // Bitmask
   @Column()
   status: number;
 
