@@ -1,4 +1,4 @@
-const SERVER_BASE_URL = 'http://localhost:3000/';
+const SERVER_BASE_URL = process.env.REACT_APP_SERVER_BASE_URL;
 
 const HTML_ELEMENT_TYPE_UNKNOWN = 0;
 const HTML_ELEMENT_TYPE_PRODUCT = 1;

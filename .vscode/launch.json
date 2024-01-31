@@ -2,6 +2,15 @@
   "version": "0.2.0",
   "configurations": [
     {
+      "type": "node",
+      "request": "attach",
+      "name": "Debug remote Docker",
+      "port": 9229,
+      "address": "94.130.24.173",
+      "localRoot": "${workspaceFolder}",
+      "remoteRoot": "/home/node/app"
+    },
+    {
       "type": "pwa-node",
       "request": "launch",
       "name": "Debug NestJS",

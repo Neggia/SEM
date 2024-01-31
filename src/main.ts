@@ -17,12 +17,12 @@ async function bootstrap() {
     // app.enableCors();
     // Alternatively, enable CORS for specific origins
     app.enableCors({
-      origin: 'http://localhost:3001',
+      origin: process.env.CORS_ORIGIN,
       methods: 'GET,HEAD,PUT,PATCH,POST,DELETE',
       credentials: true,
     });
 
-    await app.listen(3000);
+    await app.listen(process.env.SERVER_PORT);
   } catch (error) {
     console.error('Error during Nest application startup', error);
   }

@@ -17,6 +17,7 @@ import { UserContext } from '../context/UserContext';
 import i18n from 'i18next';
 import LanguageSelect from './LanguageSelect';
 import { useTranslation } from 'react-i18next';
+import { SERVER_BASE_URL } from '../utils/globals';
 
 function Login() {
   const navigate = useNavigate();
@@ -37,7 +38,8 @@ function Login() {
   const handleLogin = async (e) => {
     e.preventDefault();
     try {
-      const response = await axios.post('http://localhost:3000/auth/login', {
+      const url = SERVER_BASE_URL + 'auth/login';
+      const response = await axios.post(url, {
         username,
         password,
       });
