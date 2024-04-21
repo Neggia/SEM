@@ -1,7 +1,11 @@
+
+require('dotenv').config();
+
 import { NestFactory } from '@nestjs/core';
 import { AppModule } from './app.module';
 import { FixturesService } from './fixtures/fixtures.service';
 import { CronCrawlerService } from './cron_crawler/cron_crawler.service';
+
 
 async function bootstrap() {
   try {
