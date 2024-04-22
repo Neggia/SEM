@@ -214,8 +214,13 @@ export class CronCrawlerService {
 
   async shouldCrawl(url: string): Promise<boolean> {
     const robotsUrl = new URL('/robots.txt', url).href;
-    await this.robotsAgent.useRobotsFor(robotsUrl);
-    return this.robotsAgent.canCrawl(url);
+    try {
+      await this.robotsAgent.useRobotsFor(robotsUrl);
+      return this.robotsAgent.canCrawl(url);
+    } catch (e) {
+      console.error('Ignoring robots.txt. Not found? Exception: ', e);
+    }
+    return true;
   }
 
   async getCrawlDelay(url: string): Promise<number> {
@@ -225,8 +230,13 @@ export class CronCrawlerService {
 
     // TODO check if crawDelay already extracted and don't fetch again
     const robotsUrl = new URL('/robots.txt', url).href;
-    await this.robotsAgent.useRobotsFor(robotsUrl);
-    return this.robotsAgent.getCrawlDelay();
+    try {
+      await this.robotsAgent.useRobotsFor(robotsUrl);
+      return this.robotsAgent.getCrawlDelay();
+    } catch (e) {
+      console.error('Ignoring robots.txt. Not found? Exception: ', e);
+    }
+    return 0;
   }
 
   async crawl(websiteLazy: SemWebsite) {
@@ -702,8 +712,8 @@ export class CronCrawlerService {
             numbers.length > 1
               ? numbers[1]
               : productStructure.price_01 === 0
-              ? numbers[0]
-              : 0;
+                ? numbers[0]
+                : 0;
 
           const currency_02 = await getCurrency(
             $,
