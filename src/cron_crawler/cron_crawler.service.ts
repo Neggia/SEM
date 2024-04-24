@@ -242,7 +242,7 @@ export class CronCrawlerService {
   async scrollToBottom(page) {
     let maxPageHeight = 20000; // temporary for test. We will scroll with no limit.
     let lastHeight = await page.evaluate('document.body.scrollHeight');
-    while (lastHeight < maxPageHeight) {
+    while (true || lastHeight < maxPageHeight) {
       await page.evaluate('window.scrollTo(0, document.body.scrollHeight)');
       await page.waitForTimeout(2000); // sleep a bit
       let newHeight = await page.evaluate('document.body.scrollHeight');
@@ -630,7 +630,13 @@ export class CronCrawlerService {
         };
 
         // if infinite scroll , scroll down as many times as possible
+        console.log(
+          'before scrollToBottom. once finished , you should see another log here...',
+        );
         await this.scrollToBottom(page);
+        console.log(
+          'scrollToBottom finished. Re-downloading the whole HTML from the page.',
+        );
         // now reload the whole html to get all products , if infinite scroll
         html = await page.content();
         $ = cheerio.load(html);
