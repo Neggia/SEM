@@ -299,11 +299,8 @@ export class CronCrawlerService {
         // await page.waitForSelector('your-dynamic-content-selector');
         await page.waitForTimeout(1000); // Additional time buffer, if necessary
 
-        // if infinite scroll , scroll down as many times as possible
-        await this.scrollToBottom(page);
-
-        const html = await page.content();
-        const $ = cheerio.load(html);
+        let html = await page.content();
+        let $ = cheerio.load(html);
 
         // Function to recursively traverse the DOM and record the tag structure with classes, HTML, and selector
         const getTagStructure = (
@@ -627,6 +624,12 @@ export class CronCrawlerService {
 
           return currency;
         };
+
+        // if infinite scroll , scroll down as many times as possible
+        await this.scrollToBottom(page);
+        // now reload the whole html to get all products , if infinite scroll
+        html = await page.content();
+        $ = cheerio.load(html);
 
         const productElements = $(productHtmlElementStructure.selector).get();
         let numbers = [];
