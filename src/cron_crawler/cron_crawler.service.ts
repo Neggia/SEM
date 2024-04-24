@@ -240,7 +240,7 @@ export class CronCrawlerService {
   }
 
   async scrollToBottom(page) {
-    let maxPageHeight = 30000; // temporary for test. We will scroll with no limit.
+    let maxPageHeight = 20000; // temporary for test. We will scroll with no limit.
     let lastHeight = await page.evaluate('document.body.scrollHeight');
     while (lastHeight < maxPageHeight) {
       await page.evaluate('window.scrollTo(0, document.body.scrollHeight)');
@@ -312,9 +312,10 @@ export class CronCrawlerService {
             ? $(element).attr('class').split(/\s+/)
             : [];
           const classSelector = classes.length ? '.' + classes.join('.') : '';
-          const currentSelector = `${
+          let currentSelector = `${
             parentSelector ? parentSelector + ' > ' : ''
           }${tag}${classSelector}`;
+          currentSelector = currentSelector.replace('. ', '');
 
           const structure: TagStructure = {
             tag,
@@ -616,6 +617,9 @@ export class CronCrawlerService {
           }
           // This will remove trailing spaces and colons
           currencyStringTemp = currencyStringTemp.replace(/[:\s]+$/, '');
+          if (!currencyStringTemp) {
+            return null;
+          }
 
           const currency: SemCurrency =
             await this.semCurrencyService.getCurrencyFromString(
@@ -711,7 +715,11 @@ export class CronCrawlerService {
               productHtmlElementStructureJSON.price_01,
             ),
           );
-          productStructure.price_01 = numbers.length > 0 ? numbers[0] : 0;
+          productStructure.price_01 =
+            numbers && numbers.length > 0 ? numbers[0] : 0;
+          if (!productStructure.price_01) {
+            continue;
+          }
 
           const currency_01 = await getCurrency(
             $,
@@ -784,6 +792,10 @@ export class CronCrawlerService {
           }
         }
 
+        if (!paginationHtmlElementData) {
+          // if no pagination , infinite scroll. we will scrape from the same page next time.
+          break;
+        }
         pageUrl = null;
         const paginationJSON: PaginationHtmlElementData = JSON.parse(
           paginationHtmlElementData,
