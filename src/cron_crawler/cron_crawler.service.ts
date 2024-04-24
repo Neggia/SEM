@@ -239,6 +239,20 @@ export class CronCrawlerService {
     return 0;
   }
 
+  async scrollToBottom(page) {
+    let maxPageHeight = 30000; // temporary for test. We will scroll with no limit.
+    let lastHeight = await page.evaluate('document.body.scrollHeight');
+    while (lastHeight < maxPageHeight) {
+      await page.evaluate('window.scrollTo(0, document.body.scrollHeight)');
+      await page.waitForTimeout(2000); // sleep a bit
+      let newHeight = await page.evaluate('document.body.scrollHeight');
+      if (newHeight === lastHeight) {
+        break;
+      }
+      lastHeight = newHeight;
+    }
+  }
+
   async crawl(websiteLazy: SemWebsite) {
     // const isDebug = process.env.NODE_DEBUG === 'true';
     // const isDebug = process.execArgv.some(
@@ -284,6 +298,9 @@ export class CronCrawlerService {
         // await page.goto(url, { waitUntil: 'domcontentloaded' });
         // await page.waitForSelector('your-dynamic-content-selector');
         await page.waitForTimeout(1000); // Additional time buffer, if necessary
+
+        // if infinite scroll , scroll down as many times as possible
+        await this.scrollToBottom(page);
 
         const html = await page.content();
         const $ = cheerio.load(html);
