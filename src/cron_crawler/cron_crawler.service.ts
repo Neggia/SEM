@@ -689,6 +689,10 @@ export class CronCrawlerService {
             productStructure.thumbnailUrl,
           );
 
+          console.log(
+            'productStructure.thumbnailUrl =  ' + productStructure.thumbnailUrl,
+          );
+
           productStructure.title = extractFromElement(
             $,
             productElement,
@@ -700,6 +704,8 @@ export class CronCrawlerService {
             productElement,
             productHtmlElementStructureJSON.description,
           );
+
+          console.log('productStructure.title =  ' + productStructure.title);
 
           // if (
           //   productStructure.thumbnailUrl &&
@@ -726,6 +732,10 @@ export class CronCrawlerService {
           if (!productStructure.price_01) {
             continue;
           }
+
+          console.log(
+            'productStructure.price_01 =  ' + productStructure.price_01,
+          );
 
           const currency_01 = await getCurrency(
             $,
@@ -761,6 +771,7 @@ export class CronCrawlerService {
               productStructure.title,
               website,
             );
+          console.log('categoryName = ' + categoryName);
           const category =
             await this.semCategoryService.findOneByName(categoryName);
           productStructure.category_id = category ? category.id : null;
@@ -768,6 +779,8 @@ export class CronCrawlerService {
           productStructure.timestamp = Date.now();
 
           let productAlreadyExist: boolean = false;
+
+          console.log('findOneByUrl  ' + productStructure.url);
 
           // Url must be unique
           let product = await this.semProductService.findOneByUrl(
@@ -791,6 +804,7 @@ export class CronCrawlerService {
             }
           }
           if (!productAlreadyExist) {
+            console.log('createProduct');
             await this.semProductService.createProduct(
               productStructure,
               website,
@@ -802,6 +816,9 @@ export class CronCrawlerService {
           // if no pagination , infinite scroll. we will scrape from the same page next time.
           break;
         }
+
+        console.log('Trying to navigate to next page...');
+
         pageUrl = null;
         const paginationJSON: PaginationHtmlElementData = JSON.parse(
           paginationHtmlElementData,
@@ -828,6 +845,8 @@ export class CronCrawlerService {
           // }
         }
 
+        console.log('currentPage = ' + currentPage);
+
         if (total_pages === 0) {
           websiteLazy = await this.semWebsiteService.updateWebsiteField(
             websiteLazy.id,
@@ -842,11 +861,13 @@ export class CronCrawlerService {
           paginationJSON.current_page,
         );
         if (currentPage > total_pages) {
+          console.log('currentPage > total_pages');
           break;
         }
         if (pageUrl) {
           delay(crawlDelay);
         }
+        console.log('pageUrl = ' + pageUrl);
       }
       // });
     } catch (error) {
