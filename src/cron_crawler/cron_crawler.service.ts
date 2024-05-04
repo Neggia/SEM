@@ -214,8 +214,13 @@ export class CronCrawlerService {
 
   async shouldCrawl(url: string): Promise<boolean> {
     const robotsUrl = new URL('/robots.txt', url).href;
-    await this.robotsAgent.useRobotsFor(robotsUrl);
-    return this.robotsAgent.canCrawl(url);
+    try {
+      await this.robotsAgent.useRobotsFor(robotsUrl);
+      return this.robotsAgent.canCrawl(url);
+    } catch (e) {
+      console.error('Ignoring robots.txt. Not found? Exception: ', e);
+    }
+    return true;
   }
 
   async getCrawlDelay(url: string): Promise<number> {
@@ -225,8 +230,27 @@ export class CronCrawlerService {
 
     // TODO check if crawDelay already extracted and don't fetch again
     const robotsUrl = new URL('/robots.txt', url).href;
-    await this.robotsAgent.useRobotsFor(robotsUrl);
-    return this.robotsAgent.getCrawlDelay();
+    try {
+      await this.robotsAgent.useRobotsFor(robotsUrl);
+      return this.robotsAgent.getCrawlDelay();
+    } catch (e) {
+      console.error('Ignoring robots.txt. Not found? Exception: ', e);
+    }
+    return 0;
+  }
+
+  async scrollToBottom(page) {
+    let maxPageHeight = 20000; // temporary for test. We will scroll with no limit.
+    let lastHeight = await page.evaluate('document.body.scrollHeight');
+    while (true || lastHeight < maxPageHeight) {
+      await page.evaluate('window.scrollTo(0, document.body.scrollHeight)');
+      await page.waitForTimeout(2000); // sleep a bit
+      let newHeight = await page.evaluate('document.body.scrollHeight');
+      if (newHeight === lastHeight) {
+        break;
+      }
+      lastHeight = newHeight;
+    }
   }
 
   async crawl(websiteLazy: SemWebsite) {
@@ -275,8 +299,8 @@ export class CronCrawlerService {
         // await page.waitForSelector('your-dynamic-content-selector');
         await page.waitForTimeout(1000); // Additional time buffer, if necessary
 
-        const html = await page.content();
-        const $ = cheerio.load(html);
+        let html = await page.content();
+        let $ = cheerio.load(html);
 
         // Function to recursively traverse the DOM and record the tag structure with classes, HTML, and selector
         const getTagStructure = (
@@ -288,9 +312,10 @@ export class CronCrawlerService {
             ? $(element).attr('class').split(/\s+/)
             : [];
           const classSelector = classes.length ? '.' + classes.join('.') : '';
-          const currentSelector = `${
+          let currentSelector = `${
             parentSelector ? parentSelector + ' > ' : ''
           }${tag}${classSelector}`;
+          currentSelector = currentSelector.replace('. ', '');
 
           const structure: TagStructure = {
             tag,
@@ -592,6 +617,9 @@ export class CronCrawlerService {
           }
           // This will remove trailing spaces and colons
           currencyStringTemp = currencyStringTemp.replace(/[:\s]+$/, '');
+          if (!currencyStringTemp) {
+            return null;
+          }
 
           const currency: SemCurrency =
             await this.semCurrencyService.getCurrencyFromString(
@@ -600,6 +628,18 @@ export class CronCrawlerService {
 
           return currency;
         };
+
+        // if infinite scroll , scroll down as many times as possible
+        console.log(
+          'before scrollToBottom. once finished , you should see another log here...',
+        );
+        await this.scrollToBottom(page);
+        console.log(
+          'scrollToBottom finished. Re-downloading the whole HTML from the page.',
+        );
+        // now reload the whole html to get all products , if infinite scroll
+        html = await page.content();
+        $ = cheerio.load(html);
 
         const productElements = $(productHtmlElementStructure.selector).get();
         let numbers = [];
@@ -649,6 +689,10 @@ export class CronCrawlerService {
             productStructure.thumbnailUrl,
           );
 
+          console.log(
+            'productStructure.thumbnailUrl =  ' + productStructure.thumbnailUrl,
+          );
+
           productStructure.title = extractFromElement(
             $,
             productElement,
@@ -660,6 +704,8 @@ export class CronCrawlerService {
             productElement,
             productHtmlElementStructureJSON.description,
           );
+
+          console.log('productStructure.title =  ' + productStructure.title);
 
           // if (
           //   productStructure.thumbnailUrl &&
@@ -681,7 +727,15 @@ export class CronCrawlerService {
               productHtmlElementStructureJSON.price_01,
             ),
           );
-          productStructure.price_01 = numbers.length > 0 ? numbers[0] : 0;
+          productStructure.price_01 =
+            numbers && numbers.length > 0 ? numbers[0] : 0;
+          if (!productStructure.price_01) {
+            continue;
+          }
+
+          console.log(
+            'productStructure.price_01 =  ' + productStructure.price_01,
+          );
 
           const currency_01 = await getCurrency(
             $,
@@ -702,8 +756,8 @@ export class CronCrawlerService {
             numbers.length > 1
               ? numbers[1]
               : productStructure.price_01 === 0
-              ? numbers[0]
-              : 0;
+                ? numbers[0]
+                : 0;
 
           const currency_02 = await getCurrency(
             $,
@@ -717,6 +771,7 @@ export class CronCrawlerService {
               productStructure.title,
               website,
             );
+          console.log('categoryName = ' + categoryName);
           const category =
             await this.semCategoryService.findOneByName(categoryName);
           productStructure.category_id = category ? category.id : null;
@@ -724,6 +779,8 @@ export class CronCrawlerService {
           productStructure.timestamp = Date.now();
 
           let productAlreadyExist: boolean = false;
+
+          console.log('findOneByUrl  ' + productStructure.url);
 
           // Url must be unique
           let product = await this.semProductService.findOneByUrl(
@@ -747,12 +804,20 @@ export class CronCrawlerService {
             }
           }
           if (!productAlreadyExist) {
+            console.log('createProduct');
             await this.semProductService.createProduct(
               productStructure,
               website,
             );
           }
         }
+
+        if (!paginationHtmlElementData) {
+          // if no pagination , infinite scroll. we will scrape from the same page next time.
+          break;
+        }
+
+        console.log('Trying to navigate to next page...');
 
         pageUrl = null;
         const paginationJSON: PaginationHtmlElementData = JSON.parse(
@@ -780,6 +845,8 @@ export class CronCrawlerService {
           // }
         }
 
+        console.log('currentPage = ' + currentPage);
+
         if (total_pages === 0) {
           websiteLazy = await this.semWebsiteService.updateWebsiteField(
             websiteLazy.id,
@@ -794,11 +861,13 @@ export class CronCrawlerService {
           paginationJSON.current_page,
         );
         if (currentPage > total_pages) {
+          console.log('currentPage > total_pages');
           break;
         }
         if (pageUrl) {
           delay(crawlDelay);
         }
+        console.log('pageUrl = ' + pageUrl);
       }
       // });
     } catch (error) {
