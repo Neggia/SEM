@@ -50,6 +50,17 @@ export class SemCurrencyService {
     let symbol: string;
     let currency: SemCurrency;
 
+    currencyString = currencyString.replace(/\s\s+/g, ' ');
+
+    // fix bug with some websites: the extracted name includes the amount too
+    if (currencyString.indexOf(' ') > 0) {
+      let nameAndAmount: string[] = currencyString.split(' ');
+      let reg = /^\d+$/;
+      currencyString = reg.test(nameAndAmount[0].substring(0, 1))
+        ? nameAndAmount[1]
+        : nameAndAmount[0];
+    }
+
     switch (currencyString.length) {
       case 1:
         symbol = currencyString;
