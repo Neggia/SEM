@@ -242,15 +242,15 @@ export class CronCrawlerService {
   async scrollToBottom(page: puppeteer.Page) {
     let lastHeight = await page.evaluate('document.body.scrollHeight');
     let pageCounter = 1;
-    while (pageCounter < 3) {
-      await page.evaluate('window.scrollTo(0, document.body.scrollHeight)');
-      await page.waitForTimeout(2000); // sleep a bit
-      await page.evaluate('window.scrollTo(0, document.body.scrollHeight-200)');
-      await page.waitForTimeout(100); // sleep a bit
-      await page.evaluate('window.scrollTo(0, document.body.scrollHeight)');
-      await page.waitForTimeout(2000); // sleep a bit
-      await page.evaluate('window.scrollTo(0, document.body.scrollHeight-200)');
-      await page.waitForTimeout(100); // sleep a bit
+    while (true) {
+      for (let i = 1; i <= 3; i++) {
+        await page.evaluate('window.scrollTo(0, document.body.scrollHeight)');
+        await page.waitForTimeout(2000); // sleep a bit
+        await page.evaluate(
+          'window.scrollTo(0, document.body.scrollHeight-200)',
+        );
+        await page.waitForTimeout(100); // sleep a bit
+      }
       let newHeight = await page.evaluate('document.body.scrollHeight');
       if (newHeight === lastHeight) {
         break;

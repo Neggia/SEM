@@ -62,7 +62,7 @@ export class SemProductService {
     }
     if (currencies) {
       const currencyIds = currencies.split(',').map(Number);
-      const currencyCondition = `((product.currency_01_id IN (:...currencyIds) AND product.price_01 >= 0) AND (product.currency_02_id IN (:...currencyIds) AND product.price_02 >= 0))`;
+      const currencyCondition = `((product.currency_01_id IN (:...currencyIds) AND product.price_01 >= 0) OR (product.currency_02_id IN (:...currencyIds) AND product.price_02 >= 0))`;
 
       if (search || category_id) {
         query.andWhere(currencyCondition, { currencyIds });

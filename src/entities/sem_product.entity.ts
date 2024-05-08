@@ -41,11 +41,11 @@ export class SemProduct {
   @Column()
   currency_01_id: number;
 
-  @Column()
+  @Column({ nullable: true })
   price_02: number;
 
   // Details of currency are described in entity SemCurrency
-  @Column()
+  @Column({ nullable: true })
   currency_02_id: number;
 
   @Column({ nullable: true })
