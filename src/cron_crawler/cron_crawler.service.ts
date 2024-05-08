@@ -239,17 +239,27 @@ export class CronCrawlerService {
     return 0;
   }
 
-  async scrollToBottom(page) {
-    let maxPageHeight = 20000; // temporary for test. We will scroll with no limit.
+  async scrollToBottom(page: puppeteer.Page) {
     let lastHeight = await page.evaluate('document.body.scrollHeight');
-    while (true || lastHeight < maxPageHeight) {
+    let pageCounter = 1;
+    while (pageCounter < 3) {
       await page.evaluate('window.scrollTo(0, document.body.scrollHeight)');
       await page.waitForTimeout(2000); // sleep a bit
+      await page.evaluate('window.scrollTo(0, document.body.scrollHeight-200)');
+      await page.waitForTimeout(100); // sleep a bit
+      await page.evaluate('window.scrollTo(0, document.body.scrollHeight)');
+      await page.waitForTimeout(2000); // sleep a bit
+      await page.evaluate('window.scrollTo(0, document.body.scrollHeight-200)');
+      await page.waitForTimeout(100); // sleep a bit
       let newHeight = await page.evaluate('document.body.scrollHeight');
       if (newHeight === lastHeight) {
         break;
       }
       lastHeight = newHeight;
+      console.log(
+        'in scrollToBottom page ' + pageCounter + ' , newHeight = ' + newHeight,
+      );
+      pageCounter++;
     }
   }
 
@@ -584,6 +594,9 @@ export class CronCrawlerService {
         };
 
         const extractNumbers = (str) => {
+          if (!str) {
+            return 0;
+          }
           const sanitizedStr = str.replace(/null/g, '0');
           const matches = sanitizedStr.match(/\d+/g) || [];
           return matches.map(Number);
@@ -604,6 +617,10 @@ export class CronCrawlerService {
           currencyString: string,
         ): Promise<SemCurrency> => {
           let currencyStringTemp: string;
+
+          if (!currencyString) {
+            return null;
+          }
 
           if (isValidSelector($, currencyString)) {
             currencyStringTemp = extractFromElement(
@@ -764,7 +781,7 @@ export class CronCrawlerService {
             productElement,
             productHtmlElementStructureJSON.currency_02,
           );
-          productStructure.currency_02_id = currency_02.id;
+          productStructure.currency_02_id = currency_02 ? currency_02.id : null;
 
           const categoryName =
             await this.serviceOpenaiService.getProductCategory(

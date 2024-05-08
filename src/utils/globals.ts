@@ -54,7 +54,7 @@ export function getFormattedUrl(websiteUrl: string, pathUrl: string) {
   let path = pathUrl;
 
   const websiteUrlLastSlashIndex = websiteUrl.lastIndexOf('/');
-  const websiteUrlPartBeforeLastSlash =
+  let websiteUrlPartBeforeLastSlash =
     websiteUrl === domainUrl
       ? domainUrl
       : websiteUrl.substring(0, websiteUrlLastSlashIndex);
@@ -63,12 +63,15 @@ export function getFormattedUrl(websiteUrl: string, pathUrl: string) {
     return null;
   }
 
+  if (path.startsWith('/')) {
+    websiteUrlPartBeforeLastSlash = domainUrl;
+  }
+
   if (!path.startsWith(protocol)) {
     // it's a relative url, not absolute
     if (!path.startsWith('/')) {
       path = '/' + path;
     }
-
     path = websiteUrlPartBeforeLastSlash + path;
   }
 
