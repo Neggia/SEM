@@ -51,7 +51,7 @@ const ProductsView = () => {
 
   let searchDebounceTimeout = null;
 
-  const fetchProductData = async () => {
+  const fetchProductData = async (page) => {
     setLoading(true);
 
     try {
@@ -63,7 +63,7 @@ const ProductsView = () => {
       const productResponse = await fetch(
         SERVER_BASE_URL +
           CONTROLLER_PRODUCT_ID +
-          `?page=${currentPage}&limit=${itemsPerPage}&search=${searchTerm}&category_id=${selectedCategory}` +
+          `?page=${page ? page : currentPage}&limit=${itemsPerPage}&search=${searchTerm}&category_id=${selectedCategory}` +
           currenciesQueryString,
       );
       if (!productResponse.ok) {
@@ -222,7 +222,7 @@ const ProductsView = () => {
               disabled={loading}
               variant="contained" // Use 'contained' for a filled button
               color="primary" // Use the theme's primary color
-              onClick={() => fetchProductData()}
+              onClick={() => fetchProductData(1)}
               startIcon={<SearchIcon />}
               style={{
                 height: '100%', // Adjust the height as needed

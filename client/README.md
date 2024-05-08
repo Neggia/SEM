@@ -68,3 +68,12 @@ This section has moved here: [https://facebook.github.io/create-react-app/docs/d
 ### `npm run build` fails to minify
 
 This section has moved here: [https://facebook.github.io/create-react-app/docs/troubleshooting#npm-run-build-fails-to-minify](https://facebook.github.io/create-react-app/docs/troubleshooting#npm-run-build-fails-to-minify)
+
+### Troubleshoot
+
+If you get an error saying `Invalid options object. Dev Server has been initialized using an options object that does not match the API schema`
+then ensure you have an .env file in /client too (not just in the parent directory)
+with the following variables:
+REACT_APP_NAME=Comunità Solidali
+REACT_APP_SERVER_BASE_URL=http://localhost:3000/
+DANGEROUSLY_DISABLE_HOST_CHECK=true
