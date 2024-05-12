@@ -41,6 +41,7 @@ const {
   HTML_ELEMENT_TYPE_PRODUCT,
   // HTML_ELEMENT_TYPE_CATEGORY,
   HTML_ELEMENT_TYPE_PAGINATION,
+  HTML_ELEMENT_TYPE_INFINITE_SCROLLING,
   PROCESS_STATUS_RUNNING,
   PROCESS_STATUS_PAUSED,
   PROCESS_STATUS_STOPPED,
@@ -476,6 +477,7 @@ export class CronCrawlerService {
 
         let productHtmlElementStructure = null;
         let paginationHtmlElementStructure = null;
+        let infiniteScrollingHtmlElementStructure = null;
         let paginationHtmlElementData: string = '';
 
         productHtmlElementStructure =
@@ -490,6 +492,12 @@ export class CronCrawlerService {
             HTML_ELEMENT_TYPE_PAGINATION,
           );
 
+        infiniteScrollingHtmlElementStructure =
+          await this.semHtmlElementStructureService.findOneByWebsiteAndType(
+            website,
+            HTML_ELEMENT_TYPE_INFINITE_SCROLLING,
+          );
+
         // if (productHtmlElementStructure === null) {
         for (const updatedHtmlElement of updatedHtmlElements) {
           if (updatedHtmlElement.selector === 'body') {
@@ -498,12 +506,14 @@ export class CronCrawlerService {
 
           if (
             productHtmlElementStructure !== null &&
-            paginationHtmlElementStructure !== null
+            (paginationHtmlElementStructure !== null ||
+              infiniteScrollingHtmlElementStructure !== null)
           ) {
             // Product and pagination structures have already been identified, no need to call serviceOpenaiService.getHtmlElementType
             if (
+              paginationHtmlElementStructure &&
               updatedHtmlElement.selector ===
-              paginationHtmlElementStructure.selector
+                paginationHtmlElementStructure.selector
             ) {
               paginationHtmlElementData =
                 await this.serviceOpenaiService.getPaginationData(
@@ -820,7 +830,10 @@ export class CronCrawlerService {
               await this.semProductService.delete(product.id);
             }
           }
-          if (!productAlreadyExist) {
+          if (
+            !productAlreadyExist &&
+            (productStructure.currency_01_id || productStructure.currency_02_id)
+          ) {
             console.log('createProduct');
             await this.semProductService.createProduct(
               productStructure,

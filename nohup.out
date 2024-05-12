@@ -1,0 +1,218 @@
+
+> sem@0.0.1 start
+> nest start
+
+(node:385204) [DEP0040] DeprecationWarning: The `punycode` module is deprecated. Please use a userland alternative instead.
+(Use `node --trace-deprecation ...` to show where the warning was created)
+[32m[Nest] 385204  - [39m08/05/2024, 17:11:59 [32m    LOG[39m [38;5;3m[NestFactory] [39m[32mStarting Nest application...[39m
+[32m[Nest] 385204  - [39m08/05/2024, 17:11:59 [32m    LOG[39m [38;5;3m[InstanceLoader] [39m[32mTypeOrmModule dependencies initialized[39m[38;5;3m +143ms[39m
+[32m[Nest] 385204  - [39m08/05/2024, 17:11:59 [32m    LOG[39m [38;5;3m[InstanceLoader] [39m[32mPassportModule dependencies initialized[39m[38;5;3m +0ms[39m
+[32m[Nest] 385204  - [39m08/05/2024, 17:11:59 [32m    LOG[39m [38;5;3m[InstanceLoader] [39m[32mConfigHostModule dependencies initialized[39m[38;5;3m +1ms[39m
+[32m[Nest] 385204  - [39m08/05/2024, 17:11:59 [32m    LOG[39m [38;5;3m[InstanceLoader] [39m[32mDiscoveryModule dependencies initialized[39m[38;5;3m +0ms[39m
+[32m[Nest] 385204  - [39m08/05/2024, 17:11:59 [32m    LOG[39m [38;5;3m[InstanceLoader] [39m[32mConfigModule dependencies initialized[39m[38;5;3m +1ms[39m
+[32m[Nest] 385204  - [39m08/05/2024, 17:11:59 [32m    LOG[39m [38;5;3m[InstanceLoader] [39m[32mConfigModule dependencies initialized[39m[38;5;3m +0ms[39m
+DB_NAME:  sqlite.db
+databasePath:  /home/kubuntu/SEM/data/sqlite.db
+[32m[Nest] 385204  - [39m08/05/2024, 17:11:59 [32m    LOG[39m [38;5;3m[InstanceLoader] [39m[32mScheduleModule dependencies initialized[39m[38;5;3m +2ms[39m
+[32m[Nest] 385204  - [39m08/05/2024, 17:11:59 [32m    LOG[39m [38;5;3m[InstanceLoader] [39m[32mAuthModule dependencies initialized[39m[38;5;3m +14ms[39m
+query: PRAGMA foreign_keys = OFF
+query: BEGIN TRANSACTION
+query: SELECT * FROM "sqlite_master" WHERE "type" = 'table' AND "name" IN ('sem_category','sem_currency','sem_process','sem_product','sem_openai_completions_request','sem_openai_completions','sem_html_element_structure','sem_website','sem_html_element','sem_user')
+query: SELECT * FROM "sqlite_master" WHERE "type" = 'index' AND "tbl_name" IN ('sem_category','sem_currency','sem_process','sem_product','sem_openai_completions_request','sem_openai_completions','sem_html_element_structure','sem_website','sem_html_element','sem_user')
+query: PRAGMA table_xinfo("sem_openai_completions")
+query: PRAGMA index_list("sem_openai_completions")
+query: PRAGMA foreign_key_list("sem_openai_completions")
+query: PRAGMA table_xinfo("sem_user")
+query: PRAGMA index_list("sem_user")
+query: PRAGMA foreign_key_list("sem_user")
+query: PRAGMA table_xinfo("sem_html_element")
+query: PRAGMA index_list("sem_html_element")
+query: PRAGMA foreign_key_list("sem_html_element")
+query: PRAGMA table_xinfo("sem_currency")
+query: PRAGMA index_list("sem_currency")
+query: PRAGMA foreign_key_list("sem_currency")
+query: PRAGMA table_xinfo("sem_category")
+query: PRAGMA index_list("sem_category")
+query: PRAGMA foreign_key_list("sem_category")
+query: PRAGMA table_xinfo("sem_html_element_structure")
+query: PRAGMA index_list("sem_html_element_structure")
+query: PRAGMA foreign_key_list("sem_html_element_structure")
+query: PRAGMA table_xinfo("sem_process")
+query: PRAGMA index_list("sem_process")
+query: PRAGMA foreign_key_list("sem_process")
+query: PRAGMA table_xinfo("sem_openai_completions_request")
+query: PRAGMA index_list("sem_openai_completions_request")
+query: PRAGMA foreign_key_list("sem_openai_completions_request")
+query: PRAGMA table_xinfo("sem_website")
+query: PRAGMA index_list("sem_website")
+query: PRAGMA foreign_key_list("sem_website")
+query: PRAGMA table_xinfo("sem_product")
+query: PRAGMA index_list("sem_product")
+query: PRAGMA foreign_key_list("sem_product")
+query: PRAGMA index_info("sqlite_autoindex_sem_user_1")
+query: PRAGMA index_info("sqlite_autoindex_sem_currency_1")
+query: PRAGMA index_info("sqlite_autoindex_sem_category_1")
+query: PRAGMA index_info("IDX_a3b0580a73f0f5584b313acade")
+query: PRAGMA index_info("IDX_60875d641c2ec13bf1e5fc4ecf")
+query: PRAGMA index_info("sqlite_autoindex_sem_product_1")
+query: PRAGMA index_info("IDX_306f8c436eeb2309babbc734da")
+query: SELECT * FROM "sqlite_master" WHERE "type" = 'table' AND "name" = 'typeorm_metadata'
+query: COMMIT
+query: PRAGMA foreign_keys = ON
+[32m[Nest] 385204  - [39m08/05/2024, 17:11:59 [32m    LOG[39m [38;5;3m[InstanceLoader] [39m[32mTypeOrmCoreModule dependencies initialized[39m[38;5;3m +114ms[39m
+[32m[Nest] 385204  - [39m08/05/2024, 17:11:59 [32m    LOG[39m [38;5;3m[InstanceLoader] [39m[32mTypeOrmModule dependencies initialized[39m[38;5;3m +0ms[39m
+[32m[Nest] 385204  - [39m08/05/2024, 17:11:59 [32m    LOG[39m [38;5;3m[InstanceLoader] [39m[32mDatabaseModule dependencies initialized[39m[38;5;3m +1ms[39m
+[32m[Nest] 385204  - [39m08/05/2024, 17:11:59 [32m    LOG[39m [38;5;3m[InstanceLoader] [39m[32mAppModule dependencies initialized[39m[38;5;3m +1ms[39m
+query: SELECT "SemProcess"."id" AS "SemProcess_id", "SemProcess"."name" AS "SemProcess_name", "SemProcess"."server" AS "SemProcess_server", "SemProcess"."interval" AS "SemProcess_interval", "SemProcess"."last_start" AS "SemProcess_last_start", "SemProcess"."last_end" AS "SemProcess_last_end", "SemProcess"."status" AS "SemProcess_status", "SemProcess"."message" AS "SemProcess_message", "SemProcess__SemProcess_websites"."id" AS "SemProcess__SemProcess_websites_id", "SemProcess__SemProcess_websites"."name" AS "SemProcess__SemProcess_websites_name", "SemProcess__SemProcess_websites"."url" AS "SemProcess__SemProcess_websites_url", "SemProcess__SemProcess_websites"."last_start" AS "SemProcess__SemProcess_websites_last_start", "SemProcess__SemProcess_websites"."last_page" AS "SemProcess__SemProcess_websites_last_page", "SemProcess__SemProcess_websites"."num_pages" AS "SemProcess__SemProcess_websites_num_pages", "SemProcess__SemProcess_websites"."status" AS "SemProcess__SemProcess_websites_status", "SemProcess__SemProcess_websites"."message" AS "SemProcess__SemProcess_websites_message", "SemProcess__SemProcess_websites"."processId" AS "SemProcess__SemProcess_websites_processId" FROM "sem_process" "SemProcess" LEFT JOIN "sem_website" "SemProcess__SemProcess_websites" ON "SemProcess__SemProcess_websites"."processId"="SemProcess"."id"
+query: SELECT "SemCategory"."id" AS "SemCategory_id", "SemCategory"."parent_id" AS "SemCategory_parent_id", "SemCategory"."name" AS "SemCategory_name" FROM "sem_category" "SemCategory"
+query: SELECT "SemOpenaiCompletions"."id" AS "SemOpenaiCompletions_id", "SemOpenaiCompletions"."function_name" AS "SemOpenaiCompletions_function_name", "SemOpenaiCompletions"."website_id" AS "SemOpenaiCompletions_website_id", "SemOpenaiCompletions"."group_id" AS "SemOpenaiCompletions_group_id", "SemOpenaiCompletions"."body" AS "SemOpenaiCompletions_body", "SemOpenaiCompletions__SemOpenaiCompletions_htmlElementStructures"."id" AS "SemOpenaiCompletions__SemOpenaiCompletions_htmlElementStructures_id", "SemOpenaiCompletions__SemOpenaiCompletions_htmlElementStructures"."selector" AS "SemOpenaiCompletions__SemOpenaiCompletions_htmlElementStructures_selector", "SemOpenaiCompletions__SemOpenaiCompletions_htmlElementStructures"."type" AS "SemOpenaiCompletions__SemOpenaiCompletions_htmlElementStructures_type", "SemOpenaiCompletions__SemOpenaiCompletions_htmlElementStructures"."json" AS "SemOpenaiCompletions__SemOpenaiCompletions_htmlElementStructures_json", "SemOpenaiCompletions__SemOpenaiCompletions_htmlElementStructures"."openaiCompletionsId" AS "SemOpenaiCompletions__SemOpenaiCompletions_htmlElementStructures_openaiCompletionsId", "SemOpenaiCompletions__SemOpenaiCompletions_htmlElementStructures"."websiteId" AS "SemOpenaiCompletions__SemOpenaiCompletions_htmlElementStructures_websiteId", "SemOpenaiCompletions__SemOpenaiCompletions_openaiCompletionsRequests"."id" AS "SemOpenaiCompletions__SemOpenaiCompletions_openaiCompletionsRequests_id", "SemOpenaiCompletions__SemOpenaiCompletions_openaiCompletionsRequests"."website_id" AS "SemOpenaiCompletions__SemOpenaiCompletions_openaiCompletionsRequests_website_id", "SemOpenaiCompletions__SemOpenaiCompletions_openaiCompletionsRequests"."bodyHash" AS "SemOpenaiCompletions__SemOpenaiCompletions_openaiCompletionsRequests_bodyHash", "SemOpenaiCompletions__SemOpenaiCompletions_openaiCompletionsRequests"."body" AS "SemOpenaiCompletions__SemOpenaiCompletions_openaiCompletionsRequests_body", "SemOpenaiCompletions__SemOpenaiCompletions_openaiCompletionsRequests"."response" AS "SemOpenaiCompletions__SemOpenaiCompletions_openaiCompletionsRequests_response", "SemOpenaiCompletions__SemOpenaiCompletions_openaiCompletionsRequests"."status" AS "SemOpenaiCompletions__SemOpenaiCompletions_openaiCompletionsRequests_status", "SemOpenaiCompletions__SemOpenaiCompletions_openaiCompletionsRequests"."openaiCompletionsId" AS "SemOpenaiCompletions__SemOpenaiCompletions_openaiCompletionsRequests_openaiCompletionsId" FROM "sem_openai_completions" "SemOpenaiCompletions" LEFT JOIN "sem_html_element_structure" "SemOpenaiCompletions__SemOpenaiCompletions_htmlElementStructures" ON "SemOpenaiCompletions__SemOpenaiCompletions_htmlElementStructures"."openaiCompletionsId"="SemOpenaiCompletions"."id"  LEFT JOIN "sem_openai_completions_request" "SemOpenaiCompletions__SemOpenaiCompletions_openaiCompletionsRequests" ON "SemOpenaiCompletions__SemOpenaiCompletions_openaiCompletionsRequests"."openaiCompletionsId"="SemOpenaiCompletions"."id"
+[95m[Nest] 385204  - [39m08/05/2024, 17:12:00 [95m  DEBUG[39m [38;5;3m[CronCrawlerService] [39m[95mStarting crawler job[39m
+query: SELECT "SemProcess"."id" AS "SemProcess_id", "SemProcess"."name" AS "SemProcess_name", "SemProcess"."server" AS "SemProcess_server", "SemProcess"."interval" AS "SemProcess_interval", "SemProcess"."last_start" AS "SemProcess_last_start", "SemProcess"."last_end" AS "SemProcess_last_end", "SemProcess"."status" AS "SemProcess_status", "SemProcess"."message" AS "SemProcess_message", "SemProcess__SemProcess_websites"."id" AS "SemProcess__SemProcess_websites_id", "SemProcess__SemProcess_websites"."name" AS "SemProcess__SemProcess_websites_name", "SemProcess__SemProcess_websites"."url" AS "SemProcess__SemProcess_websites_url", "SemProcess__SemProcess_websites"."last_start" AS "SemProcess__SemProcess_websites_last_start", "SemProcess__SemProcess_websites"."last_page" AS "SemProcess__SemProcess_websites_last_page", "SemProcess__SemProcess_websites"."num_pages" AS "SemProcess__SemProcess_websites_num_pages", "SemProcess__SemProcess_websites"."status" AS "SemProcess__SemProcess_websites_status", "SemProcess__SemProcess_websites"."message" AS "SemProcess__SemProcess_websites_message", "SemProcess__SemProcess_websites"."processId" AS "SemProcess__SemProcess_websites_processId" FROM "sem_process" "SemProcess" LEFT JOIN "sem_website" "SemProcess__SemProcess_websites" ON "SemProcess__SemProcess_websites"."processId"="SemProcess"."id"
+query: SELECT DISTINCT "distinctAlias"."SemProcess_id" AS "ids_SemProcess_id" FROM (SELECT "SemProcess"."id" AS "SemProcess_id", "SemProcess"."name" AS "SemProcess_name", "SemProcess"."server" AS "SemProcess_server", "SemProcess"."interval" AS "SemProcess_interval", "SemProcess"."last_start" AS "SemProcess_last_start", "SemProcess"."last_end" AS "SemProcess_last_end", "SemProcess"."status" AS "SemProcess_status", "SemProcess"."message" AS "SemProcess_message", "SemProcess__SemProcess_websites"."id" AS "SemProcess__SemProcess_websites_id", "SemProcess__SemProcess_websites"."name" AS "SemProcess__SemProcess_websites_name", "SemProcess__SemProcess_websites"."url" AS "SemProcess__SemProcess_websites_url", "SemProcess__SemProcess_websites"."last_start" AS "SemProcess__SemProcess_websites_last_start", "SemProcess__SemProcess_websites"."last_page" AS "SemProcess__SemProcess_websites_last_page", "SemProcess__SemProcess_websites"."num_pages" AS "SemProcess__SemProcess_websites_num_pages", "SemProcess__SemProcess_websites"."status" AS "SemProcess__SemProcess_websites_status", "SemProcess__SemProcess_websites"."message" AS "SemProcess__SemProcess_websites_message", "SemProcess__SemProcess_websites"."processId" AS "SemProcess__SemProcess_websites_processId" FROM "sem_process" "SemProcess" LEFT JOIN "sem_website" "SemProcess__SemProcess_websites" ON "SemProcess__SemProcess_websites"."processId"="SemProcess"."id" WHERE (("SemProcess"."id" = 1))) "distinctAlias" ORDER BY "SemProcess_id" ASC LIMIT 1
+query: SELECT "SemProcess"."id" AS "SemProcess_id", "SemProcess"."name" AS "SemProcess_name", "SemProcess"."server" AS "SemProcess_server", "SemProcess"."interval" AS "SemProcess_interval", "SemProcess"."last_start" AS "SemProcess_last_start", "SemProcess"."last_end" AS "SemProcess_last_end", "SemProcess"."status" AS "SemProcess_status", "SemProcess"."message" AS "SemProcess_message", "SemProcess__SemProcess_websites"."id" AS "SemProcess__SemProcess_websites_id", "SemProcess__SemProcess_websites"."name" AS "SemProcess__SemProcess_websites_name", "SemProcess__SemProcess_websites"."url" AS "SemProcess__SemProcess_websites_url", "SemProcess__SemProcess_websites"."last_start" AS "SemProcess__SemProcess_websites_last_start", "SemProcess__SemProcess_websites"."last_page" AS "SemProcess__SemProcess_websites_last_page", "SemProcess__SemProcess_websites"."num_pages" AS "SemProcess__SemProcess_websites_num_pages", "SemProcess__SemProcess_websites"."status" AS "SemProcess__SemProcess_websites_status", "SemProcess__SemProcess_websites"."message" AS "SemProcess__SemProcess_websites_message", "SemProcess__SemProcess_websites"."processId" AS "SemProcess__SemProcess_websites_processId" FROM "sem_process" "SemProcess" LEFT JOIN "sem_website" "SemProcess__SemProcess_websites" ON "SemProcess__SemProcess_websites"."processId"="SemProcess"."id" WHERE ( (("SemProcess"."id" = 1)) ) AND ( "SemProcess"."id" IN (1) )
+[95m[Nest] 385204  - [39m08/05/2024, 17:12:00 [95m  DEBUG[39m [38;5;3m[CronCrawlerService] [39m[95mCrawler job completed successfully[39m
+[32m[Nest] 385204  - [39m08/05/2024, 17:12:00 [32m    LOG[39m [38;5;3m[RoutesResolver] [39m[32mAppController {/}:[39m[38;5;3m +5ms[39m
+[32m[Nest] 385204  - [39m08/05/2024, 17:12:00 [32m    LOG[39m [38;5;3m[RouterExplorer] [39m[32mMapped {/, GET} route[39m[38;5;3m +3ms[39m
+[32m[Nest] 385204  - [39m08/05/2024, 17:12:00 [32m    LOG[39m [38;5;3m[RoutesResolver] [39m[32mServiceOpenaiController {/service-openai}:[39m[38;5;3m +1ms[39m
+[32m[Nest] 385204  - [39m08/05/2024, 17:12:00 [32m    LOG[39m [38;5;3m[RouterExplorer] [39m[32mMapped {/service-openai/get-product-structure, GET} route[39m[38;5;3m +0ms[39m
+[32m[Nest] 385204  - [39m08/05/2024, 17:12:00 [32m    LOG[39m [38;5;3m[RouterExplorer] [39m[32mMapped {/service-openai/get-functions, GET} route[39m[38;5;3m +1ms[39m
+[32m[Nest] 385204  - [39m08/05/2024, 17:12:00 [32m    LOG[39m [38;5;3m[RoutesResolver] [39m[32mSemProcessController {/process}:[39m[38;5;3m +0ms[39m
+[32m[Nest] 385204  - [39m08/05/2024, 17:12:00 [32m    LOG[39m [38;5;3m[RouterExplorer] [39m[32mMapped {/process, GET} route[39m[38;5;3m +1ms[39m
+[32m[Nest] 385204  - [39m08/05/2024, 17:12:00 [32m    LOG[39m [38;5;3m[RouterExplorer] [39m[32mMapped {/process/:id, GET} route[39m[38;5;3m +0ms[39m
+[32m[Nest] 385204  - [39m08/05/2024, 17:12:00 [32m    LOG[39m [38;5;3m[RouterExplorer] [39m[32mMapped {/process/sync, POST} route[39m[38;5;3m +1ms[39m
+[32m[Nest] 385204  - [39m08/05/2024, 17:12:00 [32m    LOG[39m [38;5;3m[RoutesResolver] [39m[32mSemOpenaiCompletionsController {/openai-completions}:[39m[38;5;3m +0ms[39m
+[32m[Nest] 385204  - [39m08/05/2024, 17:12:00 [32m    LOG[39m [38;5;3m[RouterExplorer] [39m[32mMapped {/openai-completions, GET} route[39m[38;5;3m +0ms[39m
+[32m[Nest] 385204  - [39m08/05/2024, 17:12:00 [32m    LOG[39m [38;5;3m[RouterExplorer] [39m[32mMapped {/openai-completions/:id, GET} route[39m[38;5;3m +0ms[39m
+[32m[Nest] 385204  - [39m08/05/2024, 17:12:00 [32m    LOG[39m [38;5;3m[RouterExplorer] [39m[32mMapped {/openai-completions/sync, POST} route[39m[38;5;3m +1ms[39m
+[32m[Nest] 385204  - [39m08/05/2024, 17:12:00 [32m    LOG[39m [38;5;3m[RoutesResolver] [39m[32mSemProductController {/product}:[39m[38;5;3m +0ms[39m
+[32m[Nest] 385204  - [39m08/05/2024, 17:12:00 [32m    LOG[39m [38;5;3m[RouterExplorer] [39m[32mMapped {/product, GET} route[39m[38;5;3m +1ms[39m
+[32m[Nest] 385204  - [39m08/05/2024, 17:12:00 [32m    LOG[39m [38;5;3m[RouterExplorer] [39m[32mMapped {/product/title, GET} route[39m[38;5;3m +0ms[39m
+[32m[Nest] 385204  - [39m08/05/2024, 17:12:00 [32m    LOG[39m [38;5;3m[RouterExplorer] [39m[32mMapped {/product/:id, GET} route[39m[38;5;3m +0ms[39m
+[32m[Nest] 385204  - [39m08/05/2024, 17:12:00 [32m    LOG[39m [38;5;3m[RoutesResolver] [39m[32mSemCurrencyController {/currency}:[39m[38;5;3m +1ms[39m
+[32m[Nest] 385204  - [39m08/05/2024, 17:12:00 [32m    LOG[39m [38;5;3m[RouterExplorer] [39m[32mMapped {/currency, GET} route[39m[38;5;3m +0ms[39m
+[32m[Nest] 385204  - [39m08/05/2024, 17:12:00 [32m    LOG[39m [38;5;3m[RouterExplorer] [39m[32mMapped {/currency/:id, GET} route[39m[38;5;3m +0ms[39m
+[32m[Nest] 385204  - [39m08/05/2024, 17:12:00 [32m    LOG[39m [38;5;3m[RoutesResolver] [39m[32mSemCategoryController {/category}:[39m[38;5;3m +0ms[39m
+[32m[Nest] 385204  - [39m08/05/2024, 17:12:00 [32m    LOG[39m [38;5;3m[RouterExplorer] [39m[32mMapped {/category, GET} route[39m[38;5;3m +0ms[39m
+[32m[Nest] 385204  - [39m08/05/2024, 17:12:00 [32m    LOG[39m [38;5;3m[RouterExplorer] [39m[32mMapped {/category/:id, GET} route[39m[38;5;3m +1ms[39m
+[32m[Nest] 385204  - [39m08/05/2024, 17:12:00 [32m    LOG[39m [38;5;3m[RoutesResolver] [39m[32mSemWebsiteController {/website}:[39m[38;5;3m +0ms[39m
+[32m[Nest] 385204  - [39m08/05/2024, 17:12:00 [32m    LOG[39m [38;5;3m[RouterExplorer] [39m[32mMapped {/website, GET} route[39m[38;5;3m +0ms[39m
+[32m[Nest] 385204  - [39m08/05/2024, 17:12:00 [32m    LOG[39m [38;5;3m[RouterExplorer] [39m[32mMapped {/website/:id, GET} route[39m[38;5;3m +0ms[39m
+[32m[Nest] 385204  - [39m08/05/2024, 17:12:00 [32m    LOG[39m [38;5;3m[RouterExplorer] [39m[32mMapped {/website/sync, POST} route[39m[38;5;3m +1ms[39m
+[32m[Nest] 385204  - [39m08/05/2024, 17:12:00 [32m    LOG[39m [38;5;3m[RoutesResolver] [39m[32mSemHtmlElementStructureController {/html-element-structure}:[39m[38;5;3m +0ms[39m
+[32m[Nest] 385204  - [39m08/05/2024, 17:12:00 [32m    LOG[39m [38;5;3m[RouterExplorer] [39m[32mMapped {/html-element-structure, GET} route[39m[38;5;3m +0ms[39m
+[32m[Nest] 385204  - [39m08/05/2024, 17:12:00 [32m    LOG[39m [38;5;3m[RouterExplorer] [39m[32mMapped {/html-element-structure/:id, GET} route[39m[38;5;3m +0ms[39m
+[32m[Nest] 385204  - [39m08/05/2024, 17:12:00 [32m    LOG[39m [38;5;3m[RoutesResolver] [39m[32mFixturesController {/fixtures}:[39m[38;5;3m +0ms[39m
+[32m[Nest] 385204  - [39m08/05/2024, 17:12:00 [32m    LOG[39m [38;5;3m[RouterExplorer] [39m[32mMapped {/fixtures/sync, POST} route[39m[38;5;3m +1ms[39m
+[32m[Nest] 385204  - [39m08/05/2024, 17:12:00 [32m    LOG[39m [38;5;3m[RoutesResolver] [39m[32mAuthController {/auth}:[39m[38;5;3m +0ms[39m
+[32m[Nest] 385204  - [39m08/05/2024, 17:12:00 [32m    LOG[39m [38;5;3m[RouterExplorer] [39m[32mMapped {/auth/login, POST} route[39m[38;5;3m +0ms[39m
+[32m[Nest] 385204  - [39m08/05/2024, 17:12:00 [32m    LOG[39m [38;5;3m[NestApplication] [39m[32mNest application successfully started[39m[38;5;3m +17ms[39m
+
+> sem@0.0.1 start
+> nest start
+
+(node:385254) [DEP0040] DeprecationWarning: The `punycode` module is deprecated. Please use a userland alternative instead.
+(Use `node --trace-deprecation ...` to show where the warning was created)
+[32m[Nest] 385254  - [39m08/05/2024, 17:12:27 [32m    LOG[39m [38;5;3m[NestFactory] [39m[32mStarting Nest application...[39m
+[32m[Nest] 385254  - [39m08/05/2024, 17:12:27 [32m    LOG[39m [38;5;3m[InstanceLoader] [39m[32mTypeOrmModule dependencies initialized[39m[38;5;3m +154ms[39m
+[32m[Nest] 385254  - [39m08/05/2024, 17:12:27 [32m    LOG[39m [38;5;3m[InstanceLoader] [39m[32mPassportModule dependencies initialized[39m[38;5;3m +0ms[39m
+[32m[Nest] 385254  - [39m08/05/2024, 17:12:27 [32m    LOG[39m [38;5;3m[InstanceLoader] [39m[32mConfigHostModule dependencies initialized[39m[38;5;3m +1ms[39m
+[32m[Nest] 385254  - [39m08/05/2024, 17:12:27 [32m    LOG[39m [38;5;3m[InstanceLoader] [39m[32mDiscoveryModule dependencies initialized[39m[38;5;3m +0ms[39m
+[32m[Nest] 385254  - [39m08/05/2024, 17:12:27 [32m    LOG[39m [38;5;3m[InstanceLoader] [39m[32mConfigModule dependencies initialized[39m[38;5;3m +1ms[39m
+[32m[Nest] 385254  - [39m08/05/2024, 17:12:27 [32m    LOG[39m [38;5;3m[InstanceLoader] [39m[32mConfigModule dependencies initialized[39m[38;5;3m +0ms[39m
+DB_NAME:  sqlite.db
+databasePath:  /home/kubuntu/SEM/data/sqlite.db
+[32m[Nest] 385254  - [39m08/05/2024, 17:12:27 [32m    LOG[39m [38;5;3m[InstanceLoader] [39m[32mScheduleModule dependencies initialized[39m[38;5;3m +2ms[39m
+[32m[Nest] 385254  - [39m08/05/2024, 17:12:27 [32m    LOG[39m [38;5;3m[InstanceLoader] [39m[32mAuthModule dependencies initialized[39m[38;5;3m +8ms[39m
+query: PRAGMA foreign_keys = OFF
+query: BEGIN TRANSACTION
+query: SELECT * FROM "sqlite_master" WHERE "type" = 'table' AND "name" IN ('sem_category','sem_currency','sem_process','sem_product','sem_openai_completions_request','sem_openai_completions','sem_html_element_structure','sem_website','sem_html_element','sem_user')
+query: SELECT * FROM "sqlite_master" WHERE "type" = 'index' AND "tbl_name" IN ('sem_category','sem_currency','sem_process','sem_product','sem_openai_completions_request','sem_openai_completions','sem_html_element_structure','sem_website','sem_html_element','sem_user')
+query: PRAGMA table_xinfo("sem_openai_completions")
+query: PRAGMA index_list("sem_openai_completions")
+query: PRAGMA foreign_key_list("sem_openai_completions")
+query: PRAGMA table_xinfo("sem_user")
+query: PRAGMA index_list("sem_user")
+query: PRAGMA foreign_key_list("sem_user")
+query: PRAGMA table_xinfo("sem_html_element")
+query: PRAGMA index_list("sem_html_element")
+query: PRAGMA foreign_key_list("sem_html_element")
+query: PRAGMA table_xinfo("sem_currency")
+query: PRAGMA index_list("sem_currency")
+query: PRAGMA foreign_key_list("sem_currency")
+query: PRAGMA table_xinfo("sem_category")
+query: PRAGMA index_list("sem_category")
+query: PRAGMA foreign_key_list("sem_category")
+query: PRAGMA table_xinfo("sem_html_element_structure")
+query: PRAGMA index_list("sem_html_element_structure")
+query: PRAGMA foreign_key_list("sem_html_element_structure")
+query: PRAGMA table_xinfo("sem_process")
+query: PRAGMA index_list("sem_process")
+query: PRAGMA foreign_key_list("sem_process")
+query: PRAGMA table_xinfo("sem_openai_completions_request")
+query: PRAGMA index_list("sem_openai_completions_request")
+query: PRAGMA foreign_key_list("sem_openai_completions_request")
+query: PRAGMA table_xinfo("sem_website")
+query: PRAGMA index_list("sem_website")
+query: PRAGMA foreign_key_list("sem_website")
+query: PRAGMA table_xinfo("sem_product")
+query: PRAGMA index_list("sem_product")
+query: PRAGMA foreign_key_list("sem_product")
+query: PRAGMA index_info("sqlite_autoindex_sem_user_1")
+query: PRAGMA index_info("sqlite_autoindex_sem_currency_1")
+query: PRAGMA index_info("sqlite_autoindex_sem_category_1")
+query: PRAGMA index_info("IDX_a3b0580a73f0f5584b313acade")
+query: PRAGMA index_info("IDX_60875d641c2ec13bf1e5fc4ecf")
+query: PRAGMA index_info("sqlite_autoindex_sem_product_1")
+query: PRAGMA index_info("IDX_306f8c436eeb2309babbc734da")
+query: SELECT * FROM "sqlite_master" WHERE "type" = 'table' AND "name" = 'typeorm_metadata'
+query: COMMIT
+query: PRAGMA foreign_keys = ON
+[32m[Nest] 385254  - [39m08/05/2024, 17:12:28 [32m    LOG[39m [38;5;3m[InstanceLoader] [39m[32mTypeOrmCoreModule dependencies initialized[39m[38;5;3m +129ms[39m
+[32m[Nest] 385254  - [39m08/05/2024, 17:12:28 [32m    LOG[39m [38;5;3m[InstanceLoader] [39m[32mTypeOrmModule dependencies initialized[39m[38;5;3m +0ms[39m
+[32m[Nest] 385254  - [39m08/05/2024, 17:12:28 [32m    LOG[39m [38;5;3m[InstanceLoader] [39m[32mDatabaseModule dependencies initialized[39m[38;5;3m +1ms[39m
+[32m[Nest] 385254  - [39m08/05/2024, 17:12:28 [32m    LOG[39m [38;5;3m[InstanceLoader] [39m[32mAppModule dependencies initialized[39m[38;5;3m +1ms[39m
+query: SELECT "SemProcess"."id" AS "SemProcess_id", "SemProcess"."name" AS "SemProcess_name", "SemProcess"."server" AS "SemProcess_server", "SemProcess"."interval" AS "SemProcess_interval", "SemProcess"."last_start" AS "SemProcess_last_start", "SemProcess"."last_end" AS "SemProcess_last_end", "SemProcess"."status" AS "SemProcess_status", "SemProcess"."message" AS "SemProcess_message", "SemProcess__SemProcess_websites"."id" AS "SemProcess__SemProcess_websites_id", "SemProcess__SemProcess_websites"."name" AS "SemProcess__SemProcess_websites_name", "SemProcess__SemProcess_websites"."url" AS "SemProcess__SemProcess_websites_url", "SemProcess__SemProcess_websites"."last_start" AS "SemProcess__SemProcess_websites_last_start", "SemProcess__SemProcess_websites"."last_page" AS "SemProcess__SemProcess_websites_last_page", "SemProcess__SemProcess_websites"."num_pages" AS "SemProcess__SemProcess_websites_num_pages", "SemProcess__SemProcess_websites"."status" AS "SemProcess__SemProcess_websites_status", "SemProcess__SemProcess_websites"."message" AS "SemProcess__SemProcess_websites_message", "SemProcess__SemProcess_websites"."processId" AS "SemProcess__SemProcess_websites_processId" FROM "sem_process" "SemProcess" LEFT JOIN "sem_website" "SemProcess__SemProcess_websites" ON "SemProcess__SemProcess_websites"."processId"="SemProcess"."id"
+query: SELECT "SemCategory"."id" AS "SemCategory_id", "SemCategory"."parent_id" AS "SemCategory_parent_id", "SemCategory"."name" AS "SemCategory_name" FROM "sem_category" "SemCategory"
+query: SELECT "SemOpenaiCompletions"."id" AS "SemOpenaiCompletions_id", "SemOpenaiCompletions"."function_name" AS "SemOpenaiCompletions_function_name", "SemOpenaiCompletions"."website_id" AS "SemOpenaiCompletions_website_id", "SemOpenaiCompletions"."group_id" AS "SemOpenaiCompletions_group_id", "SemOpenaiCompletions"."body" AS "SemOpenaiCompletions_body", "SemOpenaiCompletions__SemOpenaiCompletions_htmlElementStructures"."id" AS "SemOpenaiCompletions__SemOpenaiCompletions_htmlElementStructures_id", "SemOpenaiCompletions__SemOpenaiCompletions_htmlElementStructures"."selector" AS "SemOpenaiCompletions__SemOpenaiCompletions_htmlElementStructures_selector", "SemOpenaiCompletions__SemOpenaiCompletions_htmlElementStructures"."type" AS "SemOpenaiCompletions__SemOpenaiCompletions_htmlElementStructures_type", "SemOpenaiCompletions__SemOpenaiCompletions_htmlElementStructures"."json" AS "SemOpenaiCompletions__SemOpenaiCompletions_htmlElementStructures_json", "SemOpenaiCompletions__SemOpenaiCompletions_htmlElementStructures"."openaiCompletionsId" AS "SemOpenaiCompletions__SemOpenaiCompletions_htmlElementStructures_openaiCompletionsId", "SemOpenaiCompletions__SemOpenaiCompletions_htmlElementStructures"."websiteId" AS "SemOpenaiCompletions__SemOpenaiCompletions_htmlElementStructures_websiteId", "SemOpenaiCompletions__SemOpenaiCompletions_openaiCompletionsRequests"."id" AS "SemOpenaiCompletions__SemOpenaiCompletions_openaiCompletionsRequests_id", "SemOpenaiCompletions__SemOpenaiCompletions_openaiCompletionsRequests"."website_id" AS "SemOpenaiCompletions__SemOpenaiCompletions_openaiCompletionsRequests_website_id", "SemOpenaiCompletions__SemOpenaiCompletions_openaiCompletionsRequests"."bodyHash" AS "SemOpenaiCompletions__SemOpenaiCompletions_openaiCompletionsRequests_bodyHash", "SemOpenaiCompletions__SemOpenaiCompletions_openaiCompletionsRequests"."body" AS "SemOpenaiCompletions__SemOpenaiCompletions_openaiCompletionsRequests_body", "SemOpenaiCompletions__SemOpenaiCompletions_openaiCompletionsRequests"."response" AS "SemOpenaiCompletions__SemOpenaiCompletions_openaiCompletionsRequests_response", "SemOpenaiCompletions__SemOpenaiCompletions_openaiCompletionsRequests"."status" AS "SemOpenaiCompletions__SemOpenaiCompletions_openaiCompletionsRequests_status", "SemOpenaiCompletions__SemOpenaiCompletions_openaiCompletionsRequests"."openaiCompletionsId" AS "SemOpenaiCompletions__SemOpenaiCompletions_openaiCompletionsRequests_openaiCompletionsId" FROM "sem_openai_completions" "SemOpenaiCompletions" LEFT JOIN "sem_html_element_structure" "SemOpenaiCompletions__SemOpenaiCompletions_htmlElementStructures" ON "SemOpenaiCompletions__SemOpenaiCompletions_htmlElementStructures"."openaiCompletionsId"="SemOpenaiCompletions"."id"  LEFT JOIN "sem_openai_completions_request" "SemOpenaiCompletions__SemOpenaiCompletions_openaiCompletionsRequests" ON "SemOpenaiCompletions__SemOpenaiCompletions_openaiCompletionsRequests"."openaiCompletionsId"="SemOpenaiCompletions"."id"
+[95m[Nest] 385254  - [39m08/05/2024, 17:12:28 [95m  DEBUG[39m [38;5;3m[CronCrawlerService] [39m[95mStarting crawler job[39m
+query: SELECT "SemProcess"."id" AS "SemProcess_id", "SemProcess"."name" AS "SemProcess_name", "SemProcess"."server" AS "SemProcess_server", "SemProcess"."interval" AS "SemProcess_interval", "SemProcess"."last_start" AS "SemProcess_last_start", "SemProcess"."last_end" AS "SemProcess_last_end", "SemProcess"."status" AS "SemProcess_status", "SemProcess"."message" AS "SemProcess_message", "SemProcess__SemProcess_websites"."id" AS "SemProcess__SemProcess_websites_id", "SemProcess__SemProcess_websites"."name" AS "SemProcess__SemProcess_websites_name", "SemProcess__SemProcess_websites"."url" AS "SemProcess__SemProcess_websites_url", "SemProcess__SemProcess_websites"."last_start" AS "SemProcess__SemProcess_websites_last_start", "SemProcess__SemProcess_websites"."last_page" AS "SemProcess__SemProcess_websites_last_page", "SemProcess__SemProcess_websites"."num_pages" AS "SemProcess__SemProcess_websites_num_pages", "SemProcess__SemProcess_websites"."status" AS "SemProcess__SemProcess_websites_status", "SemProcess__SemProcess_websites"."message" AS "SemProcess__SemProcess_websites_message", "SemProcess__SemProcess_websites"."processId" AS "SemProcess__SemProcess_websites_processId" FROM "sem_process" "SemProcess" LEFT JOIN "sem_website" "SemProcess__SemProcess_websites" ON "SemProcess__SemProcess_websites"."processId"="SemProcess"."id"
+query: SELECT DISTINCT "distinctAlias"."SemProcess_id" AS "ids_SemProcess_id" FROM (SELECT "SemProcess"."id" AS "SemProcess_id", "SemProcess"."name" AS "SemProcess_name", "SemProcess"."server" AS "SemProcess_server", "SemProcess"."interval" AS "SemProcess_interval", "SemProcess"."last_start" AS "SemProcess_last_start", "SemProcess"."last_end" AS "SemProcess_last_end", "SemProcess"."status" AS "SemProcess_status", "SemProcess"."message" AS "SemProcess_message", "SemProcess__SemProcess_websites"."id" AS "SemProcess__SemProcess_websites_id", "SemProcess__SemProcess_websites"."name" AS "SemProcess__SemProcess_websites_name", "SemProcess__SemProcess_websites"."url" AS "SemProcess__SemProcess_websites_url", "SemProcess__SemProcess_websites"."last_start" AS "SemProcess__SemProcess_websites_last_start", "SemProcess__SemProcess_websites"."last_page" AS "SemProcess__SemProcess_websites_last_page", "SemProcess__SemProcess_websites"."num_pages" AS "SemProcess__SemProcess_websites_num_pages", "SemProcess__SemProcess_websites"."status" AS "SemProcess__SemProcess_websites_status", "SemProcess__SemProcess_websites"."message" AS "SemProcess__SemProcess_websites_message", "SemProcess__SemProcess_websites"."processId" AS "SemProcess__SemProcess_websites_processId" FROM "sem_process" "SemProcess" LEFT JOIN "sem_website" "SemProcess__SemProcess_websites" ON "SemProcess__SemProcess_websites"."processId"="SemProcess"."id" WHERE (("SemProcess"."id" = 1))) "distinctAlias" ORDER BY "SemProcess_id" ASC LIMIT 1
+query: SELECT "SemProcess"."id" AS "SemProcess_id", "SemProcess"."name" AS "SemProcess_name", "SemProcess"."server" AS "SemProcess_server", "SemProcess"."interval" AS "SemProcess_interval", "SemProcess"."last_start" AS "SemProcess_last_start", "SemProcess"."last_end" AS "SemProcess_last_end", "SemProcess"."status" AS "SemProcess_status", "SemProcess"."message" AS "SemProcess_message", "SemProcess__SemProcess_websites"."id" AS "SemProcess__SemProcess_websites_id", "SemProcess__SemProcess_websites"."name" AS "SemProcess__SemProcess_websites_name", "SemProcess__SemProcess_websites"."url" AS "SemProcess__SemProcess_websites_url", "SemProcess__SemProcess_websites"."last_start" AS "SemProcess__SemProcess_websites_last_start", "SemProcess__SemProcess_websites"."last_page" AS "SemProcess__SemProcess_websites_last_page", "SemProcess__SemProcess_websites"."num_pages" AS "SemProcess__SemProcess_websites_num_pages", "SemProcess__SemProcess_websites"."status" AS "SemProcess__SemProcess_websites_status", "SemProcess__SemProcess_websites"."message" AS "SemProcess__SemProcess_websites_message", "SemProcess__SemProcess_websites"."processId" AS "SemProcess__SemProcess_websites_processId" FROM "sem_process" "SemProcess" LEFT JOIN "sem_website" "SemProcess__SemProcess_websites" ON "SemProcess__SemProcess_websites"."processId"="SemProcess"."id" WHERE ( (("SemProcess"."id" = 1)) ) AND ( "SemProcess"."id" IN (1) )
+[95m[Nest] 385254  - [39m08/05/2024, 17:12:28 [95m  DEBUG[39m [38;5;3m[CronCrawlerService] [39m[95mCrawler job completed successfully[39m
+[32m[Nest] 385254  - [39m08/05/2024, 17:12:28 [32m    LOG[39m [38;5;3m[RoutesResolver] [39m[32mAppController {/}:[39m[38;5;3m +4ms[39m
+[32m[Nest] 385254  - [39m08/05/2024, 17:12:28 [32m    LOG[39m [38;5;3m[RouterExplorer] [39m[32mMapped {/, GET} route[39m[38;5;3m +3ms[39m
+[32m[Nest] 385254  - [39m08/05/2024, 17:12:28 [32m    LOG[39m [38;5;3m[RoutesResolver] [39m[32mServiceOpenaiController {/service-openai}:[39m[38;5;3m +1ms[39m
+[32m[Nest] 385254  - [39m08/05/2024, 17:12:28 [32m    LOG[39m [38;5;3m[RouterExplorer] [39m[32mMapped {/service-openai/get-product-structure, GET} route[39m[38;5;3m +1ms[39m
+[32m[Nest] 385254  - [39m08/05/2024, 17:12:28 [32m    LOG[39m [38;5;3m[RouterExplorer] [39m[32mMapped {/service-openai/get-functions, GET} route[39m[38;5;3m +0ms[39m
+[32m[Nest] 385254  - [39m08/05/2024, 17:12:28 [32m    LOG[39m [38;5;3m[RoutesResolver] [39m[32mSemProcessController {/process}:[39m[38;5;3m +0ms[39m
+[32m[Nest] 385254  - [39m08/05/2024, 17:12:28 [32m    LOG[39m [38;5;3m[RouterExplorer] [39m[32mMapped {/process, GET} route[39m[38;5;3m +1ms[39m
+[32m[Nest] 385254  - [39m08/05/2024, 17:12:28 [32m    LOG[39m [38;5;3m[RouterExplorer] [39m[32mMapped {/process/:id, GET} route[39m[38;5;3m +0ms[39m
+[32m[Nest] 385254  - [39m08/05/2024, 17:12:28 [32m    LOG[39m [38;5;3m[RouterExplorer] [39m[32mMapped {/process/sync, POST} route[39m[38;5;3m +1ms[39m
+[32m[Nest] 385254  - [39m08/05/2024, 17:12:28 [32m    LOG[39m [38;5;3m[RoutesResolver] [39m[32mSemOpenaiCompletionsController {/openai-completions}:[39m[38;5;3m +0ms[39m
+[32m[Nest] 385254  - [39m08/05/2024, 17:12:28 [32m    LOG[39m [38;5;3m[RouterExplorer] [39m[32mMapped {/openai-completions, GET} route[39m[38;5;3m +0ms[39m
+[32m[Nest] 385254  - [39m08/05/2024, 17:12:28 [32m    LOG[39m [38;5;3m[RouterExplorer] [39m[32mMapped {/openai-completions/:id, GET} route[39m[38;5;3m +0ms[39m
+[32m[Nest] 385254  - [39m08/05/2024, 17:12:28 [32m    LOG[39m [38;5;3m[RouterExplorer] [39m[32mMapped {/openai-completions/sync, POST} route[39m[38;5;3m +1ms[39m
+[32m[Nest] 385254  - [39m08/05/2024, 17:12:28 [32m    LOG[39m [38;5;3m[RoutesResolver] [39m[32mSemProductController {/product}:[39m[38;5;3m +1ms[39m
+[32m[Nest] 385254  - [39m08/05/2024, 17:12:28 [32m    LOG[39m [38;5;3m[RouterExplorer] [39m[32mMapped {/product, GET} route[39m[38;5;3m +0ms[39m
+[32m[Nest] 385254  - [39m08/05/2024, 17:12:28 [32m    LOG[39m [38;5;3m[RouterExplorer] [39m[32mMapped {/product/title, GET} route[39m[38;5;3m +0ms[39m
+[32m[Nest] 385254  - [39m08/05/2024, 17:12:28 [32m    LOG[39m [38;5;3m[RouterExplorer] [39m[32mMapped {/product/:id, GET} route[39m[38;5;3m +1ms[39m
+[32m[Nest] 385254  - [39m08/05/2024, 17:12:28 [32m    LOG[39m [38;5;3m[RoutesResolver] [39m[32mSemCurrencyController {/currency}:[39m[38;5;3m +0ms[39m
+[32m[Nest] 385254  - [39m08/05/2024, 17:12:28 [32m    LOG[39m [38;5;3m[RouterExplorer] [39m[32mMapped {/currency, GET} route[39m[38;5;3m +0ms[39m
+[32m[Nest] 385254  - [39m08/05/2024, 17:12:28 [32m    LOG[39m [38;5;3m[RouterExplorer] [39m[32mMapped {/currency/:id, GET} route[39m[38;5;3m +0ms[39m
+[32m[Nest] 385254  - [39m08/05/2024, 17:12:28 [32m    LOG[39m [38;5;3m[RoutesResolver] [39m[32mSemCategoryController {/category}:[39m[38;5;3m +0ms[39m
+[32m[Nest] 385254  - [39m08/05/2024, 17:12:28 [32m    LOG[39m [38;5;3m[RouterExplorer] [39m[32mMapped {/category, GET} route[39m[38;5;3m +1ms[39m
+[32m[Nest] 385254  - [39m08/05/2024, 17:12:28 [32m    LOG[39m [38;5;3m[RouterExplorer] [39m[32mMapped {/category/:id, GET} route[39m[38;5;3m +0ms[39m
+[32m[Nest] 385254  - [39m08/05/2024, 17:12:28 [32m    LOG[39m [38;5;3m[RoutesResolver] [39m[32mSemWebsiteController {/website}:[39m[38;5;3m +0ms[39m
+[32m[Nest] 385254  - [39m08/05/2024, 17:12:28 [32m    LOG[39m [38;5;3m[RouterExplorer] [39m[32mMapped {/website, GET} route[39m[38;5;3m +0ms[39m
+[32m[Nest] 385254  - [39m08/05/2024, 17:12:28 [32m    LOG[39m [38;5;3m[RouterExplorer] [39m[32mMapped {/website/:id, GET} route[39m[38;5;3m +1ms[39m
+[32m[Nest] 385254  - [39m08/05/2024, 17:12:28 [32m    LOG[39m [38;5;3m[RouterExplorer] [39m[32mMapped {/website/sync, POST} route[39m[38;5;3m +0ms[39m
+[32m[Nest] 385254  - [39m08/05/2024, 17:12:28 [32m    LOG[39m [38;5;3m[RoutesResolver] [39m[32mSemHtmlElementStructureController {/html-element-structure}:[39m[38;5;3m +0ms[39m
+[32m[Nest] 385254  - [39m08/05/2024, 17:12:28 [32m    LOG[39m [38;5;3m[RouterExplorer] [39m[32mMapped {/html-element-structure, GET} route[39m[38;5;3m +0ms[39m
+[32m[Nest] 385254  - [39m08/05/2024, 17:12:28 [32m    LOG[39m [38;5;3m[RouterExplorer] [39m[32mMapped {/html-element-structure/:id, GET} route[39m[38;5;3m +0ms[39m
+[32m[Nest] 385254  - [39m08/05/2024, 17:12:28 [32m    LOG[39m [38;5;3m[RoutesResolver] [39m[32mFixturesController {/fixtures}:[39m[38;5;3m +1ms[39m
+[32m[Nest] 385254  - [39m08/05/2024, 17:12:28 [32m    LOG[39m [38;5;3m[RouterExplorer] [39m[32mMapped {/fixtures/sync, POST} route[39m[38;5;3m +0ms[39m
+[32m[Nest] 385254  - [39m08/05/2024, 17:12:28 [32m    LOG[39m [38;5;3m[RoutesResolver] [39m[32mAuthController {/auth}:[39m[38;5;3m +0ms[39m
+[32m[Nest] 385254  - [39m08/05/2024, 17:12:28 [32m    LOG[39m [38;5;3m[RouterExplorer] [39m[32mMapped {/auth/login, POST} route[39m[38;5;3m +1ms[39m
+[32m[Nest] 385254  - [39m08/05/2024, 17:12:28 [32m    LOG[39m [38;5;3m[NestApplication] [39m[32mNest application successfully started[39m[38;5;3m +16ms[39m
+Terminated
+Terminated
