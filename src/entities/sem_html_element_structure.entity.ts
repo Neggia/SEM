@@ -17,12 +17,16 @@ export class SemHtmlElementStructure {
   // @Column()
   // group_id: number; // This could become wrong if html_entity get crawled again and group_id change
 
-  @Column()
+  @Column({ nullable: true })
   selector: string;
 
   // Pagination, product, category, ecc..
   @Column()
   type: number;
+
+  // Pagination is infinite scrolling
+  @Column({ nullable: true })
+  is_infinite_scrolling: boolean;
 
   @Column()
   json: string;

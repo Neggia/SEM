@@ -139,7 +139,7 @@ export class SemWebsiteService {
             const getProductStructureOpenaiCompletions =
               await this.semOpenaiCompletionsService.findOne(1); // getProductStructure
 
-            await await this.semHtmlElementStructureService.saveFromJSON(
+            await this.semHtmlElementStructureService.saveFromJSON(
               object.product_structure,
               HTML_ELEMENT_TYPE_PRODUCT,
               website,
@@ -152,7 +152,7 @@ export class SemWebsiteService {
             const getPaginationStructureOpenaiCompletions =
               await this.semOpenaiCompletionsService.findOne(4); // getProductStructure
 
-            await await this.semHtmlElementStructureService.saveFromJSON(
+            await this.semHtmlElementStructureService.saveFromJSON(
               object.pagination_structure,
               HTML_ELEMENT_TYPE_PAGINATION,
               website,
