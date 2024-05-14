@@ -240,26 +240,27 @@ export class CronCrawlerService {
   }
 
   async scrollToBottom(page: puppeteer.Page) {
-    let lastHeight = await page.evaluate('document.body.scrollHeight');
-    let pageCounter = 1;
-    while (true) {
-      for (let i = 1; i <= 3; i++) {
-        await page.evaluate('window.scrollTo(0, document.body.scrollHeight)');
-        await page.waitForTimeout(2000); // sleep a bit
-        await page.evaluate(
-          'window.scrollTo(0, document.body.scrollHeight-200)',
-        );
-        await page.waitForTimeout(100); // sleep a bit
+    try {
+      let lastHeight = await page.evaluate('document.body.scrollHeight');
+      let scrollCounter = 0;
+      while (scrollCounter++ <= 100) {
+        for (let i = 1; i <= 20; i++) {
+          await page.evaluate('window.scrollTo(0, document.body.scrollHeight)');
+          await page.waitForTimeout(2000); // sleep a bit
+          await page.evaluate(
+            'window.scrollTo(0, document.body.scrollHeight-200)',
+          );
+          await page.waitForTimeout(100); // sleep a bit
+        }
+        let newHeight = await page.evaluate('document.body.scrollHeight');
+        if (newHeight === lastHeight) {
+          break;
+        }
+        lastHeight = newHeight;
+        console.log('in scrollToBottom newHeight = ' + newHeight);
       }
-      let newHeight = await page.evaluate('document.body.scrollHeight');
-      if (newHeight === lastHeight) {
-        break;
-      }
-      lastHeight = newHeight;
-      console.log(
-        'in scrollToBottom page ' + pageCounter + ' , newHeight = ' + newHeight,
-      );
-      pageCounter++;
+    } catch (error) {
+      console.error(`Failed scrollToBottom: `, error);
     }
   }
 
@@ -512,7 +513,7 @@ export class CronCrawlerService {
                     updatedHtmlElement,
                   );
                 break;
-              } else {
+              } else if (paginationHtmlElementStructure.json) {
                 // infinite scrolling?
                 const json = JSON.parse(paginationHtmlElementStructure.json);
                 if (json.is_infinite_scrolling) {
@@ -790,6 +791,13 @@ export class CronCrawlerService {
             productHtmlElementStructureJSON.currency_02,
           );
           productStructure.currency_02_id = currency_02 ? currency_02.id : null;
+
+          if (
+            !productStructure.currency_01_id &&
+            !productStructure.currency_02_id
+          ) {
+            continue;
+          }
 
           const categoryName =
             await this.serviceOpenaiService.getProductCategory(
