@@ -189,4 +189,12 @@ export class SemProductService {
   async delete(id: number) {
     await this.semProductRepository.delete(id);
   }
+
+  async lockDb() {
+    await this.semProductRepository.query('BEGIN');
+  }
+
+  async unlockDb() {
+    await this.semProductRepository.query('COMMIT');
+  }
 }

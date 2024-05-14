@@ -254,7 +254,7 @@ export class CronCrawlerService {
         }
         let newHeight = await page.evaluate('document.body.scrollHeight');
         if (newHeight === lastHeight) {
-          break;
+          return;
         }
         lastHeight = newHeight;
         console.log('in scrollToBottom newHeight = ' + newHeight);
@@ -670,7 +670,12 @@ export class CronCrawlerService {
         const productElements = $(productHtmlElementStructure.selector).get();
         let numbers = [];
 
-        // Loop through product elements
+        // Loop through product elements to insert/update them , in a transaction
+        // to secure exclusive write operation , and to prevent other threads to
+        // acquire a lock and make write operation fail as a consequence
+
+        await this.semProductService.lockDb();
+
         // $(productHtmlElementStructure.selector).each((index, element) => {
         for (const productElement of productElements) {
           // 'element' refers to the current item in the loop
@@ -847,6 +852,8 @@ export class CronCrawlerService {
             );
           }
         }
+
+        await this.semProductService.unlockDb();
 
         if (!paginationHtmlElementData) {
           // if no pagination , infinite scroll. we will scrape from the same page next time.
