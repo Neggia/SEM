@@ -131,18 +131,27 @@ export class SemHtmlElementStructureService {
       console.log('saveFromJSON data: ', data);
       // console.log('saveFromJSON data.id: ', data.id);
 
-      let htmlElementStructure =
-        await this.semHtmlElementStructureRepository.findOne({
-          where: { id: data.id },
-        });
+      let htmlElementStructure = null;
+      if (data.id) {
+        htmlElementStructure =
+          await this.semHtmlElementStructureRepository.findOne({
+            where: { id: data.id },
+          });
+      }
       if (!htmlElementStructure) {
         htmlElementStructure = new SemHtmlElementStructure();
-        // if (data.id !== null) {
-        htmlElementStructure.id = data.id;
-        // }
-        htmlElementStructure.selector = data.selector;
+        if (data.id) {
+          htmlElementStructure.id = data.id;
+        }
+        if (data.selector) {
+          htmlElementStructure.selector = data.selector;
+        }
         htmlElementStructure.type = type;
-        htmlElementStructure.json = data.json;
+        if (data.is_infinite_scrolling) {
+          htmlElementStructure.json = json;
+        } else {
+          htmlElementStructure.json = data.json;
+        }
         htmlElementStructure.website = website;
         htmlElementStructure.openaiCompletions = openaiCompletions;
 
