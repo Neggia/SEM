@@ -256,7 +256,7 @@ export class CronCrawlerService {
     try {
       let lastHeight = await page.evaluate('document.body.scrollHeight');
       let scrollCounter = 0;
-      while (scrollCounter++ <= 5) {
+      while (scrollCounter++ <= 100) {
         for (let i = 1; i <= 20; i++) {
           await page.evaluate('window.scrollTo(0, document.body.scrollHeight)');
           await page.waitForTimeout(2000); // sleep a bit
