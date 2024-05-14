@@ -86,6 +86,19 @@ export class CronCrawlerService {
     let intervalMs;
     let processId;
 
+    if (
+      !process.env.CRAWLING_ENABLED ||
+      parseInt(process.env.CRAWLING_ENABLED) == 0
+    ) {
+      this.logger.debug(
+        'Crawling not enabled on this backend instance. To enable it , set CRAWLING_ENABLED=1, or launch another backend instance on another port , with CRAWLING_ENABLED=1',
+      );
+      this.logger.debug(
+        'This backend instance should be called by the frontend. The instance with CRAWLING_ENABLED=1 should not , since it`s busy with the crawling',
+      );
+      return;
+    }
+
     this.logger.debug('Starting crawler job');
     try {
       const processArray = await this.semProcessService.findAll();
@@ -243,7 +256,7 @@ export class CronCrawlerService {
     try {
       let lastHeight = await page.evaluate('document.body.scrollHeight');
       let scrollCounter = 0;
-      while (scrollCounter++ <= 100) {
+      while (scrollCounter++ <= 5) {
         for (let i = 1; i <= 20; i++) {
           await page.evaluate('window.scrollTo(0, document.body.scrollHeight)');
           await page.waitForTimeout(2000); // sleep a bit
@@ -254,7 +267,7 @@ export class CronCrawlerService {
         }
         let newHeight = await page.evaluate('document.body.scrollHeight');
         if (newHeight === lastHeight) {
-          break;
+          return;
         }
         lastHeight = newHeight;
         console.log('in scrollToBottom newHeight = ' + newHeight);
@@ -670,7 +683,12 @@ export class CronCrawlerService {
         const productElements = $(productHtmlElementStructure.selector).get();
         let numbers = [];
 
-        // Loop through product elements
+        // Loop through product elements to insert/update them , in a transaction
+        // to secure exclusive write operation , and to prevent other threads to
+        // acquire a lock and make write operation fail as a consequence
+
+        await this.semProductService.lockDb();
+
         // $(productHtmlElementStructure.selector).each((index, element) => {
         for (const productElement of productElements) {
           // 'element' refers to the current item in the loop
@@ -847,6 +865,8 @@ export class CronCrawlerService {
             );
           }
         }
+
+        await this.semProductService.unlockDb();
 
         if (!paginationHtmlElementData) {
           // if no pagination , infinite scroll. we will scrape from the same page next time.
