@@ -1,4 +1,4 @@
-import { Injectable, Logger } from '@nestjs/common';
+import { Injectable, Inject, Logger } from '@nestjs/common';
 import { Cron, CronExpression } from '@nestjs/schedule';
 import * as puppeteer from 'puppeteer';
 import * as robotsParser from 'robots-txt-parser';
@@ -36,6 +36,7 @@ import {
   delay,
   getFormattedUrl,
 } from '../utils/globals';
+import { Connection } from 'typeorm';
 const {
   // HTML_ELEMENT_TYPE_UNKNOWN,
   HTML_ELEMENT_TYPE_PRODUCT,
@@ -77,6 +78,8 @@ export class CronCrawlerService {
     private readonly semProductService: SemProductService,
     private readonly semCurrencyService: SemCurrencyService,
     private readonly semCategoryService: SemCategoryService,
+    @Inject('MEMORY_DATABASE_CONNECTION')
+    private readonly memoryDbConnection: Connection,
   ) {}
 
   @Cron(CronExpression.EVERY_HOUR) // Runs every hour
@@ -100,7 +103,12 @@ export class CronCrawlerService {
     }
 
     this.logger.debug('Starting crawler job');
+
     try {
+      await this.memoryDbConnection.query(
+        'UPDATE crawler_lock SET is_locked = 1',
+      );
+
       const processArray = await this.semProcessService.findAll();
 
       for (const processLazy of processArray) {
@@ -221,6 +229,10 @@ export class CronCrawlerService {
         process.id,
         'message',
         error.stack,
+      );
+    } finally {
+      await this.memoryDbConnection.query(
+        'UPDATE crawler_lock SET is_locked = 0',
       );
     }
   }
@@ -683,12 +695,7 @@ export class CronCrawlerService {
         const productElements = $(productHtmlElementStructure.selector).get();
         let numbers = [];
 
-        // Loop through product elements to insert/update them , in a transaction
-        // to secure exclusive write operation , and to prevent other threads to
-        // acquire a lock and make write operation fail as a consequence
-
-        await this.semProductService.lockDb();
-
+        // Loop through product elements to insert/update them
         // $(productHtmlElementStructure.selector).each((index, element) => {
         for (const productElement of productElements) {
           // 'element' refers to the current item in the loop
@@ -865,8 +872,6 @@ export class CronCrawlerService {
             );
           }
         }
-
-        await this.semProductService.unlockDb();
 
         if (!paginationHtmlElementData) {
           // if no pagination , infinite scroll. we will scrape from the same page next time.
