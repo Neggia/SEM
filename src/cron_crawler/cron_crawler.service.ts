@@ -89,24 +89,17 @@ export class CronCrawlerService {
     let intervalMs;
     let processId;
 
-    if (
-      !process.env.CRAWLING_ENABLED ||
-      parseInt(process.env.CRAWLING_ENABLED) == 0
-    ) {
-      this.logger.debug(
-        'Crawling not enabled on this backend instance. To enable it , set CRAWLING_ENABLED=1, or launch another backend instance on another port , with CRAWLING_ENABLED=1',
-      );
-      this.logger.debug(
-        'This backend instance should be called by the frontend. The instance with CRAWLING_ENABLED=1 should not , since it`s busy with the crawling',
-      );
-      return;
-    }
+    // Setup memory db connection table , for blocking requests from the frontend while crawling is running
+
+    await this.memoryDbConnection.query(
+      'CREATE TABLE IF NOT EXISTS crawler_lock(is_locked INT NOT NULL PRIMARY KEY)',
+    );
 
     this.logger.debug('Starting crawler job');
 
     try {
       await this.memoryDbConnection.query(
-        'UPDATE crawler_lock SET is_locked = 1',
+        'INSERT OR IGNORE INTO crawler_lock (is_locked) VALUES (1)',
       );
 
       const processArray = await this.semProcessService.findAll();
@@ -231,9 +224,7 @@ export class CronCrawlerService {
         error.stack,
       );
     } finally {
-      await this.memoryDbConnection.query(
-        'UPDATE crawler_lock SET is_locked = 0',
-      );
+      await this.memoryDbConnection.query('DELETE FROM crawler_lock');
     }
   }
 
@@ -680,7 +671,9 @@ export class CronCrawlerService {
           return currency;
         };
 
-        // if infinite scroll , scroll down as many times as possible
+        // if infinite scroll , scroll down as many times as possible.
+        // in the meantime , allow the frontend to query the products , so unlock the db
+        await this.memoryDbConnection.query('DELETE FROM crawler_lock');
         console.log(
           'before scrollToBottom. once finished , you should see another log here...',
         );
@@ -688,7 +681,12 @@ export class CronCrawlerService {
         console.log(
           'scrollToBottom finished. Re-downloading the whole HTML from the page.',
         );
-        // now reload the whole html to get all products , if infinite scroll
+        // infinite scrolling finished , continue the crawling.
+        // Lock the db to prevent the frontend to use it during crawling
+        await this.memoryDbConnection.query(
+          'INSERT OR IGNORE INTO crawler_lock (is_locked) VALUES (1)',
+        );
+        // now reload the whole html to get all products at once, if the site had infinite scroll
         html = await page.content();
         $ = cheerio.load(html);
 

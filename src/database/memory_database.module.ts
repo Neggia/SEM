@@ -8,7 +8,7 @@ import { Connection } from 'typeorm';
     TypeOrmModule.forRootAsync({
       useFactory: () => {
         const dbName = ':memory:';
-        console.log('memory DB_NAME: ', dbName);
+        console.log('memory db name: ', dbName);
         return {
           type: 'sqlite',
           database: ':memory:',
