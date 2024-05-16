@@ -122,14 +122,16 @@ export class CronCrawlerService {
         timestampMs = Date.now();
         if (process.last_start > 0) {
           // Not first run
-          if (process.last_start > process.last_end) {
-            // Previous process still running
-            continue;
-          }
           if (timestampMs - process.last_start < intervalMs) {
             // Interval between processes has not yet passed
             continue;
           }
+          /*
+          if (process.last_start > process.last_end) {
+            // Previous process still running
+            continue;
+          }
+          */
         }
 
         process = await this.semProcessService.updateProcessField(
@@ -145,12 +147,13 @@ export class CronCrawlerService {
           timestampMs,
         );
 
-        console.log('process id:', process.id);
+        this.logger.debug('process id:', process.id);
+
         for (const websiteLazy of process.websites) {
           // Reload website if it has changed from first findAll
           let website = await this.semWebsiteService.findOne(websiteLazy.id);
 
-          console.log('crawling website url:', website.url);
+          this.logger.debug('crawling website url:', website.url);
 
           if (
             website.status & WEBSITE_STATUS_STOPPED ||
