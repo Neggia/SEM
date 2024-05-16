@@ -55,34 +55,36 @@ Admin can login (with password set in .env file) to panel from homepage widget t
 When `npm run start ` is launched from terminal , if the terminal gets closed , also the npm process terminates , since it is a child process.
 Npm needs to be launched in background then. A way to do it that is specific to Node JS , is by using the `pm2` package.
 
-install:
-`npm install pm2@latest -g`
+- install:
+  `npm install pm2@latest -g`
 
-scheduling a command: enter the node project directory, and do:
-`pm2 --name ExampleProcessName start npm -- start `
+- scheduling a command: enter the node project directory, and do:
+  `pm2 --name ExampleProcessName start npm -- start `
 
-verify that it has been scheduled:
-`pm2 ls`
-![image](https://github.com/Neggia/SEM/assets/148484240/904d9b0e-1ec2-4566-af86-ec111ec466a5)
+- verify that it has been scheduled:
+  `pm2 ls`
+  ![image](https://github.com/Neggia/SEM/assets/148484240/904d9b0e-1ec2-4566-af86-ec111ec466a5)
 
-delete all scheduled processes:
-`pm2 delete all`
+- delete all scheduled processes:
+  `pm2 delete all`
 
-to delete only a specific process: indicate its id instead of "all". E.g. to cancel the process with id 0 as seen in the screenshot:
-`pm2 delete 0`
+- to delete only a specific process: indicate its id instead of "all". E.g. to cancel the process with id 0 as seen in the screenshot:
+  `pm2 delete 0`
 
-to read the logs produced by a process:
-`pm2 logs 0 --lines 1000`
-where 1000 is the number of lines to be printed , from the most recent one, and 0 is the process id
+- to read the logs produced by a process:
+  `pm2 logs 0 --lines 1000`
+  where 1000 is the number of lines to be printed , from the most recent one, and 0 is the process id
 
-Typically you will launch the SEM backend in background, by going to the SEM root directory , and doing something like
-`pm2 --name SEMBackendCrawler start npm -- start `.
-Then you launch the frontend in background by entering the client subdirectory
-`cd client `
-and :
-`pm2 --name SEMFrontend start npm -- start `
-and here is the result:
-![pm2 ls](https://github.com/Neggia/SEM/assets/148484240/22a91346-45f0-4656-847b-354a4f63d5d4)
+Typically you will launch the SEM backend in background:
+
+- by going to the SEM root directory , and doing something like
+  `pm2 --name SEMBackendCrawler start npm -- start `.
+- Then you launch the frontend in background by entering the client subdirectory
+  `cd client `
+- and :
+  `pm2 --name SEMFrontend start npm -- start `
+- and here is the result:
+  ![pm2 ls](https://github.com/Neggia/SEM/assets/148484240/22a91346-45f0-4656-847b-354a4f63d5d4)
 
 ## Support
 
