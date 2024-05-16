@@ -75,6 +75,15 @@ to read the logs produced by a process:
 `pm2 logs 0 --lines 1000`
 where 1000 is the number of lines to be printed , from the most recent one, and 0 is the process id
 
+Typically you will launch the SEM backend in background, by going to the SEM root directory , and doing something like
+`pm2 --name SEMBackendCrawler start npm -- start `.
+Then you launch the frontend in background by entering the client subdirectory
+`cd client `
+and :
+`pm2 --name SEMFrontend start npm -- start `
+and here is the result:
+![pm2 ls](https://github.com/Neggia/SEM/assets/148484240/22a91346-45f0-4656-847b-354a4f63d5d4)
+
 ## Support
 
 SEM is an GPL 3-licensed open source project.
