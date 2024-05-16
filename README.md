@@ -15,7 +15,7 @@ $ npm install
 .env file in root folder needs the following vars:
 
 ```bash
-DB_NAME=sqlite.db
+DB_RELATIVE_PATH=data/sqlite.db
 ADMIN_PASSWORD=test1234
 OPENAI_API_KEY=sk-abc........................................xyz
 NODE_ENV=test (or prd)

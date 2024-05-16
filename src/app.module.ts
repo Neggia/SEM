@@ -1,9 +1,11 @@
-import { Module } from '@nestjs/common';
+import { Module, NestModule, MiddlewareConsumer } from '@nestjs/common';
 import { ConfigModule } from '@nestjs/config';
 import { ScheduleModule } from '@nestjs/schedule';
 import { AppController } from './app.controller';
 import { AppService } from './app.service';
 import { DatabaseModule } from './database/database.module';
+import { MemoryDatabaseModule } from './database/memory_database.module';
+import { MemoryDatabaseMiddleware } from './database/memory_database.middleware';
 // import { SemProcessService } from './entities/sem_process.service';
 import { SemCategoryController } from './entities/sem_category.controller';
 import { SemHtmlElementStructureController } from './entities/sem_html_element_structure.controller';
@@ -27,6 +29,7 @@ import { CronCrawlerService } from './cron_crawler/cron_crawler.service';
       envFilePath: '.env',
     }),
     DatabaseModule,
+    MemoryDatabaseModule,
     AuthModule,
     ScheduleModule.forRoot(),
   ],
@@ -50,4 +53,8 @@ import { CronCrawlerService } from './cron_crawler/cron_crawler.service';
     // SemWebsiteService,
   ],
 })
-export class AppModule {}
+export class AppModule implements NestModule {
+  configure(consumer: MiddlewareConsumer) {
+    consumer.apply(MemoryDatabaseMiddleware).forRoutes('*');
+  }
+}

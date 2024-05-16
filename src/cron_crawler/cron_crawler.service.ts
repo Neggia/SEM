@@ -1,4 +1,4 @@
-import { Injectable, Logger } from '@nestjs/common';
+import { Injectable, Inject, Logger } from '@nestjs/common';
 import { Cron, CronExpression } from '@nestjs/schedule';
 import * as puppeteer from 'puppeteer';
 import * as robotsParser from 'robots-txt-parser';
@@ -36,6 +36,7 @@ import {
   delay,
   getFormattedUrl,
 } from '../utils/globals';
+import { Connection } from 'typeorm';
 const {
   // HTML_ELEMENT_TYPE_UNKNOWN,
   HTML_ELEMENT_TYPE_PRODUCT,
@@ -77,6 +78,8 @@ export class CronCrawlerService {
     private readonly semProductService: SemProductService,
     private readonly semCurrencyService: SemCurrencyService,
     private readonly semCategoryService: SemCategoryService,
+    @Inject('MEMORY_DATABASE_CONNECTION')
+    private readonly memoryDbConnection: Connection,
   ) {}
 
   @Cron(CronExpression.EVERY_HOUR) // Runs every hour
@@ -86,21 +89,19 @@ export class CronCrawlerService {
     let intervalMs;
     let processId;
 
-    if (
-      !process.env.CRAWLING_ENABLED ||
-      parseInt(process.env.CRAWLING_ENABLED) == 0
-    ) {
-      this.logger.debug(
-        'Crawling not enabled on this backend instance. To enable it , set CRAWLING_ENABLED=1, or launch another backend instance on another port , with CRAWLING_ENABLED=1',
-      );
-      this.logger.debug(
-        'This backend instance should be called by the frontend. The instance with CRAWLING_ENABLED=1 should not , since it`s busy with the crawling',
-      );
-      return;
-    }
+    // Setup memory db connection table , for blocking requests from the frontend while crawling is running
+
+    await this.memoryDbConnection.query(
+      'CREATE TABLE IF NOT EXISTS crawler_lock(is_locked INT NOT NULL PRIMARY KEY)',
+    );
 
     this.logger.debug('Starting crawler job');
+
     try {
+      await this.memoryDbConnection.query(
+        'INSERT OR IGNORE INTO crawler_lock (is_locked) VALUES (1)',
+      );
+
       const processArray = await this.semProcessService.findAll();
 
       for (const processLazy of processArray) {
@@ -222,6 +223,8 @@ export class CronCrawlerService {
         'message',
         error.stack,
       );
+    } finally {
+      await this.memoryDbConnection.query('DELETE FROM crawler_lock');
     }
   }
 
@@ -668,7 +671,9 @@ export class CronCrawlerService {
           return currency;
         };
 
-        // if infinite scroll , scroll down as many times as possible
+        // if infinite scroll , scroll down as many times as possible.
+        // in the meantime , allow the frontend to query the products , so unlock the db
+        await this.memoryDbConnection.query('DELETE FROM crawler_lock');
         console.log(
           'before scrollToBottom. once finished , you should see another log here...',
         );
@@ -676,19 +681,19 @@ export class CronCrawlerService {
         console.log(
           'scrollToBottom finished. Re-downloading the whole HTML from the page.',
         );
-        // now reload the whole html to get all products , if infinite scroll
+        // infinite scrolling finished , continue the crawling.
+        // Lock the db to prevent the frontend to use it during crawling
+        await this.memoryDbConnection.query(
+          'INSERT OR IGNORE INTO crawler_lock (is_locked) VALUES (1)',
+        );
+        // now reload the whole html to get all products at once, if the site had infinite scroll
         html = await page.content();
         $ = cheerio.load(html);
 
         const productElements = $(productHtmlElementStructure.selector).get();
         let numbers = [];
 
-        // Loop through product elements to insert/update them , in a transaction
-        // to secure exclusive write operation , and to prevent other threads to
-        // acquire a lock and make write operation fail as a consequence
-
-        await this.semProductService.lockDb();
-
+        // Loop through product elements to insert/update them
         // $(productHtmlElementStructure.selector).each((index, element) => {
         for (const productElement of productElements) {
           // 'element' refers to the current item in the loop
@@ -865,8 +870,6 @@ export class CronCrawlerService {
             );
           }
         }
-
-        await this.semProductService.unlockDb();
 
         if (!paginationHtmlElementData) {
           // if no pagination , infinite scroll. we will scrape from the same page next time.

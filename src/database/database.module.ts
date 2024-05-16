@@ -30,24 +30,16 @@ import * as fs from 'fs';
     TypeOrmModule.forRootAsync({
       imports: [ConfigModule],
       useFactory: (configService: ConfigService) => {
-        const dbName = configService.get<string>('DB_NAME');
-        console.log('DB_NAME: ', dbName);
-        if (!dbName) {
+        const dbRelativePath = configService.get<string>('DB_RELATIVE_PATH');
+        console.log('DB_RELATIVE_PATH: ', dbRelativePath);
+        if (!dbRelativePath) {
           throw new Error(
-            'DB_NAME is not defined in the environment variables',
+            'DB_RELATIVE_PATH is not defined in the environment variables',
           );
         }
-        const databaseSubfolder = 'data';
 
         // Check if the subfolder exists; if not, create it
-        const databaseSubfolderPath = path.join(
-          appRoot.path,
-          databaseSubfolder,
-        );
-        if (!fs.existsSync(databaseSubfolderPath)) {
-          fs.mkdirSync(databaseSubfolderPath, { recursive: true });
-        }
-        const databasePath = join(databaseSubfolderPath, dbName);
+        const databasePath = path.join(appRoot.path, dbRelativePath);
         console.log('databasePath: ', databasePath);
 
         return {
@@ -58,16 +50,6 @@ import * as fs from 'fs';
           logging: true,
         };
       },
-      //       useFactory: (configService: ConfigService) => ({
-      //         type: 'mysql',
-      //         host: configService.get('DB_HOST'),
-      //         port: +configService.get('DB_PORT'),
-      //         username: configService.get('DB_USERNAME'),
-      //         password: configService.get('DB_PASSWORD'),
-      //         database: configService.get('DB_NAME'),
-      //         entities: [__dirname + '/../**/*.entity{.ts,.js}'],
-      //         synchronize: true,
-      //       }),
       inject: [ConfigService],
     }),
     TypeOrmModule.forFeature([
