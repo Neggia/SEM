@@ -309,8 +309,8 @@ export class CronCrawlerService {
     let websiteId;
 
     const browser = await puppeteer.launch({
-      timeout: 30_000, // 30 seconds
-      protocolTimeout: 60_000, // 60 seconds
+      timeout: 300_000, // 5 min
+      protocolTimeout: 600_000, // 10min
     });
     try {
       while (pageUrl) {
@@ -692,10 +692,10 @@ export class CronCrawlerService {
         await this.memoryDbConnection.query(
           'INSERT OR IGNORE INTO crawler_lock (is_locked) VALUES (1)',
         );
-        console.log('Downloading html of page ' + page.url);
+        console.log('Downloading html of page ' + page.url());
         // now reload the whole html to get all products at once, if the site had infinite scroll
         html = await page.content();
-        console.log('Downloaded html of page ' + page.url);
+        console.log('Downloaded html of page ' + page.url());
         $ = cheerio.load(html);
         console.log('cheerio.load done');
 
