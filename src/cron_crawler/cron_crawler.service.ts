@@ -308,7 +308,10 @@ export class CronCrawlerService {
     let total_pages = 0;
     let websiteId;
 
-    const browser = await puppeteer.launch();
+    const browser = await puppeteer.launch({
+      timeout: 30_000, // 30 seconds
+      protocolTimeout: 60_000, // 60 seconds
+    });
     try {
       while (pageUrl) {
         websiteId = websiteLazy.id;
@@ -691,7 +694,9 @@ export class CronCrawlerService {
         );
         // now reload the whole html to get all products at once, if the site had infinite scroll
         html = await page.content();
+        console.log('Downloaded html of page ' + page.url);
         $ = cheerio.load(html);
+        console.log('cheerio.load done');
 
         const productElements = $(productHtmlElementStructure.selector).get();
         let numbers = [];
