@@ -111,3 +111,9 @@
     transform: rotate(360deg);
   }
 }
+
+.notchedOutline:hover,
+.notchedOutline:focus,
+.notchedOutline:active {
+  border: 1px solid yellow;
+}

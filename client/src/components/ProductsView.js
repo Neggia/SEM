@@ -187,16 +187,27 @@ const ProductsView = () => {
 
   return (
     <>
-      <Grid container spacing={2}>
+      <Grid container spacing={2} p={3}>
         <Grid item xs={12}>
           <Box display="flex" alignItems="center">
             <Select
               onChange={handleCategoryChange}
               defaultValue=""
               displayEmpty
+              sx={{
+                '.MuiOutlinedInput-notchedOutline': {
+                  borderColor: 'black',
+                },
+                '&.Mui-focused .MuiOutlinedInput-notchedOutline': {
+                  borderColor: 'black',
+                },
+                '&:hover .MuiOutlinedInput-notchedOutline': {
+                  borderColor: 'black',
+                },
+              }}
             >
               <MenuItem value="">
-                <em>{t('None')}</em>
+                <em>{t('No Category')}</em>
               </MenuItem>
               {categories.map((category) => (
                 <MenuItem key={category.id} value={category.id}>
@@ -210,6 +221,16 @@ const ProductsView = () => {
               onChange={handleSearchChange}
               variant="outlined"
               inputRef={searchFieldRef} // Assign the ref to the TextField
+              InputLabelProps={{
+                style: { color: 'black' },
+              }}
+              sx={{
+                '& .MuiOutlinedInput-root': {
+                  '&.Mui-focused fieldset': {
+                    borderColor: 'black',
+                  },
+                },
+              }}
             />
 
             <CurrencySelect
@@ -221,12 +242,12 @@ const ProductsView = () => {
             <Button
               disabled={loading}
               variant="contained" // Use 'contained' for a filled button
-              color="primary" // Use the theme's primary color
               onClick={() => fetchProductData(1)}
               startIcon={<SearchIcon />}
               style={{
                 height: '100%', // Adjust the height as needed
                 marginLeft: 8, // Add some margin if needed
+                backgroundColor: 'black',
               }}
             >
               {t('Search')}
@@ -237,7 +258,7 @@ const ProductsView = () => {
 
         {!loading &&
           products.map((product) => (
-            <Grid item xs={12} sm={6} md={4} key={product.id}>
+            <Grid item xs={12} sm={6} md={4} lg={3} xl={2} key={product.id}>
               <Card>
                 <a href={product.url} target="_blank" rel="noopener noreferrer">
                   <CardMedia
@@ -280,6 +301,7 @@ const ProductsView = () => {
 
         {/* Dropdown for Search Results */}
         <Menu
+          sx={{ mt: '1px', '& .MuiMenu-paper': { backgroundColor: 'black' } }}
           anchorEl={anchorEl}
           open={Boolean(anchorEl && searchResults.length > 0)}
           onClose={() => setAnchorEl(null)}
@@ -320,6 +342,12 @@ const ProductsView = () => {
           count={totalPages}
           page={currentPage}
           onChange={(event, page) => setCurrentPage(page)}
+          style={{
+            paddingTop: '30px',
+            paddingBottom: '30px',
+            display: 'flex',
+            justifyContent: 'center',
+          }}
         />
       )}
     </>

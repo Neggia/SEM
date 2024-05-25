@@ -68,6 +68,9 @@ const CurrencySelect = ({ setCurrencies, selectedItems, setSelectedItems }) => {
         aria-controls="simple-menu"
         aria-haspopup="true"
         onClick={handleClick}
+        style={{
+          color: 'black',
+        }}
       >
         {t('Currency')}
       </Button>
@@ -85,7 +88,12 @@ const CurrencySelect = ({ setCurrencies, selectedItems, setSelectedItems }) => {
 
           return (
             <MenuItem key={item.id} onClick={() => handleToggle(item.id)}>
-              <Checkbox checked={selectedItems.includes(item.id)} />
+              <Checkbox
+                style={{
+                  color: 'black',
+                }}
+                checked={selectedItems.includes(item.id)}
+              />
               {itemLabel || 'Unnamed Item'}
             </MenuItem>
           );
