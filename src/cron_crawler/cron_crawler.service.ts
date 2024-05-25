@@ -308,10 +308,7 @@ export class CronCrawlerService {
     let total_pages = 0;
     let websiteId;
 
-    const browser = await puppeteer.launch({
-      timeout: 300_000, // 5 min
-      protocolTimeout: 600_000, // 10min
-    });
+    const browser = await puppeteer.launch();
     try {
       while (pageUrl) {
         websiteId = websiteLazy.id;

@@ -1,5 +1,6 @@
 import React, { useContext, useState, useEffect } from 'react';
 import axios from 'axios';
+import Box from '@mui/material/Box';
 import {
   AppBar,
   Toolbar,
@@ -18,6 +19,7 @@ import i18n from 'i18next';
 import LanguageSelect from './LanguageSelect';
 import { useTranslation } from 'react-i18next';
 import { SERVER_BASE_URL } from '../utils/globals';
+import Logo from '../assets/logo270.png';
 
 function Login() {
   const navigate = useNavigate();
@@ -83,10 +85,28 @@ function Login() {
     i18n.changeLanguage(language);
   };
 
-  return (
-    <AppBar position="static">
-      <Toolbar>
+  /* // in <Toolbar> we removed this and replaced it with the img
         <Typography variant="h6" style={{ flexGrow: 1 }}>
+          {appName}
+        </Typography>
+  */
+
+  return (
+    <AppBar
+      sx={{ bgcolor: 'white', color: 'black', padding: '10px' }}
+      position="static"
+    >
+      <Toolbar>
+        <Box
+          component="img"
+          sx={{
+            height: 64,
+            marginRight: 4,
+          }}
+          alt="{appName}"
+          src={Logo}
+        />
+        <Typography variant="h6" style={{ flexGrow: 1, fontWeight: 900 }}>
           {appName}
         </Typography>
         {!user.isLoggedIn ? (

@@ -1,11 +1,11 @@
 {
-  "short_name": "React App",
-  "name": "Create React App Sample",
+  "short_name": "Comunità Solidali / Mercato",
+  "name": "Create Comunità Solidali Mercato Sample",
   "icons": [
     {
-      "src": "favicon.ico",
-      "sizes": "64x64 32x32 24x24 16x16",
-      "type": "image/x-icon"
+      "src": "logo32.png",
+      "type": "image/png",
+      "sizes": "32x32"
     },
     {
       "src": "logo192.png",
@@ -13,9 +13,9 @@
       "sizes": "192x192"
     },
     {
-      "src": "logo512.png",
+      "src": "logo270.png",
       "type": "image/png",
-      "sizes": "512x512"
+      "sizes": "270x270"
     }
   ],
   "start_url": ".",
