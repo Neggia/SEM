@@ -1,5 +1,5 @@
 import React, { useState, useEffect } from 'react';
-import { Button, Menu, MenuItem, Checkbox } from '@mui/material';
+import { Button, Menu, MenuItem, Checkbox, useMediaQuery } from '@mui/material';
 import { SERVER_BASE_URL, CONTROLLER_CURRENCY_ID } from '../utils/globals';
 import { useTranslation } from 'react-i18next';
 
@@ -9,6 +9,8 @@ const CurrencySelect = ({ setCurrencies, selectedItems, setSelectedItems }) => {
   const [items, setItems] = useState([]);
 
   const { t } = useTranslation();
+
+  const isMobile = useMediaQuery('(max-width:960px)');
 
   const fetchData = async () => {
     try {
@@ -68,11 +70,18 @@ const CurrencySelect = ({ setCurrencies, selectedItems, setSelectedItems }) => {
         aria-controls="simple-menu"
         aria-haspopup="true"
         onClick={handleClick}
-        style={{
+        sx={{
           color: 'black',
+          padding: '15px',
+          border: '1px solid #aaa',
+          '&:hover': {
+            borderColor: '#35a455', // Apply border color on hover
+            backgroundColor: 'white',
+          },
+          width: isMobile ? '100%' : '200px',
         }}
       >
-        {t('Currency')}
+        {t('Currency')} ▼
       </Button>
       <Menu
         id="simple-menu"
@@ -90,7 +99,7 @@ const CurrencySelect = ({ setCurrencies, selectedItems, setSelectedItems }) => {
             <MenuItem key={item.id} onClick={() => handleToggle(item.id)}>
               <Checkbox
                 style={{
-                  color: 'black',
+                  color: '#35a455',
                 }}
                 checked={selectedItems.includes(item.id)}
               />

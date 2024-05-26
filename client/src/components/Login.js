@@ -1,6 +1,6 @@
 import React, { useContext, useState, useEffect } from 'react';
 import axios from 'axios';
-import Box from '@mui/material/Box';
+import { useMediaQuery, Box } from '@mui/material';
 import {
   AppBar,
   Toolbar,
@@ -103,70 +103,261 @@ function Login() {
             height: 64,
             marginRight: 4,
           }}
-          alt="{appName}"
+          alt={appName}
           src={Logo}
         />
         <Typography variant="h6" style={{ flexGrow: 1, fontWeight: 900 }}>
           {appName}
         </Typography>
-        {!user.isLoggedIn ? (
-          <>
-            <TextField
-              label={t('Username')}
-              value={username}
-              onChange={(e) => setUsername(e.target.value)}
-            />
-            <TextField
-              label="Password"
-              type="password"
-              value={password}
-              onChange={(e) => setPassword(e.target.value)}
-            />
-            <Button color="inherit" onClick={handleLogin}>
-              Login
-            </Button>
-          </>
+        {useMediaQuery('(max-width:960px)') ? (
+          <LanguageSelect onChange={changeLanguage} />
         ) : (
-          <div>
-            <Typography variant="subtitle1" style={{ display: 'inline' }}>
-              {t('Logged in as ')} {user.username}
-            </Typography>
-            <IconButton
-              edge="end"
-              aria-label="account of current user"
-              aria-controls="menu-appbar"
-              aria-haspopup="true"
-              onClick={handleMenu}
-              color="inherit"
-            >
-              <AccountCircle />
-            </IconButton>
-            <Menu
-              id="menu-appbar"
-              anchorEl={anchorEl}
-              anchorOrigin={{
-                vertical: 'top',
-                horizontal: 'right',
-              }}
-              keepMounted
-              transformOrigin={{
-                vertical: 'top',
-                horizontal: 'right',
-              }}
-              open={Boolean(anchorEl)}
-              onClose={handleClose}
-            >
-              <MenuItem onClick={handleGoToTasks}>{t('Task manager')}</MenuItem>
-              <MenuItem onClick={handleLogoutClick}>{t('Logout')}</MenuItem>
-            </Menu>
-          </div>
+          <>
+            {!user.isLoggedIn ? (
+              <>
+                <TextField
+                  label={t('Username')}
+                  value={username}
+                  onChange={(e) => setUsername(e.target.value)}
+                  InputLabelProps={{
+                    style: { color: '#555' },
+                  }}
+                  sx={{
+                    '& .MuiOutlinedInput-root': {
+                      '&.Mui-focused fieldset': {
+                        borderColor: '#35a455',
+                      },
+                      '&:hover fieldset': {
+                        borderColor: '#35a455', // Apply border color on hover
+                      },
+                      '& input': {
+                        '&:autofill': {
+                          WebkitBoxShadow: '0 0 0 100px white inset',
+                          WebkitTextFillColor: '#000', // Change text color if needed
+                        },
+                        '&:autofill:focus': {
+                          WebkitBoxShadow: '0 0 0 100px white inset',
+                          WebkitTextFillColor: '#000', // Change text color if needed
+                        },
+                        '&:autofill:hover': {
+                          WebkitBoxShadow: '0 0 0 100px white inset',
+                          WebkitTextFillColor: '#000', // Change text color if needed
+                        },
+                      },
+                    },
+                  }}
+                />
+                <TextField
+                  label="Password"
+                  type="password"
+                  value={password}
+                  onChange={(e) => setPassword(e.target.value)}
+                  InputLabelProps={{
+                    style: { color: '#555' },
+                  }}
+                  sx={{
+                    '& .MuiOutlinedInput-root': {
+                      '&.Mui-focused fieldset': {
+                        borderColor: '#35a455',
+                      },
+                      '&:hover fieldset': {
+                        borderColor: '#35a455', // Apply border color on hover
+                      },
+                      '& input': {
+                        '&:autofill': {
+                          WebkitBoxShadow: '0 0 0 100px white inset',
+                          WebkitTextFillColor: '#000', // Change text color if needed
+                        },
+                        '&:autofill:focus': {
+                          WebkitBoxShadow: '0 0 0 100px white inset',
+                          WebkitTextFillColor: '#000', // Change text color if needed
+                        },
+                        '&:autofill:hover': {
+                          WebkitBoxShadow: '0 0 0 100px white inset',
+                          WebkitTextFillColor: '#000', // Change text color if needed
+                        },
+                      },
+                    },
+                  }}
+                />
+                <Button
+                  color="inherit"
+                  onClick={handleLogin}
+                  style={{
+                    backgroundColor: '#35a455',
+                    color: 'white',
+                    padding: '3px',
+                    marginLeft: '10px',
+                  }}
+                >
+                  Login
+                </Button>
+              </>
+            ) : (
+              <div>
+                <Typography variant="subtitle1" style={{ display: 'inline' }}>
+                  {t('Logged in as ')} {user.username}
+                </Typography>
+                <IconButton
+                  edge="end"
+                  aria-label="account of current user"
+                  aria-controls="menu-appbar"
+                  aria-haspopup="true"
+                  onClick={handleMenu}
+                  color="inherit"
+                >
+                  <AccountCircle style={{ color: '#35a455' }} />
+                </IconButton>
+                <Menu
+                  id="menu-appbar"
+                  anchorEl={anchorEl}
+                  anchorOrigin={{
+                    vertical: 'top',
+                    horizontal: 'right',
+                  }}
+                  keepMounted
+                  transformOrigin={{
+                    vertical: 'top',
+                    horizontal: 'right',
+                  }}
+                  open={Boolean(anchorEl)}
+                  onClose={handleClose}
+                >
+                  <MenuItem onClick={handleGoToTasks}>
+                    {t('Task manager')}
+                  </MenuItem>
+                  <MenuItem onClick={handleLogoutClick}>{t('Logout')}</MenuItem>
+                </Menu>
+              </div>
+            )}
+            <LanguageSelect onChange={changeLanguage} />
+          </>
         )}
-        {/* <select onChange={(e) => changeLanguage(e.target.value)}>
-          <option value="it">Italiano</option>
-          <option value="en">English</option>
-        </select> */}
-        <LanguageSelect onChange={changeLanguage} />
       </Toolbar>
+      {useMediaQuery('(max-width:960px)') ? (
+        <>
+          {!user.isLoggedIn ? (
+            <>
+              <div style={{ marginTop: '10px' }}>&nbsp;</div>
+              <TextField
+                label={t('Username')}
+                value={username}
+                onChange={(e) => setUsername(e.target.value)}
+                InputLabelProps={{
+                  style: { color: '#555' },
+                }}
+                sx={{
+                  '& .MuiOutlinedInput-root': {
+                    '&.Mui-focused fieldset': {
+                      borderColor: '#35a455',
+                    },
+                    '&:hover fieldset': {
+                      borderColor: '#35a455', // Apply border color on hover
+                    },
+                    '& input': {
+                      '&:autofill': {
+                        WebkitBoxShadow: '0 0 0 100px white inset',
+                        WebkitTextFillColor: '#000', // Change text color if needed
+                      },
+                      '&:autofill:focus': {
+                        WebkitBoxShadow: '0 0 0 100px white inset',
+                        WebkitTextFillColor: '#000', // Change text color if needed
+                      },
+                      '&:autofill:hover': {
+                        WebkitBoxShadow: '0 0 0 100px white inset',
+                        WebkitTextFillColor: '#000', // Change text color if needed
+                      },
+                    },
+                  },
+                }}
+              />
+              <TextField
+                label="Password"
+                type="password"
+                value={password}
+                onChange={(e) => setPassword(e.target.value)}
+                InputLabelProps={{
+                  style: { color: '#555' },
+                }}
+                sx={{
+                  '& .MuiOutlinedInput-root': {
+                    '&.Mui-focused fieldset': {
+                      borderColor: '#35a455',
+                    },
+                    '&:hover fieldset': {
+                      borderColor: '#35a455', // Apply border color on hover
+                    },
+                    '& input': {
+                      '&:autofill': {
+                        WebkitBoxShadow: '0 0 0 100px white inset',
+                        WebkitTextFillColor: '#000', // Change text color if needed
+                      },
+                      '&:autofill:focus': {
+                        WebkitBoxShadow: '0 0 0 100px white inset',
+                        WebkitTextFillColor: '#000', // Change text color if needed
+                      },
+                      '&:autofill:hover': {
+                        WebkitBoxShadow: '0 0 0 100px white inset',
+                        WebkitTextFillColor: '#000', // Change text color if needed
+                      },
+                    },
+                  },
+                }}
+              />
+              <Button
+                color="inherit"
+                onClick={handleLogin}
+                style={{
+                  backgroundColor: '#35a455',
+                  color: 'white',
+                  padding: '3px',
+                }}
+              >
+                Login
+              </Button>
+              <div style={{ marginTop: '0px' }}>&nbsp;</div>
+            </>
+          ) : (
+            <div style={{ textAlign: 'center', marginTop: '10px' }}>
+              <Typography variant="subtitle1" style={{ display: 'inline' }}>
+                {t('Logged in as ')} {user.username}
+              </Typography>
+              <IconButton
+                edge="end"
+                aria-label="account of current user"
+                aria-controls="menu-appbar"
+                aria-haspopup="true"
+                onClick={handleMenu}
+                color="inherit"
+              >
+                <AccountCircle style={{ color: '#35a455' }} />
+              </IconButton>
+              <Menu
+                id="menu-appbar"
+                anchorEl={anchorEl}
+                anchorOrigin={{
+                  vertical: 'top',
+                  horizontal: 'right',
+                }}
+                keepMounted
+                transformOrigin={{
+                  vertical: 'top',
+                  horizontal: 'right',
+                }}
+                open={Boolean(anchorEl)}
+                onClose={handleClose}
+              >
+                <MenuItem onClick={handleGoToTasks}>
+                  {t('Task manager')}
+                </MenuItem>
+                <MenuItem onClick={handleLogoutClick}>{t('Logout')}</MenuItem>
+              </Menu>
+            </div>
+          )}
+        </>
+      ) : (
+        <div></div>
+      )}
     </AppBar>
   );
 }
