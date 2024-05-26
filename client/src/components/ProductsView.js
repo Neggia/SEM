@@ -21,6 +21,7 @@ import {
   Menu,
   Button,
   Box,
+  useMediaQuery,
 } from '@mui/material';
 import { arrayToDataUrl } from '../utils/globals';
 import { FontAwesomeIcon } from '@fortawesome/react-fontawesome';
@@ -48,6 +49,8 @@ const ProductsView = () => {
   const { t } = useTranslation();
 
   const debounceDelay = 300; // 300 milliseconds
+
+  const isMobile = useMediaQuery('(max-width:960px)');
 
   let searchDebounceTimeout = null;
 
@@ -189,20 +192,29 @@ const ProductsView = () => {
     <>
       <Grid container spacing={2} p={3}>
         <Grid item xs={12}>
-          <Box display="flex" alignItems="center">
+          <Box
+            sx={{
+              display: isMobile ? 'block' : 'flex',
+              alignItems: 'center',
+              width: isMobile ? '100%' : '900px',
+              margin: '0px auto',
+              justifyContent: 'center',
+            }}
+          >
             <Select
               onChange={handleCategoryChange}
               defaultValue=""
               displayEmpty
               sx={{
+                width: isMobile ? '100%' : 'auto',
                 '.MuiOutlinedInput-notchedOutline': {
-                  borderColor: 'black',
+                  borderColor: '#aaa',
                 },
                 '&.Mui-focused .MuiOutlinedInput-notchedOutline': {
-                  borderColor: 'black',
+                  borderColor: '#35a455',
                 },
                 '&:hover .MuiOutlinedInput-notchedOutline': {
-                  borderColor: 'black',
+                  borderColor: '#35a455',
                 },
               }}
             >
@@ -222,12 +234,17 @@ const ProductsView = () => {
               variant="outlined"
               inputRef={searchFieldRef} // Assign the ref to the TextField
               InputLabelProps={{
-                style: { color: 'black' },
+                style: { color: '#555' },
               }}
               sx={{
+                width: isMobile ? '100%' : '100%',
+                maxWidth: !isMobile && loading ? '30%' : '100%',
                 '& .MuiOutlinedInput-root': {
                   '&.Mui-focused fieldset': {
-                    borderColor: 'black',
+                    borderColor: '#35a455',
+                  },
+                  '&:hover fieldset': {
+                    borderColor: '#35a455', // Apply border color on hover
                   },
                 },
               }}
@@ -245,9 +262,12 @@ const ProductsView = () => {
               onClick={() => fetchProductData(1)}
               startIcon={<SearchIcon />}
               style={{
+                width: isMobile ? '100%' : '200px',
                 height: '100%', // Adjust the height as needed
-                marginLeft: 8, // Add some margin if needed
-                backgroundColor: 'black',
+                marginLeft: isMobile ? 0 : 8, // Add some margin if needed
+                marginTop: isMobile ? 20 : 0, // Add some margin if needed
+                marginBottom: isMobile ? 20 : 0, // Add some margin if needed
+                backgroundColor: '#35a455',
               }}
             >
               {t('Search')}
@@ -272,9 +292,19 @@ const ProductsView = () => {
                 </a>
 
                 <CardContent>
-                  <Typography gutterBottom variant="h5" component="h2">
-                    {product.title}
-                  </Typography>
+                  <a
+                    href={product.url}
+                    target="_blank"
+                    rel="noopener noreferrer"
+                    style={{
+                      color: 'black',
+                      textDecoration: 'none',
+                    }}
+                  >
+                    <Typography gutterBottom variant="h5" component="h2">
+                      {product.title}
+                    </Typography>
+                  </a>
                   {/* Displaying price information only if it's greater than 0 */}
                   {(product.price_01 || product.price_01 === 0) &&
                     product.price_01 > 0 && (
