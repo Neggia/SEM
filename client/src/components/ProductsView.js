@@ -197,7 +197,8 @@ const ProductsView = () => {
               display: isMobile ? 'block' : 'flex',
               alignItems: 'center',
               width: isMobile ? '100%' : '900px',
-              margin: '0px auto',
+              margin: isMobile ? '0px auto' : '30px auto',
+              marginBottom: isMobile ? '0px' : '40px',
               justifyContent: 'center',
             }}
           >
@@ -301,7 +302,12 @@ const ProductsView = () => {
                       textDecoration: 'none',
                     }}
                   >
-                    <Typography gutterBottom variant="h5" component="h2">
+                    <Typography
+                      style={{ fontWeight: 900 }}
+                      gutterBottom
+                      variant="h5"
+                      component="h4"
+                    >
                       {product.title}
                     </Typography>
                   </a>

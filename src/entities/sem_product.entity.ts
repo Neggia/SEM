@@ -35,13 +35,13 @@ export class SemProduct {
   @Column({ nullable: true })
   description_long: string;
 
-  @Column()
+  @Column('decimal')
   price_01: number;
 
   @Column()
   currency_01_id: number;
 
-  @Column({ nullable: true })
+  @Column('decimal', { nullable: true })
   price_02: number;
 
   // Details of currency are described in entity SemCurrency
