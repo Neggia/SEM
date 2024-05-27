@@ -277,6 +277,10 @@ export class CronCrawlerService {
         }
         lastHeight = newHeight;
         console.log('in scrollToBottom newHeight = ' + newHeight);
+        // limit scroll for now
+        if (parseInt(lastHeight.toString()) > 200000) {
+          break;
+        }
       }
     } catch (error) {
       console.error(`Failed scrollToBottom: `, error);
@@ -308,7 +312,7 @@ export class CronCrawlerService {
     let total_pages = 0;
     let websiteId;
 
-    const browser = await puppeteer.launch();
+    const browser = await puppeteer.launch({ args: ['--no-sandbox'] });
     try {
       while (pageUrl) {
         websiteId = websiteLazy.id;
@@ -626,7 +630,7 @@ export class CronCrawlerService {
             return 0;
           }
           const sanitizedStr = str.replace(/null/g, '0');
-          const matches = sanitizedStr.match(/\d+/g) || [];
+          const matches = sanitizedStr.match(/\b\d+(?:[.,]\d+)?\b/g) || [];
           return matches.map(Number);
         };
 
