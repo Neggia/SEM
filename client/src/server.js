@@ -1,6 +1,6 @@
 const express = require('express');
 const https = require('https');
-const fs = require('fs');
+const fs = require('fs').promises;
 const path = require('path');
 
 const app = express();
@@ -31,10 +31,10 @@ async function checkFileAndResolveSymlink(filePath) {
     const keyResult = await checkFileAndResolveSymlink(keyFile);
     const certResult = await checkFileAndResolveSymlink(certFile);
     if (!keyResult.exists) {
-      throw 'keyFile does not exist';
+      throw new Error('keyFile does not exist');
     }
     if (!certResult.exists) {
-      throw 'certFile does not exist';
+      throw new Error('certFile does not exist');
     }
 
     console.log('keyfile:' + keyResult.realPath);
@@ -42,11 +42,11 @@ async function checkFileAndResolveSymlink(filePath) {
 
     // SSL Options
     const httpsOptions = {
-      key: fs.readFileSync(keyResult.realPath),
-      cert: fs.readFileSync(certResult.realPath),
+      key: await fs.readFile(keyResult.realPath),
+      cert: await fs.readFile(certResult.realPath),
     };
 
-    // Serv static files of the React build
+    // Serve static files of the React build
     app.use(express.static(path.join(__dirname, 'build')));
 
     // Handle all other requests with index.html
