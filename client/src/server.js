@@ -5,8 +5,8 @@ const path = require('path');
 
 const app = express();
 const PORT = process.env.PORT || 8443;
-const keyFile = path.join(__dirname, '/../../data/privkey.pem');
-const certFile = path.join(__dirname, '/../../data/fullchain.pem');
+const keyFile = path.join(__dirname, '/../../data/key.pem');
+const certFile = path.join(__dirname, '/../../data/cert.pem');
 
 async function checkFileAndResolveSymlink(filePath) {
   try {
@@ -36,9 +36,6 @@ async function checkFileAndResolveSymlink(filePath) {
     if (!certResult.exists) {
       throw new Error('certFile does not exist');
     }
-
-    console.log('keyfile:' + keyResult.realPath);
-    console.log('certFile:' + certResult.realPath);
 
     // SSL Options
     const httpsOptions = {
