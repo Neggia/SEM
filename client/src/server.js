@@ -44,11 +44,11 @@ async function checkFileAndResolveSymlink(filePath) {
     };
 
     // Serve static files of the React build
-    app.use(express.static(path.join(__dirname, 'src')));
+    app.use(express.static(path.join(__dirname, '../public')));
 
     // Handle all other requests with index.html
     app.get('*', (req, res) => {
-      res.sendFile(path.join(__dirname, 'src', 'index.js'));
+      res.sendFile(path.join(__dirname, 'index.js'));
     });
 
     // Create the HTTPS server

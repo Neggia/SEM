@@ -19,7 +19,7 @@ import i18n from 'i18next';
 import LanguageSelect from './LanguageSelect';
 import { useTranslation } from 'react-i18next';
 import { SERVER_BASE_URL } from '../utils/globals';
-import Logo from '../assets/logo270.png';
+import Logo from '../../public/logo270.png';
 
 function Login() {
   const navigate = useNavigate();
