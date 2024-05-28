@@ -5,11 +5,16 @@ const path = require('path');
 
 const app = express();
 const PORT = process.env.PORT || 8443;
+const keyFile = path.join(__dirname, '/../../data/privkey.pem');
+const certFile = path.join(__dirname, '/../../data/fullchain.pem');
+
+console.log('keyfile:' + keyFile);
+console.log('certFile:' + certFile);
 
 // SSL Options
 const httpsOptions = {
-  key: fs.readFileSync(path.join(__dirname, '/../../data/privkey.pem')),
-  cert: fs.readFileSync(path.join(__dirname, '/../../data/fullchain.pem')),
+  key: fs.readFileSync(keyFile),
+  cert: fs.readFileSync(certFile),
 };
 
 // Serv static files of the React build
