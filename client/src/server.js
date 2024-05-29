@@ -1,3 +1,7 @@
+// unused for now . do not launch
+throw 'unused for now . do not launch';
+
+/*
 const express = require('express');
 const https = require('https');
 const fs = require('fs').promises;
@@ -59,3 +63,4 @@ async function checkFileAndResolveSymlink(filePath) {
     console.error('Error:', err);
   }
 })();
+*/
