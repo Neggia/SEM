@@ -10,7 +10,6 @@ import './i18n/i18n';
 // TODO Add translation
 
 function App() {
-  const currentDomain = window.location.hostname;
   return (
     <UserProvider>
       <Router>
@@ -19,13 +18,7 @@ function App() {
             path="/"
             element={
               <>
-                {currentDomain != 'mercato.comunitasolidali.it' ? (
-                  <>
-                    <Login />
-                  </>
-                ) : (
-                  <></>
-                )}
+                <Login />
                 <ProductsView />
               </>
             }
